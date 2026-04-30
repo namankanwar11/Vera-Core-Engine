@@ -116,61 +116,47 @@ async def push_context(request: Request):
     store.add_event(f"Context Push: {req_data.scope}/{req_data.context_id}")
     return {"accepted": True, "ack_id": ack_id, "stored_at": stored_at}
 
+# Rate-limit control for Groq Free Tier (Serial processing for absolute safety)
+semaphore = asyncio.Semaphore(1)
+
 @app.post("/v1/tick", response_model=TickResponse)
 async def process_tick(req: TickRequest):
-    start_time = asyncio.get_event_loop().time()
     try:
         store.add_event(f"Tick received: {len(req.available_triggers)} triggers")
         
         async def process_single_trigger(trigger_id):
-            try:
-                trigger_context = await store.get_context("trigger", trigger_id)
-                if not trigger_context: return []
-                
-                if hasattr(trigger_context, 'model_dump'):
-                    trigger_context = trigger_context.model_dump()
-                
-                merchant_id = trigger_context.get("merchant_id")
-                customer_id = trigger_context.get("customer_id")
-                
-                merchant_payload = {}
-                if merchant_id:
+            async with semaphore: # One at a time to avoid 429s
+                try:
+                    trigger_context = await store.get_context("trigger", trigger_id)
+                    if not trigger_context: return []
+                    
+                    if hasattr(trigger_context, 'model_dump'):
+                        trigger_context = trigger_context.model_dump()
+                    
+                    merchant_id = trigger_context.get("merchant_id")
                     merchant_payload = await store.get_context("merchant", merchant_id) or {}
                     if hasattr(merchant_payload, 'model_dump'):
                         merchant_payload = merchant_payload.model_dump()
-                
-                category_payload = {}
-                cat_slug = merchant_payload.get("category_slug")
-                if cat_slug:
-                    category_payload = await store.get_context("category", cat_slug) or {}
+                    
+                    category_payload = await store.get_context("category", merchant_payload.get("category_slug")) or {}
                     if hasattr(category_payload, 'model_dump'):
                         category_payload = category_payload.model_dump()
 
-                customer_payload = None
-                if customer_id:
-                    customer_payload = await store.get_context("customer", customer_id)
-                    if hasattr(customer_payload, 'model_dump'):
+                    customer_id = trigger_context.get("customer_id")
+                    customer_payload = await store.get_context("customer", customer_id) if customer_id else None
+                    if customer_payload and hasattr(customer_payload, 'model_dump'):
                         customer_payload = customer_payload.model_dump()
-                
-                store.add_event(f"AI Reasoning: {merchant_id or 'unknown'}...")
-                actions = await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
-                store.add_event(f"Generated {len(actions)} actions")
-                return actions
-            except Exception as e:
-                store.add_event(f"Inner Error: {str(e)}")
-                logger.error(f"Error in single trigger {trigger_id}: {e}")
-                return mock_compose(trigger_id, merchant_payload, category_payload)
+                    
+                    return await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
+                except Exception as e:
+                    logger.error(f"Error in {trigger_id}: {e}")
+                    return mock_compose(trigger_id, {}, {})
 
-        # Process triggers in parallel with small jitter to avoid collision
-        async def jittered_process(tid, idx):
-            await asyncio.sleep(idx * 0.3) # Small jitter
-            return await process_single_trigger(tid)
-
-        tasks = [jittered_process(tid, i) for i, tid in enumerate(req.available_triggers)]
+        tasks = [process_single_trigger(tid) for tid in req.available_triggers]
         
         try:
-            # SAFETY: Hard 24s timeout for the ENTIRE batch
-            results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=24.0)
+            # SAFETY: Extended 55s timeout to allow Semaphore queueing
+            results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=55.0)
             
             actions = []
             for res in results:
@@ -178,9 +164,7 @@ async def process_tick(req: TickRequest):
             return TickResponse(actions=actions[:20])
             
         except asyncio.TimeoutError:
-            store.add_event("⚠️ BATCH TIMEOUT (24s). Returning partial/mock.")
-            # If we timeout, we might have some results already, but gather() fails.
-            # We'll just return mocks for the first few to be safe.
+            store.add_event("⚠️ BATCH TIMEOUT (55s). Returning mocks.")
             mock_actions = []
             for tid in req.available_triggers[:3]:
                 mock_actions.extend(mock_compose(tid, {}, {}))
