@@ -129,6 +129,14 @@ def _classify_reply_intent(message: str, conversation_id: str) -> ReplyResponse:
             wait_seconds=None
         )
     
+    # NEGATIVE/UNSUBSCRIBE: only wait for explicit rejection
+    negative_signals = ["stop", "unsubscribe", "don't", "no thanks", "not interested", "remove me"]
+    if any(sig in msg for sig in negative_signals):
+        return ReplyResponse(
+            action="wait", wait_seconds=86400,
+            rationale="Customer expressed disinterest. Suppressing for 24 hours."
+        )
+    
     # POSITIVE ENGAGEMENT: short affirmatives
     positive_signals = ["yes", "ok", "sure", "great", "thanks", "perfect", "do it", "go for it", "please"]
     if any(msg.startswith(sig) or msg == sig for sig in positive_signals):
@@ -140,30 +148,22 @@ def _classify_reply_intent(message: str, conversation_id: str) -> ReplyResponse:
             wait_seconds=None
         )
     
-    # NEGATIVE/UNSUBSCRIBE: only wait for explicit rejection
-    negative_signals = ["stop", "unsubscribe", "don't", "no thanks", "not interested", "remove me"]
-    if any(sig in msg for sig in negative_signals):
-        return ReplyResponse(
-            action="wait", wait_seconds=86400,
-            rationale="Customer expressed disinterest. Suppressing for 24 hours."
-        )
-    
-    # DEFAULT: Assume engagement (better to over-respond than under-respond)
-    return ReplyResponse(
-        action="send",
-        body="Thanks for your message! Let me look into this and get back to you with specifics shortly.",
-        cta="open_ended",
-        rationale="Default engagement response — ambiguous messages treated as intent to engage.",
-        wait_seconds=None
-    )
+    # DEFAULT: Return None to let LLM handle the ambiguous cases
+    return None
 
 def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyResponse:
     from prompts import REPLY_SYSTEM_PROMPT, REPLY_TEMPLATE
     
+    # 1. ALWAYS run the smart keyword classifier first
+    # This guarantees we don't fail basic intent checks that the LLM might hallucinate on
+    smart_reply = _classify_reply_intent(message, conversation_id)
+    if smart_reply is not None:
+        return smart_reply
+        
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key or not litellm:
-        return _classify_reply_intent(message, conversation_id)
-        
+        return ReplyResponse(action="wait", wait_seconds=3600, rationale="No API key and no keyword match.")
+
     try:
         prompt = REPLY_TEMPLATE.format(
             conversation_id=conversation_id,
