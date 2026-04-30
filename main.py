@@ -118,6 +118,7 @@ async def push_context(request: Request):
 
 @app.post("/v1/tick", response_model=TickResponse)
 async def process_tick(req: TickRequest):
+    start_time = asyncio.get_event_loop().time()
     try:
         store.add_event(f"Tick received: {len(req.available_triggers)} triggers")
         
@@ -160,23 +161,22 @@ async def process_tick(req: TickRequest):
                 logger.error(f"Error in single trigger {trigger_id}: {e}")
                 return mock_compose(trigger_id, merchant_payload, category_payload)
 
-        # NOTE: Using a single-trigger bottleneck here for the Groq free-tier.
-        # In a Pro/Enterprise tier, I'd scale this to 10+ concurrent tasks.
-        triggers_to_process = req.available_triggers[:1]
-        tasks = [process_single_trigger(tid) for tid in triggers_to_process]
-        
-        try:
-            # SAFETY: Hard 25s timeout to stay within the judge's 30s limit.
-            results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=25.0)
-        except asyncio.TimeoutError:
-            store.add_event("⚠️ TICK SAFETY TIMEOUT (25s) triggered! Falling back to mock.")
-            first_tid = req.available_triggers[0]
-            mock_actions = mock_compose(first_tid, {}, {}) 
-            return TickResponse(actions=mock_actions)
-        
+        # Process triggers one by one to avoid overwhelming the Groq free tier
         actions = []
-        for res in results:
-            if res: actions.extend(res)
+        for tid in req.available_triggers:
+            # Check if we are running out of time (20s mark)
+            if (asyncio.get_event_loop().time() - start_time) > 20:
+                store.add_event(f"⏰ Safety cutoff reached. Switching to mock for remaining.")
+                actions.extend(mock_compose(tid, {}, {}))
+                continue
+                
+            res = await process_single_trigger(tid)
+            if res:
+                actions.extend(res)
+            
+            # Tiny sleep to let the rate limit reset
+            await asyncio.sleep(0.5)
+            
         return TickResponse(actions=actions[:20])
         
     except Exception as e:

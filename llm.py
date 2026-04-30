@@ -181,23 +181,22 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
         # Determined temperature based on trigger
         temp = 0.0 if ("regulation" in trigger_id or "compliance" in trigger_id) else 0.1
         
-        max_retries = 2
+        max_retries = 3
         for attempt in range(max_retries):
             try:
-                # Reduced timeout to 6s to allow for retries within the 25s window
+                # Reduced timeout to 5s to allow for 3 retries within the 20s window
                 response = litellm.completion(
                     model=os.getenv("DEFAULT_MODEL", "groq/llama-3.1-8b-instant"),
                     messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
                     response_format={"type": "json_object"},
-                    timeout=6,
+                    timeout=5,
                     temperature=temp
                 )
                 parsed = LLMActionOutput.model_validate_json(response.choices[0].message.content)
                 return parsed.actions
             except Exception as retry_err:
-                err_msg = str(retry_err).lower()
-                if "429" in err_msg or "rate_limit" in err_msg or "timeout" in err_msg:
-                    _time.sleep(0.5) # Shorter backoff for speed
+                if attempt < max_retries - 1:
+                    _time.sleep(0.8) # Slightly longer backoff for reliability
                     continue
                 raise
         
