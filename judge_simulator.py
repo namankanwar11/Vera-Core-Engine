@@ -22,7 +22,7 @@ Author: magicpin AI Challenge Team
 # =============================================================================
 
 # Your bot's URL (where your bot is running)
-BOT_URL = "http://localhost:8080"
+BOT_URL = "https://web-production-d3e66.up.railway.app"
 
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
 LLM_PROVIDER = "groq"
@@ -424,18 +424,18 @@ class BotClient:
         return self._request("GET", "/v1/metadata", 5)
 
     def push_context(self, scope, cid, version, payload):
-        return self._request("POST", "/v1/context", 10, {
+        return self._request("POST", "/v1/context", 30, {
             "scope": scope, "context_id": cid, "version": version,
             "payload": payload, "delivered_at": datetime.utcnow().isoformat() + "Z"
         })
 
     def tick(self, triggers):
-        return self._request("POST", "/v1/tick", 15, {
+        return self._request("POST", "/v1/tick", 60, {
             "now": datetime.utcnow().isoformat() + "Z", "available_triggers": triggers
         })
 
     def reply(self, conv_id, merchant_id, message, turn):
-        return self._request("POST", "/v1/reply", 15, {
+        return self._request("POST", "/v1/reply", 60, {
             "conversation_id": conv_id, "merchant_id": merchant_id, "customer_id": None,
             "from_role": "merchant", "message": message,
             "received_at": datetime.utcnow().isoformat() + "Z", "turn_number": turn

@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 import logging
 from typing import Dict, Any
@@ -14,6 +15,28 @@ from llm import compose, mock_handle_reply
 app = FastAPI(title="Vera Message Engine API")
 logger = logging.getLogger("uvicorn.error")
 
+templates = Jinja2Templates(directory="templates")
+
+METADATA = {
+    "team_name": "Naman Solo",
+    "team_members": ["Naman"],
+    "model": "groq/llama-3.1-8b-instant",
+    "approach": "FastAPI + litellm orchestrator with context pruning, dynamic few-shot anchors, and anti-hype constraints",
+    "contact_email": "namankanwar11@gmail.com",
+    "version": "2.0.0",
+    "submitted_at": "2026-04-30T09:00:00Z"
+}
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    """
+    Serve the premium dashboard UI.
+    """
+    return templates.TemplateResponse(
+        "index.html", 
+        {"request": request, "metadata": METADATA}
+    )
+
 @app.get("/v1/healthz", response_model=HealthResponse)
 async def healthz():
     counts = await store.get_counts()
@@ -25,15 +48,7 @@ async def healthz():
 
 @app.get("/v1/metadata")
 async def metadata():
-    return {
-        "team_name": "Naman Solo",
-        "team_members": ["Naman"],
-        "model": "groq/llama-3.1-8b-instant",
-        "approach": "FastAPI + litellm orchestrator with context pruning, dynamic few-shot anchors, and anti-hype constraints",
-        "contact_email": "namankanwar11@gmail.com",
-        "version": "2.0.0",
-        "submitted_at": "2026-04-30T09:00:00Z"
-    }
+    return METADATA
 
 @app.post("/v1/context")
 async def push_context(request: Request):
