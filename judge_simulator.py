@@ -835,7 +835,7 @@ class JudgeSimulator:
 
         for i in range(0, len(tids), 5):
             batch = tids[i:i+5]
-            time.sleep(3) # Give Groq breathing room for the BOT
+            time.sleep(5) # Absolute safety for 10/10 run
             data, err, lat = self.client.tick(batch)
 
             if err:
@@ -846,7 +846,7 @@ class JudgeSimulator:
             print_info(f"Batch {i//5 + 1}: {len(actions)} actions ({lat:.0f}ms)")
 
             for action in actions:
-                time.sleep(3) # Give Groq breathing room for the JUDGE
+                time.sleep(5) # Absolute safety for 10/10 run
                 self._score_and_display(action, verbose=False)
 
         return True
