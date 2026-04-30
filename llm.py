@@ -184,7 +184,7 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
             anchor_example=anchor_example
         )
         
-        max_retries = 3
+        max_retries = 2
         for attempt in range(max_retries):
             try:
                 response = litellm.completion(
@@ -194,7 +194,7 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
                         {"role": "user", "content": prompt}
                     ],
                     response_format={"type": "json_object"},
-                    timeout=15
+                    timeout=8
                 )
                 
                 content = response.choices[0].message.content
@@ -204,7 +204,7 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
             except Exception as retry_err:
                 err_str = str(retry_err).lower()
                 if "429" in err_str or "rate_limit" in err_str:
-                    wait = 2 ** attempt  # 1s, 2s, 4s
+                    wait = 1  # Fixed short wait
                     logger.warning(f"Rate limited (attempt {attempt+1}/{max_retries}), retrying in {wait}s...")
                     _time.sleep(wait)
                     continue

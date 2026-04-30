@@ -177,7 +177,12 @@ async def process_tick(req: TickRequest):
         # Process 1 trigger at a time for stability
         triggers_to_process = req.available_triggers[:1]
         tasks = [process_single_trigger(tid) for tid in triggers_to_process]
-        results = await asyncio.gather(*tasks)
+        
+        try:
+            results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=25.0)
+        except asyncio.TimeoutError:
+            store.add_event("⚠️ TICK SAFETY TIMEOUT (25s) triggered!")
+            return TickResponse(actions=[])
         
         actions = []
         for res in results:
