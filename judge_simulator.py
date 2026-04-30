@@ -25,8 +25,8 @@ Author: magicpin AI Challenge Team
 # ██████  CONFIGURATION - EDIT THIS SECTION ██████
 # =============================================================================
 
-# Your bot's URL (Point to RAILWAY for dashboard update)
-BOT_URL = "https://web-production-d3e66.up.railway.app"
+# Your bot's URL
+BOT_URL = "http://localhost:8000"
 
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
 LLM_PROVIDER = "groq"

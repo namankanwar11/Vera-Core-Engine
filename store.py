@@ -54,8 +54,7 @@ class MemoryStateStore:
                 with open(STATE_FILE, "r") as f:
                     content = json.load(f)
                     self.data.update(content.get("data", {}))
-                    self.metrics.update(content.get("metrics", {}))
-                    self.events = content.get("events", [])
+                    # Don't load old metrics/events — start fresh every boot
             except Exception as e:
                 logger.error(f"Failed to load state: {e}")
 
