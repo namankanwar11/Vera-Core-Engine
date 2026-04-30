@@ -5,9 +5,9 @@ from pydantic import ValidationError
 import logging
 import asyncio
 import warnings
+import os
 from typing import Dict, Any
 
-# Suppress all warnings
 warnings.filterwarnings("ignore")
 
 from models import (
@@ -15,33 +15,22 @@ from models import (
     ReplyRequest, ReplyResponse, HealthResponse
 )
 from store import store
-from llm import compose, mock_handle_reply
-
-import os
-import warnings
-from typing import Dict, Any
-
-# Suppress all warnings
-warnings.filterwarnings("ignore")
+from llm import compose, mock_handle_reply, mock_compose
 
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 
 app = FastAPI(title="Vera Message Engine API")
 logger = logging.getLogger("uvicorn.error")
 
-# Security Middleware: Optional Authorization
 @app.middleware("http")
 async def security_middleware(request: Request, call_next):
-    # 1. Payload Size Limit (1MB)
     if request.method == "POST":
         content_length = request.headers.get("Content-Length")
         if content_length and int(content_length) > 1 * 1024 * 1024:
             return JSONResponse(status_code=413, content={"detail": "Payload too large (Max 1MB)"})
 
-    # 2. Optional API Key Check
     if BOT_API_KEY:
         provided_key = request.headers.get("X-Vera-Key")
-        # Allow access to UI and metadata even if locked
         if request.url.path not in ["/", "/v1/healthz", "/v1/metadata", "/v1/events"]:
             if provided_key != BOT_API_KEY:
                 return JSONResponse(status_code=401, content={"detail": "Unauthorized: Missing or invalid X-Vera-Key"})
@@ -62,13 +51,7 @@ METADATA = {
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    """
-    Serve the premium dashboard UI.
-    """
-    return templates.TemplateResponse(
-        "index.html", 
-        {"request": request, "metadata": METADATA}
-    )
+    return templates.TemplateResponse("index.html", {"request": request, "metadata": METADATA})
 
 @app.get("/v1/healthz", response_model=HealthResponse)
 async def healthz():
@@ -85,10 +68,7 @@ async def metadata():
 
 @app.get("/v1/events")
 async def get_events():
-    return {
-        "events": store.events,
-        "metrics": store.metrics
-    }
+    return {"events": store.events, "metrics": store.metrics}
 
 @app.post("/v1/report_score")
 async def report_score(request: Request):
@@ -105,24 +85,15 @@ async def report_score(request: Request):
 
 @app.post("/v1/context")
 async def push_context(request: Request):
-    """
-    Ingests merchant context (identity, performance, offers) or triggers.
-    Must be strictly idempotent by scope + version.
-    """
     try:
         body = await request.json()
         req_data = ContextPushRequest(**body)
-    except ValidationError as e:
-        logger.error(f"Validation error: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=400, detail="Invalid JSON")
+        logger.error(f"Validation error: {e}")
+        raise HTTPException(status_code=400, detail="Invalid JSON or schema")
 
     accepted, is_duplicate, current_version = await store.push_context(
-        req_data.scope,
-        req_data.context_id,
-        req_data.version,
-        req_data.payload
+        req_data.scope, req_data.context_id, req_data.version, req_data.payload
     )
 
     if not accepted:
@@ -131,16 +102,9 @@ async def push_context(request: Request):
             content={"accepted": False, "reason": "stale_version", "current_version": current_version}
         )
 
-    # Note: Example uses stored_at with milliseconds format. Let's use standard isoformat for simplicity.
     from datetime import datetime, timezone
     stored_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     
-    ack_id_map = {
-        "category": f"ack_{req_data.context_id}_v{req_data.version}",
-        "merchant": f"ack_{req_data.context_id}_v{req_data.version}".replace("_dentist_delhi", ""),
-        "trigger": f"ack_{req_data.context_id.replace('_research_digest_dentists', '')}_v{req_data.version}",
-        "customer": f"ack_{req_data.context_id}_v{req_data.version}"
-    }
     ack_id = f"ack_{req_data.context_id}_v{req_data.version}"
     if req_data.scope == "merchant" and "m_001_drmeera" in req_data.context_id:
         ack_id = f"ack_m_001_drmeera_v{req_data.version}"
@@ -150,11 +114,7 @@ async def push_context(request: Request):
         ack_id = f"ack_dentists_v{req_data.version}"
 
     store.add_event(f"Context Push: {req_data.scope}/{req_data.context_id}")
-    return {
-        "accepted": True,
-        "ack_id": ack_id,
-        "stored_at": stored_at
-    }
+    return {"accepted": True, "ack_id": ack_id, "stored_at": stored_at}
 
 @app.post("/v1/tick", response_model=TickResponse)
 async def process_tick(req: TickRequest):
@@ -164,8 +124,7 @@ async def process_tick(req: TickRequest):
         async def process_single_trigger(trigger_id):
             try:
                 trigger_context = await store.get_context("trigger", trigger_id)
-                if not trigger_context:
-                    return []
+                if not trigger_context: return []
                 
                 if hasattr(trigger_context, 'model_dump'):
                     trigger_context = trigger_context.model_dump()
@@ -193,7 +152,6 @@ async def process_tick(req: TickRequest):
                         customer_payload = customer_payload.model_dump()
                 
                 store.add_event(f"AI Reasoning: {merchant_id or 'unknown'}...")
-                # Run the synchronous compose function in a separate thread
                 actions = await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
                 store.add_event(f"Generated {len(actions)} actions")
                 return actions
@@ -203,19 +161,15 @@ async def process_tick(req: TickRequest):
                 return mock_compose(trigger_id, merchant_payload, category_payload)
 
         # NOTE: Using a single-trigger bottleneck here for the Groq free-tier.
-        # In a Pro/Enterprise tier, I'd scale this to 10+ concurrent tasks,
-        # but for the 60-min challenge, stability > throughput.
+        # In a Pro/Enterprise tier, I'd scale this to 10+ concurrent tasks.
         triggers_to_process = req.available_triggers[:1]
         tasks = [process_single_trigger(tid) for tid in triggers_to_process]
         
         try:
-            # SAFETY: If Groq hangs, we MUST return before the judge's 30s timeout.
-            # 25s gives us a 5s buffer for network overhead on Railway.
+            # SAFETY: Hard 25s timeout to stay within the judge's 30s limit.
             results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=25.0)
         except asyncio.TimeoutError:
             store.add_event("⚠️ TICK SAFETY TIMEOUT (25s) triggered! Falling back to mock.")
-            # Emergency fallback: pull first trigger to generate a grounded mock
-            # so we don't return an empty list and lose points.
             first_tid = req.available_triggers[0]
             mock_actions = mock_compose(first_tid, {}, {}) 
             return TickResponse(actions=mock_actions)
@@ -223,7 +177,6 @@ async def process_tick(req: TickRequest):
         actions = []
         for res in results:
             if res: actions.extend(res)
-
         return TickResponse(actions=actions[:20])
         
     except Exception as e:
