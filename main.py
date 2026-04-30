@@ -125,42 +125,45 @@ async def process_tick(req: TickRequest):
         store.add_event(f"Tick received: {len(req.available_triggers)} triggers")
         
         async def process_single_trigger(trigger_id):
-            async with semaphore: # One at a time to avoid 429s
-                try:
-                    trigger_context = await store.get_context("trigger", trigger_id)
-                    if not trigger_context: return []
-                    
-                    if hasattr(trigger_context, 'model_dump'):
-                        trigger_context = trigger_context.model_dump()
-                    
-                    merchant_id = trigger_context.get("merchant_id")
-                    merchant_payload = await store.get_context("merchant", merchant_id) or {}
-                    if hasattr(merchant_payload, 'model_dump'):
-                        merchant_payload = merchant_payload.model_dump()
-                    
-                    category_payload = await store.get_context("category", merchant_payload.get("category_slug")) or {}
-                    if hasattr(category_payload, 'model_dump'):
-                        category_payload = category_payload.model_dump()
+            try:
+                trigger_context = await store.get_context("trigger", trigger_id)
+                if not trigger_context: return []
+                
+                if hasattr(trigger_context, 'model_dump'):
+                    trigger_context = trigger_context.model_dump()
+                
+                merchant_id = trigger_context.get("merchant_id")
+                merchant_payload = await store.get_context("merchant", merchant_id) or {}
+                if hasattr(merchant_payload, 'model_dump'):
+                    merchant_payload = merchant_payload.model_dump()
+                
+                category_payload = await store.get_context("category", merchant_payload.get("category_slug")) or {}
+                if hasattr(category_payload, 'model_dump'):
+                    category_payload = category_payload.model_dump()
 
-                    customer_id = trigger_context.get("customer_id")
-                    customer_payload = await store.get_context("customer", customer_id) if customer_id else None
-                    if customer_payload and hasattr(customer_payload, 'model_dump'):
-                        customer_payload = customer_payload.model_dump()
-                    
-                    return await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
-                except Exception as e:
-                    logger.error(f"Error in {trigger_id}: {e}")
-                    return mock_compose(trigger_id, {}, {})
+                customer_id = trigger_context.get("customer_id")
+                customer_payload = await store.get_context("customer", customer_id) if customer_id else None
+                if customer_payload and hasattr(customer_payload, 'model_dump'):
+                    customer_payload = customer_payload.model_dump()
+                
+                store.add_event(f"AI Reasoning: {merchant_id or trigger_id}...")
+                actions = await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
+                store.add_event(f"Generated {len(actions)} actions for {trigger_id}")
+                return actions
+            except Exception as e:
+                logger.error(f"Error in {trigger_id}: {e}")
+                store.add_event(f"Error: {trigger_id}: {str(e)[:50]}")
+                return mock_compose(trigger_id, {}, {})
 
         tasks = [process_single_trigger(tid) for tid in req.available_triggers]
         
         try:
-            # SAFETY: Extended 55s timeout to allow Semaphore queueing
             results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=55.0)
             
             actions = []
             for res in results:
                 if res: actions.extend(res)
+            store.add_event(f"Batch complete: {len(actions)} total actions")
             return TickResponse(actions=actions[:20])
             
         except asyncio.TimeoutError:
