@@ -2,7 +2,7 @@ import json
 import os
 import logging
 from typing import Optional, List
-from .models import ActionModel, ReplyResponse
+from models import ActionModel, ReplyResponse
 from pydantic import BaseModel, ValidationError
 
 # Try importing litellm
@@ -168,7 +168,7 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
         
     try:
         import time as _time
-        from .prompts import SYSTEM_PROMPT, COMPOSE_TEMPLATE, CATEGORY_ANCHORS
+        from prompts import SYSTEM_PROMPT, COMPOSE_TEMPLATE, CATEGORY_ANCHORS
         
         m_pruned, c_pruned = prune_context(merchant, customer, trigger or {})
         

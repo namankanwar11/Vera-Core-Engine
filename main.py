@@ -4,12 +4,12 @@ from pydantic import ValidationError
 import logging
 from typing import Dict, Any
 
-from .models import (
+from models import (
     ContextPushRequest, TickRequest, TickResponse,
     ReplyRequest, ReplyResponse, HealthResponse
 )
-from .store import store
-from .llm import compose, mock_handle_reply
+from store import store
+from llm import compose, mock_handle_reply
 
 app = FastAPI(title="Vera Message Engine API")
 logger = logging.getLogger("uvicorn.error")
