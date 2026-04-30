@@ -1,5 +1,9 @@
-#!/usr/bin/env python3
 import os
+import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env BEFORE EVERYTHING ELSE
+load_dotenv()
 """
 magicpin AI Challenge — LLM-Powered Judge Simulator
 ====================================================
@@ -21,14 +25,14 @@ Author: magicpin AI Challenge Team
 # ██████  CONFIGURATION - EDIT THIS SECTION ██████
 # =============================================================================
 
-# Your bot's URL (where your bot is running)
-BOT_URL = "https://web-production-d3e66.up.railway.app"
+# Your bot's URL (Point to LOCAL for terminal testing)
+BOT_URL = "http://localhost:8000"
 
 # Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
 LLM_PROVIDER = "groq"
 
-# Your API key (or set GROQ_API_KEY env var)
-LLM_API_KEY = os.getenv("GROQ_API_KEY", "")  # <-- PUT YOUR API KEY HERE
+# Your API key (Pulled from .env automatically)
+LLM_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 # Model to use (leave empty for default, or specify like "gpt-4o", "claude-3-5-sonnet-20241022", etc.)
 LLM_MODEL = "llama-3.1-8b-instant"  # Must match a model your API key can access
