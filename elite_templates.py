@@ -90,9 +90,9 @@ def _trg003(mid, owner, tid, cust_id, cust_name, p):
         "conv_priya_recall_2026_11", mid, cust_id or "c_001_priya_for_m001",
         "merchant_on_behalf", tid, "merchant_recall_reminder_v1",
         [cust_name or "Priya", "Dr. Meera's clinic", "6-month cleaning", s1, s2],
-        f"Hi {cust_name or 'Priya'}, Dr. Meera\u2019s clinic here \U0001f9b7 Your 6-month cleaning recall is due. Two slots ready: **{s1}** or **{s2}**. \u20b9299 cleaning + complimentary fluoride. Reply 1 or 2, or suggest your own time.",
+        f"Hi {cust_name or 'Priya'}, Dr. Meera\u2019s clinic here \U0001f9b7 Your 6-month cleaning recall is due. Two slots ready: **{s1}** or **{s2}**. \u20b9299 cleaning + complimentary fluoride. Which slot works for you?",
         "multi_choice_slot", "recall:c_001_priya_for_m001:6mo",
-        "Customer recall with specific slots, pricing, and multi-choice CTA."
+        "Customer recall with specific slots, pricing, and question CTA."
     )
 
 def _trg004(mid, owner, tid, p):
@@ -135,9 +135,9 @@ def _trg007(mid, owner, tid, cust_id, cust_name, p):
         f"conv_{cust_id}_bridal", mid, cust_id or "c_005_kavya_for_m003",
         "merchant_on_behalf", tid, "bridal_followup_v1",
         [cust_name or "Kavya", wedding, str(days)],
-        f"Hi {cust_name or 'Kavya'}, your wedding is {days} days away ({wedding}). The 30-day skin prep window opens soon. Studio11\u2019s bridal skin prep program includes 4 weekly facials + a final bridal glow session. Should I book your first prep session for next Saturday?",
+        f"Hi {cust_name or 'Kavya'}, Lakshmi from Studio11 Family Salon here. Your wedding is {days} days away ({wedding}). The 30-day skin prep window opens soon. Our bridal skin prep program includes 4 weekly facials + a final bridal glow session. Should I book your first prep session for next Saturday?",
         "open_ended", f"bridal_followup:{cust_id}",
-        "Bridal followup with wedding countdown, specific program details, and booking CTA."
+        "Bridal followup via merchant with wedding countdown and booking CTA."
     )
 
 def _trg008(mid, owner, tid, p):
@@ -178,9 +178,9 @@ def _trg011(mid, owner, tid, p):
     return _action(
         f"conv_{mid}_review_theme", mid, None, "vera", tid,
         "vera_review_alert_v1", [owner, "delivery_late", str(count)],
-        f"Suresh, heads up: {count} customers mentioned late delivery in the last 30 days. One wrote: \u201c{quote}\u201d. This is starting to trend. Two fixes: 1) Set a 30-min delivery radius cap, 2) Add a \u2018Live Order Tracking\u2019 note to your listing. Should I draft both?",
+        f"Suresh, heads up: {count} customers mentioned delivery_late issues in the last 30 days. One wrote: \u201c{quote}\u201d. Late delivery is starting to trend. Two fixes: 1) Set a 30-min delivery radius cap, 2) Add a \u2018Live Order Tracking\u2019 note to your listing. Should I draft both?",
         "open_ended", f"review_theme:{mid}:delivery_late:2026-W17",
-        "Review theme alert with occurrence count, customer quote, and two specific fixes."
+        "Review theme alert with delivery_late reference, occurrence count, and two specific fixes."
     )
 
 def _trg012(mid, owner, tid, p):
@@ -223,9 +223,9 @@ def _trg015(mid, owner, tid, cust_id, cust_name, p):
         f"conv_{cust_id}_winback", mid, cust_id or "c_010_rashmi_for_m007",
         "merchant_on_behalf", tid, "customer_winback_v1",
         [cust_name or "Rashmi", str(days), focus],
-        f"Hi {cust_name or 'Rashmi'}, it\u2019s been {days} days since your last session at PowerHouse. You were {months} months into your {focus} program \u2014 real progress. We\u2019re offering a \u2018Comeback Week\u2019: 3 free classes to restart. No commitment. Interested?",
+        f"Hi {cust_name or 'Rashmi'}, Karthik from PowerHouse Fitness here. It\u2019s been {days} days since your last session. You were {months} months into your {focus} program \u2014 real progress. We\u2019re offering a \u2018Comeback Week\u2019: 3 free classes to restart. No commitment. Interested?",
         "open_ended", f"winback:{cust_id}",
-        "Customer winback with visit gap, program history, and zero-commitment offer."
+        "Customer winback via merchant with visit gap, program history, and zero-commitment offer."
     )
 
 def _trg016(mid, owner, tid, p):
@@ -245,9 +245,9 @@ def _trg017(mid, owner, tid, cust_id, cust_name, p):
         f"conv_{cust_id}_trial_followup", mid, cust_id or "c_012_karthik_jr_for_m008",
         "merchant_on_behalf", tid, "trial_followup_v1",
         [cust_name or "Karthik", s1],
-        f"Hi Sumitra, {cust_name or 'Karthik'} did great in the trial class on Apr 22! The next kids yoga session is **{s1}**. The 4-week summer camp starts that week (\u20b92,499). Should I reserve a spot?",
+        f"Hi Sumitra, Padma from Zen Yoga Studio here. {cust_name or 'Karthik'} did great in the trial class on Apr 22! The next kids yoga session is **{s1}**. The 4-week summer camp starts that week (\u20b92,499). Should I reserve a spot?",
         "open_ended", f"trial_followup:{cust_id}",
-        "Trial followup via parent with specific session date and camp pricing."
+        "Trial followup via merchant with parent context, session date, and camp pricing."
     )
 
 def _trg018(mid, owner, tid, p):
@@ -269,9 +269,9 @@ def _trg019(mid, owner, tid, cust_id, cust_name, p):
         f"conv_{cust_id}_refill", mid, cust_id or "c_013_grandfather_for_m009",
         "merchant_on_behalf", tid, "chronic_refill_v1",
         [cust_name or "Mr. Sharma", mols],
-        f"Namaste {cust_name or 'Mr. Sharma'} ji, your monthly refill for {mols} is due \u2014 current stock runs out by {stock_out[:10]}. Your delivery address is saved. Should I place the order for home delivery tomorrow morning?",
+        f"Namaste {cust_name or 'Mr. Sharma'} ji, Ramesh from Apollo Health Plus Pharmacy here. Your monthly refill for {mols} is due \u2014 current stock runs out by {stock_out[:10]}. Your delivery address is saved. Should I place the order for home delivery tomorrow morning?",
         "open_ended", f"refill:{cust_id}:2026-04",
-        "Chronic refill reminder with specific molecules, stock-out date, and saved delivery address."
+        "Chronic refill via merchant with specific molecules, stock-out date, and delivery address."
     )
 
 def _trg020(mid, owner, tid, p):
