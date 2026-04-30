@@ -161,23 +161,30 @@ async def process_tick(req: TickRequest):
                 logger.error(f"Error in single trigger {trigger_id}: {e}")
                 return mock_compose(trigger_id, merchant_payload, category_payload)
 
-        # Process triggers one by one to avoid overwhelming the Groq free tier
-        actions = []
-        for tid in req.available_triggers:
-            # Check if we are running out of time (20s mark)
-            if (asyncio.get_event_loop().time() - start_time) > 20:
-                store.add_event(f"⏰ Safety cutoff reached. Switching to mock for remaining.")
-                actions.extend(mock_compose(tid, {}, {}))
-                continue
-                
-            res = await process_single_trigger(tid)
-            if res:
-                actions.extend(res)
+        # Process triggers in parallel with small jitter to avoid collision
+        async def jittered_process(tid, idx):
+            await asyncio.sleep(idx * 0.3) # Small jitter
+            return await process_single_trigger(tid)
+
+        tasks = [jittered_process(tid, i) for i, tid in enumerate(req.available_triggers)]
+        
+        try:
+            # SAFETY: Hard 24s timeout for the ENTIRE batch
+            results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=24.0)
             
-            # Tiny sleep to let the rate limit reset
-            await asyncio.sleep(0.5)
+            actions = []
+            for res in results:
+                if res: actions.extend(res)
+            return TickResponse(actions=actions[:20])
             
-        return TickResponse(actions=actions[:20])
+        except asyncio.TimeoutError:
+            store.add_event("⚠️ BATCH TIMEOUT (24s). Returning partial/mock.")
+            # If we timeout, we might have some results already, but gather() fails.
+            # We'll just return mocks for the first few to be safe.
+            mock_actions = []
+            for tid in req.available_triggers[:3]:
+                mock_actions.extend(mock_compose(tid, {}, {}))
+            return TickResponse(actions=mock_actions)
         
     except Exception as e:
         error_msg = f"CRITICAL TICK ERROR: {str(e)}"
