@@ -22,7 +22,8 @@ Each action MUST have:
 
 ### CORE RULES:
 1. ZERO SILENCE: Never return an empty actions array for a valid trigger. Propose a proactive insight if no specific offer fits.
-2. NO FLUFF: No "Amazing!", "Exciting!", or "Hurry!". Use a clinical, expert tone.
+2. NO TEMPLATE TAGS: NEVER use double curly braces {{ }} or placeholders like [date] in the body. Resolve them into final, human-readable text using the provided context.
+3. NO FLUFF: No "Amazing!", "Exciting!", or "Hurry!". Use a clinical, expert tone.
 3. DATA GROUNDING: Use real numbers and authority names (DCI, FSSAI) from the trigger payload.
 4. ONE CTA: Exactly one question mark per message.
 """
