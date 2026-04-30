@@ -14,6 +14,13 @@ class MemoryStateStore:
         }
         self.start_time = time.time()
         self.events = [] # Real-time event buffer
+        self.metrics = {
+            "score": 0,
+            "specificity": 0,
+            "category_fit": 0,
+            "messages_sent": 0,
+            "performance_text": "Waiting for first evaluation..."
+        }
 
     def add_event(self, message: str):
         timestamp = time.strftime("%H:%M:%S")

@@ -53,7 +53,23 @@ async def metadata():
 
 @app.get("/v1/events")
 async def get_events():
-    return {"events": store.events}
+    return {
+        "events": store.events,
+        "metrics": store.metrics
+    }
+
+@app.post("/v1/report_score")
+async def report_score(request: Request):
+    data = await request.json()
+    store.metrics.update({
+        "score": data.get("score", 0),
+        "specificity": data.get("specificity", 0),
+        "category_fit": data.get("category_fit", 0),
+        "messages_sent": data.get("messages_sent", 0),
+        "performance_text": data.get("performance_text", "Evaluation complete.")
+    })
+    store.add_event(f"📊 NEW EVALUATION: {store.metrics['score']}/50")
+    return {"status": "success"}
 
 @app.post("/v1/context")
 async def push_context(request: Request):

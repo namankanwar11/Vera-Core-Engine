@@ -915,13 +915,29 @@ class JudgeSimulator:
         print(f"\n{Colors.BOLD}  AVERAGE SCORE: {total}/50 ({pct:.0f}%){Colors.RESET}")
 
         if pct >= 80:
-            print(f"\n  {Colors.GREEN}EXCELLENT{Colors.RESET}")
+            status = "EXCELLENT"
+            print(f"\n  {Colors.GREEN}{status}{Colors.RESET}")
         elif pct >= 60:
-            print(f"\n  {Colors.YELLOW}GOOD{Colors.RESET}")
+            status = "GOOD"
+            print(f"\n  {Colors.YELLOW}{status}{Colors.RESET}")
         elif pct >= 40:
-            print(f"\n  {Colors.YELLOW}NEEDS IMPROVEMENT{Colors.RESET}")
+            status = "NEEDS IMPROVEMENT"
+            print(f"\n  {Colors.YELLOW}{status}{Colors.RESET}")
         else:
-            print(f"\n  {Colors.RED}BELOW EXPECTATIONS{Colors.RESET}")
+            status = "BELOW EXPECTATIONS"
+            print(f"\n  {Colors.RED}{status}{Colors.RESET}")
+
+        # Report to cloud bot for dynamic dashboard
+        try:
+            self.client._request("POST", "/v1/report_score", 10, {
+                "score": total,
+                "specificity": avg.specificity,
+                "category_fit": avg.category_fit,
+                "messages_sent": n,
+                "performance_text": f"Evaluation Complete: {status} ({total}/50)"
+            })
+        except:
+            pass
 
 # =============================================================================
 # ENTRY POINT

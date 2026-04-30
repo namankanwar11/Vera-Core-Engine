@@ -244,36 +244,36 @@
                 </div>
             </div>
 
-            <!-- Certified Performance Snapshot -->
+            <!-- Dynamic Performance Snapshot -->
             <div class="stat-card" style="margin-bottom: 1.5rem; border-color: var(--accent); background: rgba(0, 255, 136, 0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <div class="stat-label" style="color: var(--accent); margin: 0;">Cloud Deployment Score</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">32/50 (GOOD)</div>
+                    <div class="stat-label" style="color: var(--accent); margin: 0;">Live Evaluation Score</div>
+                    <div id="live-score" style="font-size: 1.5rem; font-weight: 800; color: var(--accent);">0/50</div>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
                     <div style="font-size: 0.85rem;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                             <span>Avg Specificity</span>
-                            <span>8/10</span>
+                            <span id="stat-spec">0/10</span>
                         </div>
                         <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
-                            <div style="width: 80%; height: 100%; background: var(--accent); border-radius: 2px;"></div>
+                            <div id="bar-spec" style="width: 0%; height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease;"></div>
                         </div>
                     </div>
                     <div style="font-size: 0.85rem;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                             <span>Avg Category Fit</span>
-                            <span>7/10</span>
+                            <span id="stat-cat">0/10</span>
                         </div>
                         <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
-                            <div style="width: 70%; height: 100%; background: var(--accent); border-radius: 2px;"></div>
+                            <div id="bar-cat" style="width: 0%; height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s ease;"></div>
                         </div>
                     </div>
                 </div>
 
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; line-height: 1.5; color: var(--text-dim);">
-                    <strong style="color: #fff;">Cloud Performance:</strong> "Successful parallel processing of multiple triggers in the Railway environment. System maintained sub-10s latency for cloud-to-cloud transactions."
+                <div id="performance-text" style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.85rem; line-height: 1.5; color: var(--text-dim);">
+                    Waiting for first evaluation...
                 </div>
             </div>
 
@@ -309,6 +309,17 @@
                 const response = await fetch('/v1/events');
                 const data = await response.json();
                 
+                // Update Metrics
+                if (data.metrics) {
+                    const m = data.metrics;
+                    document.getElementById('live-score').innerText = `${m.score}/50`;
+                    document.getElementById('stat-spec').innerText = `${m.specificity}/10`;
+                    document.getElementById('stat-cat').innerText = `${m.category_fit}/10`;
+                    document.getElementById('bar-spec').style.width = `${(m.specificity/10)*100}%`;
+                    document.getElementById('bar-cat').style.width = `${(m.category_fit/10)*100}%`;
+                    document.getElementById('performance-text').innerText = m.performance_text;
+                }
+
                 if (data.events && data.events.length > 0) {
                     logs.innerHTML = '';
                     data.events.forEach(event => {
@@ -321,6 +332,7 @@
                         if (event.includes('Context Push')) formatted = `<span>[SYNC]</span> ${event.split('] ')[1]}`;
                         if (event.includes('Reasoning')) formatted = `<span>[AI]</span> ${event.split('] ')[1]}`;
                         if (event.includes('Generated')) formatted = `<span style="color: #fff;">[DONE]</span> ${event.split('] ')[1]}`;
+                        if (event.includes('ERROR')) formatted = `<span style="color: #ff5f56;">[ERROR]</span> ${event.split('] ')[1]}`;
                         
                         entry.innerHTML = formatted;
                         logs.appendChild(entry);
