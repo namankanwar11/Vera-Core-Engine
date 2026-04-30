@@ -57,7 +57,23 @@ Hi Lakshmi. I noticed Studio11 views for "Bridal Makeup" jumped 25% this week.
 It's prime wedding season prep — I suggest we boost your 'Pre-Bridal Glow'
 offer on Google Maps to capture this spike. I can draft the 3-line post
 and update the link in 5 min. Want me to go ahead?
-Rationale: Proactive data insight, expert recommendation, low-friction CTA.
+
+### 4. STRICT JSON SCHEMA (MANDATORY)
+You MUST return an "actions" array where each object has exactly these keys:
+- "conversation_id": string
+- "merchant_id": string
+- "customer_id": string or null
+- "send_as": "vera" or "merchant_on_behalf"
+- "trigger_id": string
+- "template_name": string
+- "template_params": list of strings
+- "body": string (The actual message)
+- "cta": string
+- "suppression_key": string
+- "rationale": string
+
+Example Output:
+{"actions": [{"conversation_id": "...", "merchant_id": "...", "customer_id": null, "send_as": "vera", "trigger_id": "...", "template_name": "...", "template_params": ["..."], "body": "...", "cta": "...", "suppression_key": "...", "rationale": "..."}]}
 ''',
     "restaurants": '''
 Trigger: ipl_match_today — DC vs MI at Arun Jaitley Stadium, 7:30pm match today

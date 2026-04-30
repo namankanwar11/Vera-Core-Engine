@@ -27,15 +27,21 @@ class MemoryStateStore:
         }
         self._load_from_disk()
 
-    def _save_to_disk(self):
+    def _save_state(self):
         try:
-            with open(STATE_FILE, "w") as f:
-                json.dump({
-                    "data": self.data,
-                    "metrics": self.metrics
-                }, f)
+            # Deep conversion of Pydantic models to serializable dicts
+            serializable_state = {
+                "merchants": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.merchants.items()},
+                "triggers": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.triggers.items()},
+                "categories": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.categories.items()},
+                "customers": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.customers.items()},
+                "events": self.events,
+                "metrics": self.metrics
+            }
+            with open(self.state_file, "w") as f:
+                json.dump(serializable_state, f)
         except Exception as e:
-            print(f"Failed to save state: {e}")
+            logger.error(f"Failed to save state: {e}")
 
     def _load_from_disk(self):
         if os.path.exists(STATE_FILE):
