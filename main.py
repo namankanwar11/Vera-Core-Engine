@@ -110,47 +110,66 @@ async def push_context(request: Request):
 
 @app.post("/v1/tick", response_model=TickResponse)
 async def process_tick(req: TickRequest):
-    store.add_event(f"Tick received: {len(req.available_triggers)} triggers")
-    
-    async def process_single_trigger(trigger_id):
-        trigger_context = await store.get_context("trigger", trigger_id)
-        merchant_payload = {}
-        category_payload = {}
-        customer_payload = {}
+    try:
+        store.add_event(f"Tick received: {len(req.available_triggers)} triggers")
         
-        if trigger_context:
-            if hasattr(trigger_context, 'model_dump'):
-                trigger_context = trigger_context.model_dump()
-            merchant_id = trigger_context.get("merchant_id")
-            customer_id = trigger_context.get("customer_id")
-            if merchant_id:
-                merchant_payload = await store.get_context("merchant", merchant_id) or {}
-                if hasattr(merchant_payload, 'model_dump'):
-                    merchant_payload = merchant_payload.model_dump()
+        async def process_single_trigger(trigger_id):
+            try:
+                trigger_context = await store.get_context("trigger", trigger_id)
+                if not trigger_context:
+                    return []
+                
+                if hasattr(trigger_context, 'model_dump'):
+                    trigger_context = trigger_context.model_dump()
+                
+                merchant_id = trigger_context.get("merchant_id")
+                customer_id = trigger_context.get("customer_id")
+                
+                merchant_payload = {}
+                if merchant_id:
+                    merchant_payload = await store.get_context("merchant", merchant_id) or {}
+                    if hasattr(merchant_payload, 'model_dump'):
+                        merchant_payload = merchant_payload.model_dump()
+                
+                category_payload = {}
                 cat_slug = merchant_payload.get("category_slug")
                 if cat_slug:
                     category_payload = await store.get_context("category", cat_slug) or {}
                     if hasattr(category_payload, 'model_dump'):
                         category_payload = category_payload.model_dump()
-        # Run the synchronous compose function in a separate thread
-        store.add_event(f"Reasoning for {trigger_id}...")
-        actions = await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context)
-        store.add_event(f"Generated {len(actions)} actions")
-        return actions
 
-    # Process 1 trigger at a time to stay within strict Groq Free Tier limits (6000 TPM)
-    triggers_to_process = req.available_triggers[:1]
-    tasks = [process_single_trigger(tid) for tid in triggers_to_process]
-    results = await asyncio.gather(*tasks)
-    
-    actions = []
-    for res in results:
-        actions.extend(res)
+                customer_payload = None
+                if customer_id:
+                    customer_payload = await store.get_context("customer", customer_id)
+                    if hasattr(customer_payload, 'model_dump'):
+                        customer_payload = customer_payload.model_dump()
+                
+                store.add_event(f"AI Reasoning: {merchant_id or 'unknown'}...")
+                # Run the synchronous compose function in a separate thread
+                actions = await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
+                store.add_event(f"Generated {len(actions)} actions")
+                return actions
+            except Exception as e:
+                store.add_event(f"Inner Error: {str(e)}")
+                logger.error(f"Error in single trigger: {e}")
+                return []
 
-    # Strictly enforce 20 actions per tick cap
-    actions = actions[:20]
+        # Process 1 trigger at a time for stability
+        triggers_to_process = req.available_triggers[:1]
+        tasks = [process_single_trigger(tid) for tid in triggers_to_process]
+        results = await asyncio.gather(*tasks)
+        
+        actions = []
+        for res in results:
+            if res: actions.extend(res)
 
-    return TickResponse(actions=actions)
+        return TickResponse(actions=actions[:20])
+        
+    except Exception as e:
+        error_msg = f"CRITICAL TICK ERROR: {str(e)}"
+        store.add_event(error_msg)
+        logger.error(error_msg)
+        return JSONResponse(status_code=500, content={"detail": error_msg})
 
 @app.post("/v1/reply", response_model=ReplyResponse)
 async def process_reply(req: ReplyRequest):
