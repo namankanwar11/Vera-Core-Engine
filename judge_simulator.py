@@ -430,12 +430,12 @@ class BotClient:
         })
 
     def tick(self, triggers):
-        return self._request("POST", "/v1/tick", 60, {
+        return self._request("POST", "/v1/tick", 120, {
             "now": datetime.utcnow().isoformat() + "Z", "available_triggers": triggers
         })
 
     def reply(self, conv_id, merchant_id, message, turn):
-        return self._request("POST", "/v1/reply", 60, {
+        return self._request("POST", "/v1/reply", 120, {
             "conversation_id": conv_id, "merchant_id": merchant_id, "customer_id": None,
             "from_role": "merchant", "message": message,
             "received_at": datetime.utcnow().isoformat() + "Z", "turn_number": turn

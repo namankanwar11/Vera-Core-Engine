@@ -137,8 +137,8 @@ async def process_tick(req: TickRequest):
         store.add_event(f"Generated {len(actions)} actions")
         return actions
 
-    # Process at most 2 triggers to avoid strict Groq Free Tier TPM limits (6000 TPM)
-    triggers_to_process = req.available_triggers[:2]
+    # Process 1 trigger at a time to stay within strict Groq Free Tier limits (6000 TPM)
+    triggers_to_process = req.available_triggers[:1]
     tasks = [process_single_trigger(tid) for tid in triggers_to_process]
     results = await asyncio.gather(*tasks)
     
