@@ -2,9 +2,11 @@ import asyncio
 import json
 import os
 import time
+import logging
 from typing import Dict, Any, Tuple
 
 STATE_FILE = "state.json"
+logger = logging.getLogger("uvicorn.error")
 
 class MemoryStateStore:
     def __init__(self):
@@ -17,7 +19,7 @@ class MemoryStateStore:
             "customer": {}
         }
         self.start_time = time.time()
-        self.events = [] # Real-time event buffer
+        self.events = []
         self.metrics = {
             "score": 0,
             "specificity": 0,
@@ -29,17 +31,20 @@ class MemoryStateStore:
 
     def _save_state(self):
         try:
-            # Deep conversion of Pydantic models to serializable dicts
-            serializable_state = {
-                "merchants": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.merchants.items()},
-                "triggers": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.triggers.items()},
-                "categories": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.categories.items()},
-                "customers": {k: (v.model_dump() if hasattr(v, "model_dump") else v) for k, v in self.customers.items()},
-                "events": self.events,
-                "metrics": self.metrics
+            # Pydantic-aware serialization
+            def serialize(obj):
+                if hasattr(obj, "model_dump"):
+                    return obj.model_dump()
+                return obj
+
+            serializable_data = {
+                "data": self.data,
+                "metrics": self.metrics,
+                "events": self.events
             }
-            with open(self.state_file, "w") as f:
-                json.dump(serializable_state, f)
+            
+            with open(STATE_FILE, "w") as f:
+                json.dump(serializable_data, f, default=serialize)
         except Exception as e:
             logger.error(f"Failed to save state: {e}")
 
@@ -50,27 +55,24 @@ class MemoryStateStore:
                     content = json.load(f)
                     self.data.update(content.get("data", {}))
                     self.metrics.update(content.get("metrics", {}))
+                    self.events = content.get("events", [])
             except Exception as e:
-                print(f"Failed to load state: {e}")
+                logger.error(f"Failed to load state: {e}")
 
     def add_event(self, message: str):
         timestamp = time.strftime("%H:%M:%S")
         self.events.append(f"[{timestamp}] {message}")
         if len(self.events) > 15:
             self.events.pop(0)
-        
+        self._save_state()
+
     def get_uptime(self) -> int:
         return int(time.time() - self.start_time)
-        
+
     async def get_counts(self) -> Dict[str, int]:
         async with self.lock:
-            return {
-                "category": len(self.data.get("category", {})),
-                "merchant": len(self.data.get("merchant", {})),
-                "customer": len(self.data.get("customer", {})),
-                "trigger": len(self.data.get("trigger", {}))
-            }
-            
+            return {k: len(v) for k, v in self.data.items()}
+
     async def push_context(self, scope: str, context_id: str, version: int, payload: Any) -> Tuple[bool, bool, int]:
         async with self.lock:
             if scope not in self.data:
@@ -87,7 +89,7 @@ class MemoryStateStore:
                 "version": version,
                 "payload": payload
             }
-            self._save_to_disk()
+            self._save_state()
             return True, False, version
 
     async def get_context(self, scope: str, context_id: str) -> Any:
@@ -99,6 +101,6 @@ class MemoryStateStore:
 
     def report_score(self, metrics: Dict[str, Any]):
         self.metrics.update(metrics)
-        self._save_to_disk()
+        self._save_state()
 
 store = MemoryStateStore()

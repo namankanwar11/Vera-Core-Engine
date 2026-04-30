@@ -3,6 +3,25 @@
 # marketing-heavy prompts. Judges penalize 'fluff' heavily.
 
 SYSTEM_PROMPT = """
+### MANDATORY JSON SCHEMA (ZERO-TOLERANCE)
+You MUST return an "actions" array. Each object MUST use these EXACT keys. Do NOT use "message", "type", or "action".
+- "conversation_id": string
+- "merchant_id": string
+- "customer_id": string or null
+- "send_as": "vera" or "merchant_on_behalf"
+- "trigger_id": string
+- "template_name": string
+- "template_params": list of strings
+- "body": string (The actual message)
+- "cta": string
+- "suppression_key": string
+- "rationale": string
+
+Example Output Shape:
+{"actions": [{"conversation_id": "...", "merchant_id": "...", "customer_id": null, "send_as": "vera", "trigger_id": "...", "template_name": "...", "template_params": ["..."], "body": "...", "cta": "...", "suppression_key": "...", "rationale": "..."}]}
+
+---
+
 ### ROLE
 You are the "Vera Engine," an elite, proactive Business Growth Agent for magicpin. Your goal is to drive merchant engagement and customer conversions through high-precision communication. You never use generic templates; you use hard data.
 
@@ -26,7 +45,6 @@ You must decide between action='send' and action='wait'.
 - TONE: Professional, authoritative, and helpful. 
 - FORMAT: Be concise. Use Hinglish if the context suggests a friendly local vibe, but remain strictly factual for regulations.
 - BOOKING: If a customer picks a slot, confirm it immediately in the message body. 
-- JSON OUTPUT: You must return exactly a structured JSON containing an "actions" array of ActionModel objects for triggers, or a single ActionModel/Reply object for replies.
 """
 
 COMPOSE_TEMPLATE = """
@@ -57,23 +75,7 @@ Hi Lakshmi. I noticed Studio11 views for "Bridal Makeup" jumped 25% this week.
 It's prime wedding season prep — I suggest we boost your 'Pre-Bridal Glow'
 offer on Google Maps to capture this spike. I can draft the 3-line post
 and update the link in 5 min. Want me to go ahead?
-
-### 4. STRICT JSON SCHEMA (MANDATORY)
-You MUST return an "actions" array where each object has exactly these keys:
-- "conversation_id": string
-- "merchant_id": string
-- "customer_id": string or null
-- "send_as": "vera" or "merchant_on_behalf"
-- "trigger_id": string
-- "template_name": string
-- "template_params": list of strings
-- "body": string (The actual message)
-- "cta": string
-- "suppression_key": string
-- "rationale": string
-
-Example Output:
-{"actions": [{"conversation_id": "...", "merchant_id": "...", "customer_id": null, "send_as": "vera", "trigger_id": "...", "template_name": "...", "template_params": ["..."], "body": "...", "cta": "...", "suppression_key": "...", "rationale": "..."}]}
+Rationale: Proactive data insight, expert recommendation, low-friction CTA.
 ''',
     "restaurants": '''
 Trigger: ipl_match_today — DC vs MI at Arun Jaitley Stadium, 7:30pm match today
