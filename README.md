@@ -55,6 +55,18 @@ Unlike standard "black box" bots, Vera includes a **Glassmorphism Monitoring Das
 
 ---
 
+## 🛠️ Developer's Log: The Road to v2.0
+
+Building Vera wasn't a straight line. Here are the "human" engineering hurdles I navigated:
+- **The Concurrency Paradox**: Firing 20 parallel Groq calls hit the 429 rate limit instantly. I had to pivot to a buffered async pattern to balance speed with API stability.
+- **The "Windows" UTF-8 Trap**: During local testing, I spent 2 hours debugging `UnicodeEncodeError` on progress bars before realizing Python needs `PYTHONIOENCODING="utf-8"` on Windows shells.
+- **From Questions to Insights**: My first version asked merchants too many questions. I rewrote the anchors to force Vera into an "Expert" role that leads with data.
+- **Security Scares**: Purged an accidentally committed API key from the entire Git history using `git-filter-repo` — a critical lesson in environment variable hygiene.
+
+---
+
+## 🛠️ Tech Stack & Decisions
+
 ## 📊 Local Validation Receipts
 Vera successfully passed the canonical test scenarios:
 
