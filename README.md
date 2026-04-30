@@ -36,22 +36,27 @@ The engine is deployed on **Railway** and is ready for automated evaluation.
 
 ## 💎 Senior-Level Engineering Pillars
 
-### 1. **Zero-Latency Orchestration**
-Leveraging **Groq's LPU inference**, Vera achieves sub-second reasoning. By wrapping synchronous LLM calls in `asyncio.to_thread` and using `asyncio.gather`, we process triggers in parallel, maintaining a tick latency of **~1.2s** even under high load.
+### 1. **Zero-Fail Safety (25s Deadman Switch)**
+To survive the strict **30-second judge timeout**, Vera implements a hard **25-second Safety Switch** (`asyncio.wait_for`). If LLM reasoning takes too long due to rate limits, the engine cuts its losses at 25s and returns a 200 OK, ensuring the evaluation never stalls.
 
 ### 2. **Real-Time Monitoring Dashboard**
 Unlike standard "black box" bots, Vera includes a **Glassmorphism Monitoring Dashboard**.
 *   **Live Event Feed**: Watch `v1/tick` and `v1/context` payloads arrive in real-time via a polling event buffer.
 *   **Dynamic Metrics**: The dashboard automatically updates its specificity and category-fit scores whenever a judge reports a new evaluation.
 
-### 3. **API Resilience & Idempotency**
-*   **Idempotent State**: The `MemoryStateStore` uses atomic `asyncio.Lock` and version-tracking to ensure `/v1/context` pushes never cause duplicate data or stale overwrites.
-*   **Graceful Degradation**: If the LLM hits rate limits (HTTP 429), Vera implements exponential backoff (1s → 2s → 4s) before falling back to deterministic mock responses to ensure **zero-fail delivery**.
+### 3. **Production-Grade Security**
+*   **Optional Authorization**: Secure your engine by setting a `BOT_API_KEY` in Railway. The bot will then require a valid `X-Vera-Key` in headers.
+*   **Payload Protection**: A 1MB hard limit on request bodies prevents data poisoning and memory exhaustion attacks.
+*   **Pydantic V2 Validation**: Every incoming payload is strictly validated at the boundary, rejecting malformed JSON before it reaches logic.
+
+### 4. **Resilience & Idempotency**
+*   **Idempotent State**: The `MemoryStateStore` uses version-tracking to ensure `/v1/context` pushes never cause duplicate data or stale overwrites.
+*   **Exponential Backoff**: Implements 1s -> 2s retries for LLM 429 errors to maximize success under heavy load.
 
 ---
 
 ## 📊 Local Validation Receipts
-During pre-deployment testing, Vera successfully passed the canonical test scenarios:
+Vera successfully passed the canonical test scenarios:
 
 ```text
 --- WARMUP ---
@@ -71,41 +76,27 @@ During pre-deployment testing, Vera successfully passed the canonical test scena
 
 ---
 
-## 🛠️ Tech Stack & Decisions
-
-| Component | Choice | Rationale |
-| :--- | :--- | :--- |
-| **Framework** | **FastAPI** | Native async support and Pydantic V2 for strict boundary validation. |
-| **LLM** | **Llama-3.1-8b** | The best-in-class open model for utility-first business messaging. |
-| **Inference** | **Groq LPU** | Unmatched speed for meeting the 30s judge timeout constraint. |
-| **State** | **MemoryStore** | O(1) read/write with zero external dependencies for maximum reliability. |
-| **Styling** | **Vanilla CSS** | Premium glassmorphism UI for a "WOW" first impression. |
-
----
-
-## 🏃 Getting Started
+## 🏃 Getting Started Locally
 
 ### 1. Configure `.env`
 ```env
 GROQ_API_KEY="gsk_your_key"
 DEFAULT_MODEL="groq/llama-3.1-8b-instant"
+# BOT_API_KEY="optional_secret_here"
 ```
 
-### 2. Run Locally
+### 2. Run the Evaluation
 ```powershell
 # Set encoding for Windows progress bars
 $env:PYTHONIOENCODING="utf-8"
 
-# Start the server
-uvicorn main:app --port 8080 --workers 1
-
-# Run the judge
+# Run the judge (it now loads .env automatically)
 python judge_simulator.py
 ```
 
 ---
 
 ## 🏁 Final Post-Mortem
-Vera v2.0 solves the **Concurrency vs. Rate-Limit** paradox. By strictly controlling the batch size (Batch=1 for Free Tier stability) while maintaining an asynchronous internal loop, we ensure that the bot stays alive for the full 60-minute evaluation without hitches.
+Vera v2.0 solves the **Concurrency vs. Rate-Limit** paradox. By strictly controlling internal timeouts and providing a live observability layer, we ensure that the bot stays alive and high-performing for the full 60-minute evaluation without hitches.
 
 **Built for magicpin by Naman Solo.** 🥂
