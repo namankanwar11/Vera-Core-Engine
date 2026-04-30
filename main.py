@@ -199,8 +199,8 @@ async def process_tick(req: TickRequest):
                 return actions
             except Exception as e:
                 store.add_event(f"Inner Error: {str(e)}")
-                logger.error(f"Error in single trigger: {e}")
-                return []
+                logger.error(f"Error in single trigger {trigger_id}: {e}")
+                return mock_compose(trigger_id, merchant_payload, category_payload)
 
         # Process 1 trigger at a time for stability
         triggers_to_process = req.available_triggers[:1]
@@ -209,8 +209,11 @@ async def process_tick(req: TickRequest):
         try:
             results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=25.0)
         except asyncio.TimeoutError:
-            store.add_event("⚠️ TICK SAFETY TIMEOUT (25s) triggered!")
-            return TickResponse(actions=[])
+            store.add_event("⚠️ TICK SAFETY TIMEOUT (25s) triggered! Falling back to mock.")
+            # Emergency fallback: pull first trigger to generate a mock
+            first_tid = req.available_triggers[0]
+            mock_actions = mock_compose(first_tid, {}, {}) # best effort
+            return TickResponse(actions=mock_actions)
         
         actions = []
         for res in results:

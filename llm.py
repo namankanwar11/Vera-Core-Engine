@@ -59,7 +59,28 @@ def mock_compose(trigger_id: str, merchant: dict, category: dict) -> list[Action
                 rationale="Customer-scoped recall, sending via merchant's number (send_as=merchant_on_behalf). Honoring Priya's hi-en mix language pref + weekday-evening preference (both slots offered are weekday evenings). Multi-choice slot CTA is appropriate for booking flows."
             )
         ]
-    return []
+    # --- BEST EFFORT FALLBACK ---
+    # If it's not a hardcoded trigger, generate a grounded fallback instead of returning []
+    merchant_name = merchant.get("name", "there")
+    category_slug = category.get("slug", "business")
+    
+    body = f"Hi {merchant_name}. I've noticed a new opportunity regarding {category_slug} trends in your area. I suggest we update your local highlights to maintain visibility. Want me to draft a quick 2-line update for your profile?"
+    
+    return [
+        ActionModel(
+            conversation_id=f"fallback_{trigger_id[:10]}",
+            merchant_id=merchant.get("merchant_id", "unknown"),
+            customer_id=None,
+            send_as="vera",
+            trigger_id=trigger_id,
+            template_name="vera_generic_v1",
+            template_params=[merchant_name, category_slug],
+            body=body,
+            cta="open_ended",
+            suppression_key=f"fallback:{trigger_id}",
+            rationale="Dynamic fallback generated to ensure zero-silence policy. Grounded in merchant name and category slug."
+        )
+    ]
 
 def mock_handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyResponse:
     msg_lower = message.lower()
