@@ -4,7 +4,11 @@ from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
 import logging
 import asyncio
+import warnings
 from typing import Dict, Any
+
+# Suppress all warnings
+warnings.filterwarnings("ignore")
 
 from models import (
     ContextPushRequest, TickRequest, TickResponse,

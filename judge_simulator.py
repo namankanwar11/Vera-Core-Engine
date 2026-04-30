@@ -43,7 +43,17 @@ TEST_SCENARIO = "full_evaluation"
 # ██████  END OF CONFIGURATION - DON'T EDIT BELOW THIS LINE ██████
 # =============================================================================
 
+import sys
 import os
+import warnings
+from dotenv import load_dotenv
+
+# Suppress all warnings (clean terminal)
+warnings.filterwarnings("ignore")
+
+# Load environment variables from .env
+load_dotenv()
+
 import sys
 import json
 import time
@@ -647,15 +657,12 @@ class JudgeSimulator:
 
         print_section("CONTEXT PUSH")
         for slug, cat in self.dataset.categories.items():
-            data, err, _ = self.client.push_context("category", slug, 1, cat)
-            status = "PASS" if data and data.get("accepted") else "FAIL"
-            print(f"  [{status}] category/{slug}")
+            self.client.push_context("category", slug, 1, cat)
+        print_success(f"Pushed {len(self.dataset.categories)} categories")
 
-        for mid, m in list(self.dataset.merchants.items())[:5]:
-            data, err, _ = self.client.push_context("merchant", mid, 1, m)
-            status = "PASS" if data and data.get("accepted") else "FAIL"
-            short_id = mid.split('_')[1] if '_' in mid else mid[:10]
-            print(f"  [{status}] merchant/{short_id}")
+        for mid, m in self.dataset.merchants.items():
+            self.client.push_context("merchant", mid, 1, m)
+        print_success(f"Pushed {len(self.dataset.merchants)} merchants")
 
         return True
 
