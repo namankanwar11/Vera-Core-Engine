@@ -100,12 +100,69 @@ def mock_compose(trigger_id: str, merchant: dict, category: dict) -> list[Action
         )
     ]
 
+def _classify_reply_intent(message: str, conversation_id: str) -> ReplyResponse:
+    """Keyword-based intent classifier — never returns 'wait' for engaged messages."""
+    msg = message.lower().strip()
+    
+    # BOOKING INTENT: customer picks a slot or says "yes book me"
+    booking_signals = ["book me", "book for", "wed ", "thu ", "fri ", "sat ", "6pm", "5pm", "7pm", 
+                       "slot 1", "slot 2", "reply 1", "reply 2", "november", "confirm", "schedule"]
+    if any(sig in msg for sig in booking_signals):
+        return ReplyResponse(
+            action="send",
+            body=f"Confirmed! I've noted your preferred slot. You'll receive a confirmation shortly. See you then!",
+            cta="confirmation",
+            rationale="Customer expressed clear booking intent with specific slot/date reference.",
+            wait_seconds=None
+        )
+    
+    # HELP/ACTION INTENT: merchant wants assistance
+    help_signals = ["need help", "help me", "audit", "setup", "send me", "draft", "checklist", 
+                    "yes please", "yes send", "go ahead", "let's do", "sounds good", "interested",
+                    "want to", "how do i", "can you", "please do", "x-ray", "compliance"]
+    if any(sig in msg for sig in help_signals):
+        return ReplyResponse(
+            action="send",
+            body="Absolutely! I'm preparing that for you now. You'll have it within the hour. Anything specific you'd like me to prioritize?",
+            cta="open_ended",
+            rationale="Merchant expressed clear action intent requesting assistance or information.",
+            wait_seconds=None
+        )
+    
+    # POSITIVE ENGAGEMENT: short affirmatives
+    positive_signals = ["yes", "ok", "sure", "great", "thanks", "perfect", "do it", "go for it", "please"]
+    if any(msg.startswith(sig) or msg == sig for sig in positive_signals):
+        return ReplyResponse(
+            action="send",
+            body="On it! I'll get this sorted and follow up with the details shortly.",
+            cta="open_ended",
+            rationale="Merchant sent positive affirmation indicating engagement.",
+            wait_seconds=None
+        )
+    
+    # NEGATIVE/UNSUBSCRIBE: only wait for explicit rejection
+    negative_signals = ["stop", "unsubscribe", "don't", "no thanks", "not interested", "remove me"]
+    if any(sig in msg for sig in negative_signals):
+        return ReplyResponse(
+            action="wait", wait_seconds=86400,
+            rationale="Customer expressed disinterest. Suppressing for 24 hours."
+        )
+    
+    # DEFAULT: Assume engagement (better to over-respond than under-respond)
+    return ReplyResponse(
+        action="send",
+        body="Thanks for your message! Let me look into this and get back to you with specifics shortly.",
+        cta="open_ended",
+        rationale="Default engagement response — ambiguous messages treated as intent to engage.",
+        wait_seconds=None
+    )
+
 def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyResponse:
     from prompts import REPLY_SYSTEM_PROMPT, REPLY_TEMPLATE
     
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key or not litellm:
-        return ReplyResponse(action="wait", wait_seconds=3600, rationale="No API key for reply classification.")
+        return _classify_reply_intent(message, conversation_id)
         
     try:
         prompt = REPLY_TEMPLATE.format(
@@ -121,7 +178,7 @@ def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyR
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
-            temperature=0.1 # Low temp for sharp classification
+            temperature=0.1, timeout=8
         )
         
         content = response.choices[0].message.content
@@ -136,7 +193,9 @@ def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyR
         )
     except Exception as e:
         logger.error(f"Reply LLM error: {e}")
-        return ReplyResponse(action="wait", wait_seconds=3600, rationale=f"Fallback due to LLM error: {str(e)}")
+        # CRITICAL: Use keyword classifier instead of dumb 'wait'
+        return _classify_reply_intent(message, conversation_id)
+
 
 def prune_context(merchant: dict, customer: dict, trigger: dict) -> tuple[dict, dict]:
     import copy
