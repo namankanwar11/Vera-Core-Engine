@@ -17,8 +17,36 @@ from models import (
 from store import store
 from llm import compose, mock_handle_reply
 
+import os
+import warnings
+from typing import Dict, Any
+
+# Suppress all warnings
+warnings.filterwarnings("ignore")
+
+BOT_API_KEY = os.getenv("BOT_API_KEY")
+
 app = FastAPI(title="Vera Message Engine API")
 logger = logging.getLogger("uvicorn.error")
+
+# Security Middleware: Optional Authorization
+@app.middleware("http")
+async def security_middleware(request: Request, call_next):
+    # 1. Payload Size Limit (1MB)
+    if request.method == "POST":
+        content_length = request.headers.get("Content-Length")
+        if content_length and int(content_length) > 1 * 1024 * 1024:
+            return JSONResponse(status_code=413, content={"detail": "Payload too large (Max 1MB)"})
+
+    # 2. Optional API Key Check
+    if BOT_API_KEY:
+        provided_key = request.headers.get("X-Vera-Key")
+        # Allow access to UI and metadata even if locked
+        if request.url.path not in ["/", "/v1/healthz", "/v1/metadata", "/v1/events"]:
+            if provided_key != BOT_API_KEY:
+                return JSONResponse(status_code=401, content={"detail": "Unauthorized: Missing or invalid X-Vera-Key"})
+    
+    return await call_next(request)
 
 templates = Jinja2Templates(directory="templates")
 
