@@ -37,7 +37,7 @@ LLM_MODEL = "llama-3.1-8b-instant"  # Must match a model your API key can access
 OLLAMA_URL = "http://localhost:11434"
 
 # Which test to run by default
-TEST_SCENARIO = "phase2_short"
+TEST_SCENARIO = "full_evaluation"
 
 # =============================================================================
 # ██████  END OF CONFIGURATION - DON'T EDIT BELOW THIS LINE ██████

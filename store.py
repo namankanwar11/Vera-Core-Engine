@@ -13,6 +13,13 @@ class MemoryStateStore:
             "customer": {}
         }
         self.start_time = time.time()
+        self.events = [] # Real-time event buffer
+
+    def add_event(self, message: str):
+        timestamp = time.strftime("%H:%M:%S")
+        self.events.append(f"[{timestamp}] {message}")
+        if len(self.events) > 15:
+            self.events.pop(0)
         
     def get_uptime(self) -> int:
         return int(time.time() - self.start_time)

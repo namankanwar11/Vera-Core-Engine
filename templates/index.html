@@ -303,25 +303,37 @@
 
     <script>
         const logs = document.getElementById('logs');
-        const phrases = [
-            "Railway: Context push received...",
-            "Groq: LLM Reasoning (Llama-3.1)...",
-            "Action generated: DCI Circular nudge",
-            "Latency: 512ms",
-            "Railway: /v1/tick success"
-        ];
-
-        setInterval(() => {
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            const time = new Date().toLocaleTimeString();
-            entry.innerHTML = `<span>[${time}]</span> ${phrases[Math.floor(Math.random() * phrases.length)]}`;
-            logs.appendChild(entry);
-            
-            if (logs.children.length > 6) {
-                logs.removeChild(logs.children[0]);
+        
+        async function fetchEvents() {
+            try {
+                const response = await fetch('/v1/events');
+                const data = await response.json();
+                
+                if (data.events && data.events.length > 0) {
+                    logs.innerHTML = '';
+                    data.events.forEach(event => {
+                        const entry = document.createElement('div');
+                        entry.className = 'log-entry';
+                        
+                        // Highlight system/info/error
+                        let formatted = event;
+                        if (event.includes('Tick received')) formatted = `<span>[TICK]</span> ${event.split('] ')[1]}`;
+                        if (event.includes('Context Push')) formatted = `<span>[SYNC]</span> ${event.split('] ')[1]}`;
+                        if (event.includes('Reasoning')) formatted = `<span>[AI]</span> ${event.split('] ')[1]}`;
+                        if (event.includes('Generated')) formatted = `<span style="color: #fff;">[DONE]</span> ${event.split('] ')[1]}`;
+                        
+                        entry.innerHTML = formatted;
+                        logs.appendChild(entry);
+                    });
+                }
+            } catch (e) {
+                console.error("Failed to fetch events", e);
             }
-        }, 5000);
+        }
+
+        // Poll every 1.5 seconds
+        setInterval(fetchEvents, 1500);
+        fetchEvents(); // Initial call
     </script>
 </body>
 </html>
