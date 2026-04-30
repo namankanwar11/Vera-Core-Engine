@@ -1,6 +1,10 @@
 import asyncio
-from typing import Dict, Any, Tuple
+import json
+import os
 import time
+from typing import Dict, Any, Tuple
+
+STATE_FILE = "state.json"
 
 class MemoryStateStore:
     def __init__(self):
@@ -21,6 +25,27 @@ class MemoryStateStore:
             "messages_sent": 0,
             "performance_text": "Waiting for first evaluation..."
         }
+        self._load_from_disk()
+
+    def _save_to_disk(self):
+        try:
+            with open(STATE_FILE, "w") as f:
+                json.dump({
+                    "data": self.data,
+                    "metrics": self.metrics
+                }, f)
+        except Exception as e:
+            print(f"Failed to save state: {e}")
+
+    def _load_from_disk(self):
+        if os.path.exists(STATE_FILE):
+            try:
+                with open(STATE_FILE, "r") as f:
+                    content = json.load(f)
+                    self.data.update(content.get("data", {}))
+                    self.metrics.update(content.get("metrics", {}))
+            except Exception as e:
+                print(f"Failed to load state: {e}")
 
     def add_event(self, message: str):
         timestamp = time.strftime("%H:%M:%S")
@@ -34,17 +59,13 @@ class MemoryStateStore:
     async def get_counts(self) -> Dict[str, int]:
         async with self.lock:
             return {
-                "category": len(self.data["category"]),
-                "merchant": len(self.data["merchant"]),
-                "customer": len(self.data["customer"]),
-                "trigger": len(self.data["trigger"])
+                "category": len(self.data.get("category", {})),
+                "merchant": len(self.data.get("merchant", {})),
+                "customer": len(self.data.get("customer", {})),
+                "trigger": len(self.data.get("trigger", {}))
             }
             
     async def push_context(self, scope: str, context_id: str, version: int, payload: Any) -> Tuple[bool, bool, int]:
-        """
-        Pushes a context into the store.
-        Returns a tuple: (accepted: bool, is_duplicate: bool, current_version: int)
-        """
         async with self.lock:
             if scope not in self.data:
                 self.data[scope] = {}
@@ -52,14 +73,15 @@ class MemoryStateStore:
             current = self.data[scope].get(context_id)
             if current:
                 if current["version"] > version:
-                    return False, False, current["version"] # Stale version
+                    return False, False, current["version"]
                 elif current["version"] == version:
-                    return True, True, current["version"] # Duplicate version, accepted as no-op
+                    return True, True, current["version"]
                 
             self.data[scope][context_id] = {
                 "version": version,
                 "payload": payload
             }
+            self._save_to_disk()
             return True, False, version
 
     async def get_context(self, scope: str, context_id: str) -> Any:
@@ -68,5 +90,9 @@ class MemoryStateStore:
             if current:
                 return current["payload"]
             return None
+
+    def report_score(self, metrics: Dict[str, Any]):
+        self.metrics.update(metrics)
+        self._save_to_disk()
 
 store = MemoryStateStore()
