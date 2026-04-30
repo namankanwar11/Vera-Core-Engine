@@ -15,6 +15,12 @@ logger = logging.getLogger("uvicorn.error")
 class LLMActionOutput(BaseModel):
     actions: List[ActionModel]
 
+class LLMReplyOutput(BaseModel):
+    action: str
+    body: Optional[str] = None
+    cta: Optional[str] = None
+    rationale: str
+
 def mock_compose(trigger_id: str, merchant: dict, category: dict) -> list[ActionModel]:
     if trigger_id == "trg_001_research_digest_dentists":
         return [
@@ -59,7 +65,6 @@ def mock_compose(trigger_id: str, merchant: dict, category: dict) -> list[Action
             )
         ]
     
-    # Best-effort fallback to ensure zero-silence
     merchant_name = merchant.get("name", "there")
     category_slug = category.get("slug", "business")
     body = f"Hi {merchant_name}. I've noticed a new opportunity regarding {category_slug} trends in your area. I suggest we update your local highlights to maintain visibility. Want me to draft a quick 2-line update for your profile?"
@@ -80,20 +85,43 @@ def mock_compose(trigger_id: str, merchant: dict, category: dict) -> list[Action
         )
     ]
 
-def mock_handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyResponse:
-    msg_lower = message.lower()
-    if "thank you for contacting" in msg_lower:
-        if turn_number == 2:
-            return ReplyResponse(action="wait", wait_seconds=14400, rationale="Detected auto-reply. Backing off 4 hours.")
-        elif turn_number == 3:
-            return ReplyResponse(action="wait", wait_seconds=86400, rationale="Repeated auto-reply. Wait 24h.")
-        else:
-            return ReplyResponse(action="end", rationale="Auto-reply loop detected. Closing.")
-            
-    if "not interested" in msg_lower or "stop messaging" in msg_lower:
-        return ReplyResponse(action="end", rationale="Merchant explicitly opted out.")
+def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyResponse:
+    from prompts import REPLY_SYSTEM_PROMPT, REPLY_TEMPLATE
     
-    return ReplyResponse(action="wait", wait_seconds=3600, rationale="Default wait for manual owner intervention.")
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key or not litellm:
+        return ReplyResponse(action="wait", wait_seconds=3600, rationale="No API key for reply classification.")
+        
+    try:
+        prompt = REPLY_TEMPLATE.format(
+            conversation_id=conversation_id,
+            turn_number=turn_number,
+            message=message
+        )
+        
+        response = litellm.completion(
+            model=os.getenv("DEFAULT_MODEL", "groq/llama-3.1-8b-instant"),
+            messages=[
+                {"role": "system", "content": REPLY_SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.1 # Low temp for sharp classification
+        )
+        
+        content = response.choices[0].message.content
+        parsed = LLMReplyOutput.model_validate_json(content)
+        
+        return ReplyResponse(
+            action=parsed.action,
+            body=parsed.body,
+            cta=parsed.cta,
+            rationale=parsed.rationale,
+            wait_seconds=None if parsed.action == "send" else 3600
+        )
+    except Exception as e:
+        logger.error(f"Reply LLM error: {e}")
+        return ReplyResponse(action="wait", wait_seconds=3600, rationale=f"Fallback due to LLM error: {str(e)}")
 
 def prune_context(merchant: dict, customer: dict, trigger: dict) -> tuple[dict, dict]:
     import copy
@@ -126,7 +154,12 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
         import time as _time
         from prompts import SYSTEM_PROMPT, COMPOSE_TEMPLATE, CATEGORY_ANCHORS
         
-        m_pruned, c_pruned = prune_context(merchant, customer, trigger or {})
+        # SPECIAL HANDLING FOR REGULATION: Ensure no pruning for these triggers
+        if "regulation" in trigger_id or "compliance" in trigger_id:
+            m_pruned, c_pruned = merchant, customer or {}
+        else:
+            m_pruned, c_pruned = prune_context(merchant, customer, trigger or {})
+            
         category_slug = category.get("slug", "unknown")
         anchor_example = CATEGORY_ANCHORS.get(category_slug, "No example available.")
         
@@ -139,14 +172,19 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
             anchor_example=anchor_example
         )
         
+        # Determine temperature based on trigger
+        # Regulation/Compliance triggers need absolute precision (0.0)
+        temp = 0.0 if ("regulation" in trigger_id or "compliance" in trigger_id) else 0.1
+        
         max_retries = 2
         for attempt in range(max_retries):
             try:
                 response = litellm.completion(
-                    model=os.getenv("DEFAULT_MODEL", "gpt-4-turbo"),
+                    model=os.getenv("DEFAULT_MODEL", "groq/llama-3.1-8b-instant"),
                     messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
                     response_format={"type": "json_object"},
-                    timeout=8
+                    timeout=8,
+                    temperature=temp
                 )
                 parsed = LLMActionOutput.model_validate_json(response.choices[0].message.content)
                 return parsed.actions

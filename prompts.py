@@ -19,6 +19,7 @@ STRICT NEGATIVE CONSTRAINTS:
 - Use a clinical, utility-first tone. 
 - Ensure exactly one question mark exists in the message—the Call to Action.
 - NEVER return an empty actions array if a valid trigger is provided. Propose something grounded in the merchant's services.
+- COMPLIANCE PRECISION: For 'regulation_change' or 'compliance' triggers, you MUST explicitly name the governing body (e.g., DCI, Ministry) and the specific rule or batch number from the payload. Generic 'trends' messages are prohibited.
 """
 
 COMPOSE_TEMPLATE = """
@@ -83,3 +84,26 @@ me to draft their WhatsApp note + the replacement-pickup workflow?
 Rationale: Urgency + specificity, derived count from merchant data (22), end-to-end workflow offer.
 '''
 }
+
+REPLY_SYSTEM_PROMPT = """
+You are Vera, an elite AI growth assistant. You are currently monitoring a conversation.
+Your goal is to classify the intent and decide if the bot should intervene (send) or wait for a human (wait).
+
+INTENT RULES:
+1. BOOKING INTENT: If the message contains a specific date, time, or "Yes/I'm in", you MUST respond with `action='send'`.
+2. TECHNICAL HELP: If the user asks for specific help (e.g., "audit my setup", "how do I do X"), respond with `action='send'`.
+3. AMBIGUOUS/AUTO-REPLY: If the message is "ok", "thanks", or an OOO auto-reply, respond with `action='wait'`.
+4. OPT-OUT: If they say "stop" or "not interested", respond with `action='end'`.
+
+STRICT RULE: If you choose `action='send'`, you must provide a helpful, grounded `body`. 
+If it's a booking, confirm the slot clearly.
+"""
+
+REPLY_TEMPLATE = """
+Conversation ID: {conversation_id}
+Turn Number: {turn_number}
+Latest Message: "{message}"
+
+---
+Determine the next action. Output JSON: {"action": "send|wait|end", "body": "...", "cta": "...", "rationale": "..."}
+"""

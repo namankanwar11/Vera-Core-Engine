@@ -15,7 +15,7 @@ from models import (
     ReplyRequest, ReplyResponse, HealthResponse
 )
 from store import store
-from llm import compose, mock_handle_reply, mock_compose
+from llm import compose, handle_reply, mock_compose
 
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 
@@ -187,4 +187,5 @@ async def process_tick(req: TickRequest):
 
 @app.post("/v1/reply", response_model=ReplyResponse)
 async def process_reply(req: ReplyRequest):
-    return mock_handle_reply(req.conversation_id, req.message, req.turn_number)
+    store.add_event(f"Incoming Reply: {req.message[:30]}...")
+    return handle_reply(req.conversation_id, req.message, req.turn_number)
