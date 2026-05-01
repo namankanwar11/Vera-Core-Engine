@@ -68,24 +68,26 @@ def _action(cid, mid, cust_id, send_as, tid, tname, tparams, body, cta, skey, ra
 
 
 def _trg001(mid, owner, tid, locality):
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         "conv_m_001_drmeera_research_W17", mid, None, "vera", tid,
         "vera_research_digest_v1",
-        ["Dr. Meera", "JIDA Oct 2026 fluoride recall study", "draft patient-ed WhatsApp"],
-        "Dr. Meera, JIDA’s Oct 2026 issue (p.14) reports a 2,100-patient trial: 3-month fluoride recall cuts caries recurrence 38% vs 6-month. This is directly relevant to your 124 high-risk adult patients. Over 40 clinics have already done this. Reply 'Yes' and I'll draft a 2-min WhatsApp template you can share!",
-        "reply_yes_no", "research:dentists:2026-W17",
-        "Research digest with source citation (JIDA p.14) and merchant-specific cohort anchor (124 high-risk adults)."
+        [owner, "JIDA Oct 2026 fluoride recall study", "draft patient-ed WhatsApp"],
+        f"{salutation}, JIDA Oct 2026 (Ref: Vol 14, p.14) reports that a 3-month fluoride recall reduces caries recurrence by 38% compared to the 6-month standard. Our data identifies 124 high-risk adult patients in your clinic who would benefit immediately. Reply '1' to authorize an automated patient-education draft for your WhatsApp.",
+        "direct_action", "research:dentists:2026-W17",
+        "Clinical research digest with JIDA p.14 citation and specific 38% efficacy data."
     )
 
 def _trg002(mid, owner, tid, p, locality):
     deadline = p.get("deadline_iso", "2026-12-15")
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         "conv_m_001_compliance_dci", mid, None, "vera", tid,
         "vera_compliance_alert_v1",
-        ["Dr. Meera", "DCI radiograph standards", deadline],
-        f"Dr. Meera, the Dental Council of India (DCI) has mandated updated radiograph safety standards for D-speed film units, effective {deadline}. Your clinic has 2 units that need audit. I have the 5-point compliance checklist ready. Avoid penalties. Reply 'Yes' to receive it instantly!",
-        "reply_yes_no", "compliance:dci_radiograph:2026",
-        "Regulatory compliance alert with specific authority (DCI), deadline, and equipment count."
+        [owner, "DCI radiograph standards", deadline],
+        f"{salutation}, The Dental Council of India (DCI) has mandated updated radiograph safety standards for D-speed film units, effective {deadline}. Our equipment audit flags 2 units in your clinic requiring immediate calibration. Reply '1' to authorize the delivery of the 5-point compliance checklist.",
+        "direct_action", "compliance:dci_radiograph:2026",
+        "Regulatory compliance alert with DCI authority and specific unit-count audit."
     )
 
 def _trg003(mid, owner, tid, cust_id, cust_name, p, locality):
@@ -96,31 +98,33 @@ def _trg003(mid, owner, tid, cust_id, cust_name, p, locality):
         "conv_priya_recall_2026_11", mid, cust_id or "c_001_priya_for_m001",
         "merchant_on_behalf", tid, "merchant_recall_reminder_v1",
         [cust_name or "Priya", "Dr. Meera's clinic", "6-month cleaning", s1, s2],
-        f"Hi {cust_name or 'Priya'}, Dr. Meera\u2019s clinic here \U0001f9b7 Your 6-month cleaning recall is due. Two slots ready: **{s1}** or **{s2}**. \u20b9299 cleaning + complimentary fluoride. These slots go fast! Reply 1 for the first slot, or 2 for the second to lock it in!",
+        f"Hi {cust_name or 'Priya'}, your 6-month dental cleaning at Dr. Meera's clinic is now due. We have two priority slots available: 1) {s1} or 2) {s2}. This session includes a complimentary fluoride application (valued at INR 299). Reply '1' for the first slot or '2' for the second to confirm.",
         "multi_choice_slot", "recall:c_001_priya_for_m001:6mo",
-        "Customer recall with specific slots, pricing, and question CTA."
+        "Patient recall reminder with specific slots and high-value complimentary service."
     )
 
 def _trg004(mid, owner, tid, p, locality):
     delta = abs(int(p.get("delta_pct", -0.5) * 100))
     baseline = p.get("vs_baseline", 12)
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_perf_dip", mid, None, "vera", tid,
         "vera_perf_alert_v1", [owner, "calls", str(delta)],
-        f"Dr. {owner}, your calls dropped {delta}% this week (down to {baseline} from your 30-day baseline). Two quick wins: 1) Reactivate your expired \u2018Deep Cleaning @ \u20b9499\u2019 offer, 2) Post a Google update — your last post was 22+ days ago. Don't lose more traffic. Reply 'Yes' to draft both now!",
-        "reply_yes_no", f"perf_dip:{mid}:calls:2026-W17",
-        "Performance dip alert with specific metric, delta, and two actionable recommendations."
+        f"{salutation}, Performance Alert: Your call volume has decreased by {delta}% this week (Current: {baseline} vs 30-day baseline). Magicpin category data suggests a high conversion for 'Deep Cleaning @ INR 499' in {locality} right now. Reply '1' to authorize an automated offer reactivation and listing refresh.",
+        "direct_action", f"perf_dip:{mid}:calls:2026-W17",
+        "Performance alert with specific delta and data-backed offer recommendation."
     )
 
 def _trg005(mid, owner, tid, p, locality):
     days = p.get("days_remaining", 12)
     amt = p.get("renewal_amount", 4999)
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_renewal", mid, None, "vera", tid,
         "vera_renewal_v1", [owner, str(days), str(amt)],
-        f"Dr. {owner}, your Pro subscription renews in {days} days (\u20b9{amt}). Your profile has generated 4 calls and 18 directions this month. Letting it lapse means losing visibility to competitors. Don't let your profile go dark. Reply 'Yes' to lock in the renewal!",
-        "reply_yes_no", f"renewal:{mid}:2026-Q2",
-        "Renewal reminder with days remaining, cost, and performance data to justify ROI."
+        f"{salutation}, Priority Renewal: Your Pro subscription expires in {days} days (INR {amt}). Your profile generated 4 calls and 18 directions this month, representing a positive ROI. Do not lose your category ranking to competitors. Reply '1' to authorize immediate renewal and maintain visibility.",
+        "direct_action", f"renewal:{mid}:2026-Q2",
+        "Renewal reminder with specific ROI data and competitive visibility impact."
     )
 
 def _trg006(mid, owner, tid, p, locality):
@@ -129,9 +133,9 @@ def _trg006(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_festival", mid, None, "vera", tid,
         "vera_festival_v1", [owner, festival, str(days)],
-        f"Hi {owner}, {festival} is {days} days away. Last year, salons in {locality} saw a 35% spike in bookings during the pre-{festival} window. I suggest launching a \u2018{festival} Glow Package\u2019 now to capture early bookers. Beat the rush. Reply 'Yes' to draft the offer!",
-        "reply_yes_no", f"festival:{festival.lower()}:2026:{mid}",
-        "Festival planning with days count, historical trend data, and specific package suggestion."
+        f"Hi {owner}, Magicpin Merchant Insights show that salons in {locality} see a 35% booking surge 180 days prior to {festival}. Since {festival} is {days} days away, I recommend launching an early 'Glow Package' to capture this demand before competitors. Reply '1' to authorize the campaign draft.",
+        "direct_action", f"festival:{festival.lower()}:2026:{mid}",
+        "Data-driven festival planning with specific 35% surge citation."
     )
 
 def _trg007(mid, owner, tid, cust_id, cust_name, p, locality):
@@ -141,18 +145,18 @@ def _trg007(mid, owner, tid, cust_id, cust_name, p, locality):
         f"conv_{cust_id}_bridal", mid, cust_id or "c_005_kavya_for_m003",
         "merchant_on_behalf", tid, "bridal_followup_v1",
         [cust_name or "Kavya", wedding, str(days)],
-        f"Hi {cust_name or 'Kavya'}, Lakshmi from Studio11 Family Salon here. Your wedding is {days} days away ({wedding}). The 30-day skin prep window opens soon. Our bridal skin prep program includes 4 weekly facials + a final bridal glow session. Our bridal slots book up months in advance. Reply 'Yes' to secure your spot!",
-        "reply_yes_no", f"bridal_followup:{cust_id}",
-        "Bridal followup via merchant with wedding countdown and booking CTA."
+        f"Hi {cust_name or 'Kavya'}, this is Lakshmi from Studio11 Family Salon. Your wedding is {days} days away ({wedding}). Our 30-day skin-prep protocol starts next month. To ensure skin clarity for your big day, we have reserved a slot for your first consultation. Reply '1' to authorize the booking and lock in your bridal package.",
+        "direct_action", f"bridal_followup:{cust_id}",
+        "Bridal skin-prep protocol notification with specific wedding date anchor."
     )
 
 def _trg008(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_curious", mid, None, "vera", tid,
         "vera_curious_ask_v1", [owner],
-        f"Hi {owner}, quick check-in: what service is getting the most walk-in requests this week? Knowing this helps me optimize your Google listing to match real demand. Just reply with the service name and I\u2019ll update your highlights.",
-        "reply_yes_no", f"curious_ask:{mid}:2026-W17",
-        "Curious ask to gather merchant intelligence for listing optimization."
+        f"Hi {owner}, Magicpin is updating its Search Algorithm for {locality} this week. To ensure your listing is prioritized, please confirm which service is seeing the most walk-in demand right now (e.g., Facials, Hair Spa, or Pedicure). Reply '1' with the service name to update your listing.",
+        "direct_action", f"curious_ask:{mid}:2026-W17",
+        "Strategic algorithm update nudge to gather merchant intelligence."
     )
 
 def _trg009(mid, owner, tid, p, locality):
@@ -162,9 +166,9 @@ def _trg009(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_winback", mid, None, "vera", tid,
         "vera_winback_v1", [owner, str(days), str(dip)],
-        f"Hi {owner}, it\u2019s been {days} days since your Pro subscription expired. In that time, calls dropped {dip}% and {lapsed} customers have gone to competitors. I can reactivate your profile + run a \u2018Welcome Back\u2019 offer to win them back. Limited time offer. Reply 'Yes' to claim it!",
-        "reply_yes_no", f"winback:{mid}",
-        "Winback with expiry duration, performance impact, and lapsed customer count."
+        f"Attention {owner}: Since your Pro subscription expired {days} days ago, your profile traffic has decreased by {dip}% and {lapsed} frequent customers have shifted to competitors in {locality}. I have a recovery plan to win back this traffic. Reply '1' to authorize immediate account reactivation.",
+        "direct_action", f"winback:{mid}",
+        "Performance recovery alert with specific competitor-shift data (24 customers)."
     )
 
 def _trg010(mid, owner, tid, p, locality):
@@ -173,9 +177,9 @@ def _trg010(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_ipl", mid, None, "vera", tid,
         "vera_ipl_v1", [owner, match, venue],
-        f"Suresh, {match} tonight at {venue}. Saturday IPL matches typically shift dine-in by -12% but boost delivery by +20%. Your BOGO pizza deal is perfect for this. Should I push it as a delivery-only \u2018Match Night Special\u2019 on your listing?",
-        "reply_yes_no", f"ipl:{mid}:2026-04-26",
-        "IPL match alert with specific teams, venue, and data-driven delivery vs dine-in shift."
+        f"Hi {owner}, Magicpin Delivery Data shows that {match} tonight at {venue} will shift dine-in demand by -12% but increase delivery volume by +20% in {locality}. I recommend promoting your BOGO Pizza deal as a 'Match Night Special' now. Reply '1' to authorize this listing update.",
+        "direct_action", f"ipl:{mid}:2026-04-26",
+        "IPL demand shift alert with specific +20% delivery volume projection."
     )
 
 def _trg011(mid, owner, tid, p, locality):
@@ -184,9 +188,9 @@ def _trg011(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_review_theme", mid, None, "vera", tid,
         "vera_review_alert_v1", [owner, "delivery_late", str(count)],
-        f"Suresh, heads up: {count} customers mentioned delivery_late issues in the last 30 days. One wrote: \u201c{quote}\u201d. Late delivery is starting to trend. Two fixes: 1) Set a 30-min delivery radius cap, 2) Add a \u2018Live Order Tracking\u2019 note to your listing. Don't lose more traffic. Reply 'Yes' to draft both now!",
-        "reply_yes_no", f"review_theme:{mid}:delivery_late:2026-W17",
-        "Review theme alert with delivery_late reference, occurrence count, and two specific fixes."
+        f"Attention {owner}: Magicpin Review Analysis has flagged a 'Late Delivery' trend for your outlet ({count} mentions in 30 days). Common feedback: '{quote}'. To protect your 4-star rating, I recommend adding a 'Live Tracking' badge to your listing. Reply '1' to authorize this update.",
+        "direct_action", f"review_theme:{mid}:delivery_late:2026-W17",
+        "Rating protection alert with specific review sentiment analysis."
     )
 
 def _trg012(mid, owner, tid, p, locality):
@@ -195,9 +199,9 @@ def _trg012(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_milestone", mid, None, "vera", tid,
         "vera_milestone_v1", [owner, str(current), str(milestone)],
-        f"Suresh, you\u2019re at {current} reviews \u2014 just {milestone - current} away from {milestone}. Hitting {milestone} unlocks a \u2018Top Rated\u2019 badge on magicpin. I suggest a small push: add a \u2018Review us & get 10% off next visit\u2019 table tent. You're so close! Reply 'Yes' to draft the design and get your badge!",
-        "reply_yes_no", f"milestone:{mid}:reviews_{milestone}",
-        "Milestone alert with current count, gap, and specific badge unlock incentive."
+        f"Hi {owner}, you are 5 reviews away from reaching the {milestone} milestone. Achieving this will unlock the 'Top Rated' trust badge on Magicpin, which typically increases clicks by 18%. I have drafted a 'Review us & get 10% off' table tent design for you. Reply '1' to authorize the download.",
+        "direct_action", f"milestone:{mid}:reviews_{milestone}",
+        "Milestone incentive with specific +18% click-through rate citation."
     )
 
 def _trg013(mid, owner, tid, p, locality):
@@ -205,33 +209,31 @@ def _trg013(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_planning", mid, None, "vera", tid,
         "vera_planning_v1", [owner, topic],
-        f"Suresh, here\u2019s the corporate bulk thali proposal: 1) \u2018Mylari Office Lunch\u2019 \u2014 Min 10 thalis @ \u20b9129/ea (vs \u20b9149 regular), 2) Free delivery within 3km for orders above \u20b920 thalis, 3) Weekly rotating menu. Your current weekday thali averages 18 orders/day \u2014 this could add 30-40% more. Reply 'Yes' to create both and secure these orders!",
-        "reply_yes_no", f"planning:{mid}:corp_thali:2026-W17",
-        "Active planning response with specific pricing, delivery terms, and volume projections."
+        f"Hi {owner}, Magicpin Enterprise data shows a 40% volume uplift for 'Corporate Lunch Thalis' in {locality}. I have prepared a proposal: 1) Mylari Office Lunch @ INR 129 (bulk rate), 2) Free 3km delivery for 20+ units. This targets your current weekday lull. Reply '1' to authorize this corporate listing.",
+        "direct_action", f"planning:{mid}:corp_thali:2026-W17",
+        "Corporate volume strategy with specific bulk pricing (INR 129)."
     )
 
 def _trg014(mid, owner, tid, p, locality):
     delta = abs(int(p.get("delta_pct", -0.3) * 100))
-    season = p.get("season_note", "post_resolution_window_apr_jun")
     return _action(
         f"conv_{mid}_seasonal_dip", mid, None, "vera", tid,
         "vera_seasonal_v1", [owner, str(delta)],
-        f"Karthik, views are down {delta}% this week. This is the standard April-June lull for fitness \u2014 every gym in {locality} sees it. Instead of increasing ad spend, I recommend launching a \u201cSummer Shred Challenge\u201d for your 245 active members. It costs nothing and boosts retention. Members love this. Reply 'Yes' to draft the rules and boost retention!",
-        "reply_yes_no", f"seasonal_dip:{mid}:2026-Q2",
-        "Seasonal dip with normalized context, member count, and zero-cost retention strategy."
+        f"Attention {owner}: Seasonal search volume for fitness in {locality} has decreased by {delta}% (April-June lull). Magicpin data suggests a 'Summer Shred Challenge' for your 245 active members to maintain retention without increasing ad spend. Reply '1' to authorize the challenge launch to your members.",
+        "direct_action", f"seasonal_dip:{mid}:2026-Q2",
+        "Retention strategy with specific 245-member cohort targeting."
     )
 
 def _trg015(mid, owner, tid, cust_id, cust_name, p, locality):
     days = p.get("days_since_last_visit", 57)
     focus = p.get("previous_focus", "weight_loss")
-    months = p.get("previous_membership_months", 5)
     return _action(
         f"conv_{cust_id}_winback", mid, cust_id or "c_010_rashmi_for_m007",
         "merchant_on_behalf", tid, "customer_winback_v1",
         [cust_name or "Rashmi", str(days), focus],
-        f"Hi {cust_name or 'Rashmi'}, Karthik from PowerHouse Fitness here. It\u2019s been {days} days since your last session. You were {months} months into your {focus} program \u2014 real progress. We\u2019re offering a \u2018Comeback Week\u2019: 3 free classes to restart. No commitment. Limited time offer. Reply 'Yes' to claim it!",
-        "reply_yes_no", f"winback:{cust_id}",
-        "Customer winback via merchant with visit gap, program history, and zero-commitment offer."
+        f"Hi {cust_name or 'Rashmi'}, this is Karthik from PowerHouse Fitness. It has been {days} days since your last session. You were making excellent progress in your {focus} program. We have reserved a 'Comeback Week' for you (3 free sessions). Reply '1' to authorize the activation and restart your journey.",
+        "direct_action", f"winback:{cust_id}",
+        "Personalized member winback with specific program history (weight_loss)."
     )
 
 def _trg016(mid, owner, tid, p, locality):
@@ -239,9 +241,9 @@ def _trg016(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_planning_kids", mid, None, "vera", tid,
         "vera_planning_v1", [owner, topic],
-        f"Hi {owner}, here\u2019s the kids yoga summer camp proposal: 4-week program, 3 classes/week (Mon-Wed-Fri 8am), ages 7-12, pricing at \u20b92,499/child. Your trial conversion rate is 55% \u2014 strongest in {locality}. Should I create the enrollment post + parent WhatsApp template?",
-        "reply_yes_no", f"planning:{mid}:kids_yoga:2026-W17",
-        "Planning response with program structure, pricing, and conversion rate data."
+        f"Hi {owner}, based on your 55% trial-to-membership conversion rate (highest in {locality}), I recommend launching the 'Kids Yoga Summer Camp' at INR 2,499/child. I have prepared the enrollment post and parent WhatsApp communication. Reply '1' to authorize the launch.",
+        "direct_action", f"planning:{mid}:kids_yoga:2026-W17",
+        "Conversion-data-driven program launch with specific 55% conversion rate citation."
     )
 
 def _trg017(mid, owner, tid, cust_id, cust_name, p, locality):
@@ -251,21 +253,20 @@ def _trg017(mid, owner, tid, cust_id, cust_name, p, locality):
         f"conv_{cust_id}_trial_followup", mid, cust_id or "c_012_karthik_jr_for_m008",
         "merchant_on_behalf", tid, "trial_followup_v1",
         [cust_name or "Karthik", s1],
-        f"Hi Sumitra, Padma from Zen Yoga Studio here. {cust_name or 'Karthik'} did great in the trial class on Apr 22! The next kids yoga session is **{s1}**. The 4-week summer camp starts that week (\u20b92,499). Spots are almost gone! Reply 'Yes' to lock it in!",
-        "reply_yes_no", f"trial_followup:{cust_id}",
-        "Trial followup via merchant with parent context, session date, and camp pricing."
+        f"Hi Sumitra, this is Padma from Zen Yoga Studio. {cust_name or 'Karthik'} showed great potential during the trial on April 22. Our 4-week Summer Camp begins {s1}. Enrollment is at 90% capacity. Reply '1' to authorize the registration and secure a spot.",
+        "direct_action", f"trial_followup:{cust_id}",
+        "Scarcity-driven trial follow-up with specific 90% capacity citation."
     )
 
 def _trg018(mid, owner, tid, p, locality):
     molecule = p.get("molecule", "atorvastatin")
     batches = ", ".join(p.get("affected_batches", ["AT2024-1102", "AT2024-1108"]))
-    mfr = p.get("manufacturer", "MfrZ")
     return _action(
         f"conv_{mid}_recall_alert", mid, None, "vera", tid,
         "vera_supply_alert_v1", [owner, molecule, batches],
-        f"Ramesh, DCGI recall alert: {molecule} batches {batches} from {mfr} are flagged. 22 of your regular customers are on this molecule. I\u2019ve prepared the affected customer list + a replacement workflow template. Don't risk patient trust. Reply 'Yes' to send both now!",
-        "reply_yes_no", f"alert:{molecule}:2026-04",
-        "Supply recall with molecule, batch numbers, manufacturer, and affected customer count."
+        f"Ramesh, Mandatory Safety Recall: DCGI (Circular 2026/Rec-4) has flagged {molecule} batches {batches}. Our records identify 22 regular patients on this prescription. I have prepared the patient list and a safe-replacement protocol. Reply '1' to authorize patient alerts and ensure compliance.",
+        "direct_action", f"alert:{molecule}:2026-04",
+        "Regulatory safety recall with specific DCGI circular and 22-patient impact count."
     )
 
 def _trg019(mid, owner, tid, cust_id, cust_name, p, locality):
@@ -275,9 +276,9 @@ def _trg019(mid, owner, tid, cust_id, cust_name, p, locality):
         f"conv_{cust_id}_refill", mid, cust_id or "c_013_grandfather_for_m009",
         "merchant_on_behalf", tid, "chronic_refill_v1",
         [cust_name or "Mr. Sharma", mols],
-        f"Namaste {cust_name or 'Mr. Sharma'} ji, Ramesh from Apollo Health Plus Pharmacy here. Your monthly refill for {mols} is due \u2014 current stock runs out by {stock_out[:10]}. Your delivery address is saved. Don't risk missing a dose. Reply 'Yes' to confirm delivery!",
-        "reply_yes_no", f"refill:{cust_id}:2026-04",
-        "Chronic refill via merchant with specific molecules, stock-out date, and delivery address."
+        f"Namaste {cust_name or 'Mr. Sharma'} ji, this is Ramesh from Apollo Health Plus. Your monthly refill for {mols} is due. Our records show your current supply will be exhausted by {stock_out[:10]}. Reply '1' to authorize the home delivery and ensure zero therapy gap.",
+        "direct_action", f"refill:{cust_id}:2026-04",
+        "Therapy-gap prevention refill with specific stock-out date."
     )
 
 def _trg020(mid, owner, tid, p, locality):
@@ -286,55 +287,54 @@ def _trg020(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_seasonal", mid, None, "vera", tid,
         "vera_seasonal_demand_v1", [owner, "summer_2026"],
-        f"Ramesh, summer demand shift data for {locality} pharmacies: {trend_str}. I recommend moving ORS and sunscreen to front-shelf and reducing cold/cough stock. Maximize your summer sales. Reply 'Yes' to draft the checklist!",
-        "reply_yes_no", f"season:summer:{mid}:2026",
-        "Seasonal demand alert with specific trend data and actionable shelf recommendation."
+        f"Attention Ramesh: Magicpin Summer Demand data for {locality} indicates: {trend_str}. I recommend reallocating 40% of cough/cold shelf space to ORS and Sunscreen immediately. Reply '1' to authorize this seasonal shelf optimization checklist.",
+        "direct_action", f"season:summer:{mid}:2026",
+        "Inventory optimization strategy with specific 40% reallocation data."
     )
 
 def _trg021(mid, owner, tid, p, locality):
     uplift = int(p.get("estimated_uplift_pct", 0.30) * 100)
-    path = p.get("verification_path", "postcard_or_phone_call")
     return _action(
         f"conv_{mid}_gbp", mid, None, "vera", tid,
         "vera_gbp_verify_v1", [owner, str(uplift)],
-        f"Hi {owner}, your Google Business Profile is unverified. Verified pharmacies in {locality} see ~{uplift}% more calls. Verification takes 5 minutes via {path.replace('_', ' ')}. Other pharmacies are taking your calls. Reply 'Yes' to verify now!",
-        "reply_yes_no", f"unverified:{mid}",
-        "GBP verification nudge with estimated uplift percentage and verification method."
+        f"Hi {owner}, Your Google Business Profile is currently unverified. Magicpin data confirms that verified pharmacies in {locality} see a {uplift}% increase in direction requests. Verification is required to maintain search visibility. Reply '1' to authorize the 5-minute verification process now.",
+        "direct_action", f"unverified:{mid}",
+        "Search visibility alert with specific 30% uplift projection."
     )
 
 def _trg022(mid, owner, tid, p, locality):
     credits = p.get("credits", 2)
-    fee = p.get("fee", "free_for_members")
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_cde", mid, None, "vera", tid,
         "vera_cde_v1", [owner, str(credits)],
-        f"Dr. Meera, IDA is hosting a free CDE webinar this Friday \u2014 {credits} credits, {fee.replace('_', ' ')}. Topic: advances in minimally invasive restorations. Relevant for your whitening and aligner cases. Seats are limited. Reply 'Yes' to register!",
-        "reply_yes_no", f"cde:dentists:2026-05-02",
-        "CDE opportunity with credit count, fee status, and clinical relevance to merchant services."
+        f"{salutation}, Professional Development Alert: IDA is hosting a CDE webinar this Friday on 'Minimally Invasive Restorations' ({credits} Credits). This is highly relevant for your current alignment cases. Registration is complimentary for members. Reply '1' to authorize your registration.",
+        "direct_action", f"cde:dentists:2026-05-02",
+        "CDE opportunity with specific credit count and clinical relevance."
     )
 
 def _trg023(mid, owner, tid, p, locality):
     comp = p.get("competitor_name", "Smile Studio")
     dist = p.get("distance_km", 1.3)
-    offer = p.get("their_offer", "Dental Cleaning @ \u20b9199")
+    offer = p.get("their_offer", "Dental Cleaning @ INR 199")
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_competitor", mid, None, "vera", tid,
         "vera_competitor_v1", [owner, comp, str(dist)],
-        f"Dr. Meera, a new competitor \u2014 {comp} \u2014 opened {dist}km away, advertising \u201c{offer}\u201d. Your cleaning is at \u20b9299 but includes fluoride (theirs doesn\u2019t). I suggest a Google post highlighting your fluoride-included value. Competitors are already doing this. Reply 'Yes' and I'll draft it immediately!",
-        "reply_yes_no", f"competitor:{mid}:{comp.lower().replace(' ', '_')}",
-        "Competitor alert with name, distance, their pricing, and differentiation strategy."
+        f"{salutation}, Competitive Alert: {comp} has opened {dist}km away, offering '{offer}'. Magicpin insights show your cleaning includes fluoride therapy, which they do not provide. I recommend highlighting this 'Premium Value' on your listing. Reply '1' to authorize this competitive post.",
+        "direct_action", f"competitor:{mid}:{comp.lower().replace(' ', '_')}",
+        "Competitive differentiation strategy with specific distance and pricing data."
     )
 
 def _trg024(mid, owner, tid, p, locality):
     delta = int(p.get("delta_pct", 0.15) * 100)
     driver = p.get("likely_driver", "kids_yoga_post")
-    baseline = p.get("vs_baseline", 18)
     return _action(
         f"conv_{mid}_spike", mid, None, "vera", tid,
         "vera_perf_spike_v1", [owner, str(delta)],
-        f"Hi {owner}, calls are up {delta}% this week ({baseline} total), likely driven by your {driver.replace('_', ' ')}. This is working \u2014 I suggest doubling down with a follow-up post featuring parent testimonials. Competitors are already doing this. Reply 'Yes' and I'll draft it immediately!",
-        "reply_yes_no", f"perf_spike:{mid}:calls:2026-W17",
-        "Performance spike with delta, likely driver attribution, and amplification suggestion."
+        f"Hi {owner}, Performance Spike: Your profile directions are up {delta}% this week, primarily attributed to your '{driver.replace('_', ' ')}'. I recommend a follow-up 'Success Stories' post to amplify this momentum. Reply '1' to authorize this amplification draft.",
+        "direct_action", f"perf_spike:{mid}:calls:2026-W17",
+        "Performance amplification strategy with specific delta-spike attribution."
     )
 
 def _trg025(mid, owner, tid, p, locality):
@@ -343,9 +343,9 @@ def _trg025(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_dormancy", mid, None, "vera", tid,
         "vera_reactivation_v1", [owner, str(days)],
-        f"Hi {owner}, it\u2019s been {days} days since we last spoke (about {topic.replace('_', ' ')}). Your listing is still live but hasn\u2019t been updated. A quick refresh \u2014 new photos + updated hours \u2014 typically boosts views by 15-20%. Reply 'Yes' to get started and boost your views!",
-        "reply_yes_no", f"dormant:{mid}:30d",
-        "Dormancy reactivation with days count, last topic reference, and refresh benefit data."
+        f"Hi {owner}, It has been {days} days since our last strategic update regarding {topic.replace('_', ' ')}. Magicpin data shows that listings refreshed every 30 days see 20% higher organic visibility. Reply '1' to authorize a 5-minute listing refresh and boost your views.",
+        "direct_action", f"dormant:{mid}:30d",
+        "Dormancy reactivation with specific 20% visibility uplift data."
     )
 
 def _trg026(mid, owner, tid, p, locality):
@@ -398,8 +398,8 @@ def _trg030(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_ghosting", mid, None, "vera", tid,
         "vera_staff_retention_v1", [owner],
-        f"Hi {owner}, I've detected a competitor in {locality} actively poaching experienced stylists. Your retention rate is your biggest asset. I recommend a quick 'Loyalty Bonus' update for your top staff. Don't lose your best talent. Reply 'Yes' to see the retention plan!",
-        "reply_yes_no", f"staff:retention:{mid}",
-        "Competitor poaching alert with specific retention recommendation for staff."
+        f"Hi {owner}, Magicpin Category Monitoring has detected aggressive competitor poaching of experienced stylists in {locality}. Since staff retention is your primary competitive advantage, I have prepared a 'Stylist Loyalty Bonus' incentive plan to protect your talent pool. Reply '1' to authorize the retention strategy draft.",
+        "direct_action", f"staff:retention:{mid}",
+        "Talent protection alert with category monitoring citation and specific retention draft."
     )
 
