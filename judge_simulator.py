@@ -891,7 +891,7 @@ class JudgeSimulator:
 
             for action in actions:
                 time.sleep(5) # Absolute safety for 10/10 run
-                self._score_and_display(action, verbose=False)
+                self._score_and_display(action, verbose=True)
 
         return True
 
