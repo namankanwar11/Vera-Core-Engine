@@ -551,13 +551,18 @@ Send As: {action.get('send_as', 'vera')}
 
 Score each dimension 0-10 with clear reasoning. Be STRICT."""
 
-        try:
-            print_llm("Analyzing message...")
-            response = self.llm.complete(prompt, self.SYSTEM)
-            return self._parse_response(response, action)
-        except Exception as e:
-            print_warn(f"LLM error: {e}")
-            return self._fallback_score(action)
+        for attempt in range(3):
+            try:
+                print_llm(f"Analyzing message (Attempt {attempt+1})...")
+                time.sleep(1)  # Rate limiting
+                response = self.llm.complete(prompt, self.SYSTEM)
+                return self._parse_response(response, action)
+            except Exception as e:
+                print_warn(f"LLM error: {e}")
+                if attempt == 2:
+                    return self._fallback_score(action)
+                time.sleep(2)
+        return self._fallback_score(action)
 
     def _parse_response(self, response: str, action: Dict) -> ScoreResult:
         """Parse LLM JSON response."""

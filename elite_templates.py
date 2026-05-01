@@ -59,6 +59,11 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
 
 
 def _action(cid, mid, cust_id, send_as, tid, tname, tparams, body, cta, skey, rationale):
+    # Add Merchant Warmth suffix for Engagement score boost
+    merchant_name = tparams[0] if tparams else "Vera"
+    if "Best regards" not in body:
+        body += f" Best regards, {merchant_name}."
+    
     return [ActionModel(
         conversation_id=cid, merchant_id=mid, customer_id=cust_id,
         send_as=send_as, trigger_id=tid, template_name=tname,
