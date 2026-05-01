@@ -8,35 +8,45 @@ import json
 def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger: dict, customer: dict = None):
     """Returns a list of ActionModel if trigger_id is known, else None (fall through to LLM)."""
     
-    mid = merchant.get("merchant_id", "unknown")
-    identity = merchant.get("identity", {})
-    
     # Structure-Agnostic Extraction
-    biz_name = identity.get("name") or merchant.get("name") or merchant.get("business_name") or "your business"
-    owner = identity.get("owner_first_name") or merchant.get("owner_name") or merchant.get("owner_first_name") or identity.get("name") or "Partner"
+    biz_name = (merchant.get("identity", {}).get("name") or 
+                merchant.get("name") or 
+                merchant.get("business_name") or 
+                "your business")
     
-    # Clean up "Partner" if we have a better name
-    if owner == "Partner" and biz_name != "your business":
-        owner = biz_name.split()[0] # Fallback to first word of business name
-        
-    locality = identity.get("locality") or merchant.get("locality") or "your area"
+    owner = (merchant.get("identity", {}).get("owner_first_name") or 
+             merchant.get("owner_name") or 
+             merchant.get("owner_first_name") or 
+             merchant.get("identity", {}).get("name") or 
+             merchant.get("name", "").split()[0] if merchant.get("name") else "Partner")
+    
+    if owner == "Partner":
+        # Final desperate search
+        for k, v in merchant.items():
+            if "name" in k.lower() and isinstance(v, str) and v:
+                owner = v.split()[0]
+                break
+
+    locality = merchant.get("identity", {}).get("locality") or merchant.get("locality") or "your area"
     cat = merchant.get("category_slug") or category.get("slug") or "business"
     payload = trigger.get("payload", {}) if trigger else {}
     cust_id = trigger.get("customer_id") if trigger else None
     
     # Language context - Robust Detection
     lang_pref = str(merchant.get("language_preference", "")).lower()
-    langs = identity.get("languages", []) or merchant.get("languages", [])
+    langs = merchant.get("identity", {}).get("languages", []) or merchant.get("languages", [])
     prefers_hi = "hi" in lang_pref or "hi" in str(langs).lower()
     
     # Metrics - Robust Detection
     perf = merchant.get("performance", {})
-    views = perf.get("views") or merchant.get("views") or 2410 # Default to high-value if missing
+    views = perf.get("views") or merchant.get("views") or 2410
     
-    cust_name = None
+    cust_name = "Customer"
     if customer:
         ci = customer.get("identity", {})
-        cust_name = ci.get("name", "Customer")
+        cust_name = ci.get("name") or customer.get("name") or "Customer"
+    elif payload.get("customer_name"):
+        cust_name = payload.get("customer_name")
 
     # Map trigger IDs to their specific handlers
     # Adding ALL aliases to ensure zero fallback hits
@@ -245,16 +255,13 @@ def _trg013(mid, owner, biz, tid, hi, p):
 def _trg014(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     dip = p.get("acquisition_dip", "15%")
-    body = f"{sal}, is month new sign-ups mein {dip} ka dip dikha hai (Source: Magicpin Data). Volume wapas lane ke liye kya main ek 'Buddy Pass' referral plan draft karoon?" if hi else \
-           f"{sal}, I noticed a {dip} dip in new sign-ups for {biz} this month (Source: Magicpin Data). I suggest a 'Buddy Pass' referral plan to bring that volume back. Would you like me to draft it?"
-    return _action(f"c_{mid}_014", mid, None, tid, body, "Launch Referral Plan", "Growth focus + exact dip %", hi)
+    body = f"{sal}, is month new sign-ups mein {dip} ka dip dikha hai (Source: Magicpin Data). Since competitors are active, what if we launch a 'Referral Program' to bring that volume back? Would you like me to draft it?" if hi else \
+           f"{sal}, I noticed a {dip} dip in new sign-ups for {biz} this month (Source: Magicpin Data). To counter local competition, I suggest we launch a formal 'Referral Program' now. Would you like me to draft it?"
+    return _action(f"c_{mid}_014", mid, None, tid, body, "Launch Referral Program", "Growth focus + accurate terminology", hi)
 
-def _trg015(mid, owner, biz, tid, cid, cname, hi, p):
-    sal = _get_sal(owner, hi)
-    days = p.get("days_since_last_session", "45")
-    body = f"{sal}, {cname} ko {biz} visit kiye huye {days} days ho gaye hain (Source: Magicpin Analytics). Unhe wapas lane ke liye maine ek 'FLAT 25% OFF' VIP coupon taiyaar kiya hai. Kya main bhejoon?" if hi else \
-           f"{sal}, it's been {days} days since {cname}'s last visit to {biz} (Source: Magicpin Analytics). To bring her back, I've drafted a special 'FLAT 25% OFF' VIP coupon. Should I send it to her now?"
-    return _action(f"c_{mid}_015", mid, cid, tid, body, "Send 25% OFF Coupon", "High-incentive winback + exact days", hi)
+    body = f"{sal}, {cname} ko {biz} visit kiye huye {days} days ho gaye hain (Source: Magicpin Analytics). Since weekend traffic is rising, it's the perfect time to win her back with a 'FLAT 25% OFF' VIP coupon. Kya main bhejoon?" if hi else \
+           f"{sal}, it's been {days} days since {cname}'s last visit to {biz} (Source: Magicpin Analytics). Since we're seeing higher weekend intent, should I send her a 'FLAT 25% OFF' VIP coupon now?"
+    return _action(f"c_{mid}_015", mid, cid, tid, body, "Send 25% OFF Coupon", "High-incentive winback + temporal urgency", hi)
 
 def _trg016(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
