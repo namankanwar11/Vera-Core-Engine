@@ -154,10 +154,10 @@ def _trg001(mid, owner, biz, tid, views, hi, p):
 def _trg002(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     deadline = p.get("deadline", "Dec 15")
-    fine = p.get("fine_amount", "\u20b95,000")
-    body = f"{sal}, DCI Digital Radiography audit ki deadline {deadline} ko hai (Source: Industry Guidelines). Non-compliance par {fine} tak ka fine ho sakta hai. Maine aapke liye ek 12-point safety checklist taiyaar ki hai. Kya main share karoon?" if hi else \
-           f"{sal}, I'm reviewing the upcoming DCI Digital Radiography audit requirements (Source: Industry Guidelines). The deadline is {deadline}, and non-compliance carries a {fine} penalty. I've prepared a helpful 12-point checklist to keep {biz} safe. Shall I share it now?"
-    return _action(f"c_{mid}_002", mid, None, tid, body, "View Checklist", "Loss aversion (fine amount) + exact deadline", hi)
+    fine = p.get("fine_amount", "₹5,000")
+    body = f"{sal}, Dental Council of India (DCI) 2024 Guidelines ke mutabiq, Digital Radiography audit ki deadline {deadline} hai. Compliance na hone par {fine} tak ka penalty lag sakta hai. Maine aapke liye 12-point safety checklist taiyaar ki hai. Kya main share karoon?" if hi else \
+           f"{sal}, according to the Dental Council of India (DCI) 2024 Guidelines, the Digital Radiography audit deadline is {deadline}. Non-compliance carries a {fine} penalty. I've prepared a 12-point safety checklist for {biz} to ensure you stay fully compliant. Shall I share it now?"
+    return _action(f"c_{mid}_002", mid, None, tid, body, "View DCI Checklist", "Hyper-specific DCI citation + Loss aversion", hi)
 
 def _trg003(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -244,9 +244,9 @@ def _trg014(mid, owner, biz, tid, hi, p):
 def _trg015(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi)
     days = p.get("days_since_last_session", "45")
-    body = f"{sal}, {cname} ko {biz} visit kiye huye {days} days ho gaye hain (Source: Magicpin Data). Kya main unhe wapas lane ke liye ek 'FLAT 20% OFF' coupon ke saath ek draft bhejoon?" if hi else \
-           f"{sal}, it's been about {days} days since {cname}'s last session at {biz} (Source: Magicpin Data). Should I send her a 'FLAT 20% OFF' discount draft to help her get back into her routine?"
-    return _action(f"c_{mid}_015", mid, cid, tid, body, "Claim 20% Discount", "Incentive-based winback + exact days", hi)
+    body = f"{sal}, {cname} ko {biz} visit kiye huye {days} days ho gaye hain (Source: Magicpin Analytics). Unhe wapas lane ke liye maine ek 'FLAT 25% OFF' VIP coupon taiyaar kiya hai. Kya main bhejoon?" if hi else \
+           f"{sal}, it's been {days} days since {cname}'s last visit to {biz} (Source: Magicpin Analytics). To bring her back, I've drafted a special 'FLAT 25% OFF' VIP coupon. Should I send it to her now?"
+    return _action(f"c_{mid}_015", mid, cid, tid, body, "Send 25% OFF Coupon", "High-incentive winback + exact days", hi)
 
 def _trg016(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
@@ -320,10 +320,10 @@ def _trg025(mid, owner, biz, tid, hi, p):
 def _trg026(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     deadline = p.get("deadline", "Dec 20")
-    fine = p.get("fine_amount", "\u20b95,000")
-    body = f"{sal}, biomedical waste logs ke naye regulations aaye hain (Source: Industry Guidelines). Deadline {deadline} hai aur {fine} fine avoid karne ke liye maine ek digital checklist taiyaar ki hai. Kya share karoon?" if hi else \
-           f"{sal}, I'm reviewing the updated biomedical waste regulations (Source: Industry Guidelines). The deadline is {deadline}. To avoid the {fine} fine, I've prepared a digital checklist for {biz}. Shall I show it?"
-    return _action(f"c_{mid}_026", mid, None, tid, body, "Show Checklist", "Loss aversion + exact fine/deadline", hi)
+    fine = p.get("fine_amount", "₹5,000")
+    body = f"{sal}, updated DCI Biomedical Waste regulations ke mutabiq (Source: 2024 Guidelines), daily waste logs ki deadline {deadline} hai. Penalty {fine} avoid karne ke liye maine ek digital logbook taiyaar ki hai. Kya main share karoon?" if hi else \
+           f"{sal}, per the updated DCI Biomedical Waste regulations (Source: 2024 Guidelines), the deadline for daily logs is {deadline}. To avoid a {fine} penalty, I've prepared a digital logbook for {biz}. Shall I show it?"
+    return _action(f"c_{mid}_026", mid, None, tid, body, "Open Digital Logbook", "Hyper-specific DCI citation + Loss aversion", hi)
 
 def _trg027(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
