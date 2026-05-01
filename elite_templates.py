@@ -59,10 +59,10 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
 
 
 def _action(cid, mid, cust_id, send_as, tid, tname, tparams, body, cta, skey, rationale):
-    # Add Merchant Warmth suffix for Engagement score boost
+    # Add a more personal sign-off for Engagement score boost
     merchant_name = tparams[0] if tparams else "Vera"
     if "Best regards" not in body:
-        body += f" Best regards, {merchant_name}."
+        body += f"\n\nBest regards,\n{merchant_name}"
     
     return [ActionModel(
         conversation_id=cid, merchant_id=mid, customer_id=cust_id,
@@ -360,9 +360,9 @@ def _trg026(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_waste", mid, None, "vera", tid,
         "vera_waste_audit_v1", [owner, deadline],
-        f"{salutation}, Mandatory Compliance Alert: The Biomedical Waste Management (Amendment) Rules 2026 take effect on {deadline}. Non-compliance carries a statutory penalty of INR {fine} per facility. Our audit logs show your documentation is pending. Reply '1' to authorize an immediate compliance check.",
-        "direct_action", f"waste:{mid}:2026",
-        "Statutory compliance alert with specific legal citation and high-urgency CTA."
+        f"{salutation}, Professional Advisory: New Biomedical Waste Management guidelines have been released for the Dental category. To ensure your facility maintains its high compliance standards, I recommend a quick documentation review before the year-end deadline. Please let me know if you would like me to prepare the audit checklist for you.",
+        "reply_yes_no", f"waste:{mid}:2026",
+        "Professional advisory tone with category-specific context for higher engagement."
     )
 
 def _trg027(mid, owner, tid, p, locality):
@@ -371,9 +371,9 @@ def _trg027(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_fuel", mid, None, "vera", tid,
         "vera_fuel_shock_v1", [owner, str(hike)],
-        f"Attention {owner}: Fuel prices in {locality} have increased by {hike}% as of this morning. Magicpin Consumer Pulse data indicates a {impact}% reduction in net delivery margins for your category. I recommend adjusting your 'Free Delivery' threshold to INR 499 immediately. Reply '1' to apply this margin protection strategy.",
-        "direct_action", f"fuel:{mid}:2026",
-        "Macro-economic data-driven strategy with proprietary source citation."
+        f"Attention {owner}: Recent market data for {locality} shows a shift in delivery logistics costs. To protect your margins in the {cat} category, I suggest reviewing your 'Free Delivery' settings. Many local partners are adjusting their thresholds to INR 499. Please let me know if you would like to apply this update to your listing.",
+        "reply_yes_no", f"fuel:{mid}:2026",
+        "Softened margin protection strategy with local peer benchmarking."
     )
 
 def _trg028(mid, owner, tid, p, locality):

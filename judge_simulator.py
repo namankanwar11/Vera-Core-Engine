@@ -124,7 +124,8 @@ def print_reason(text: str):
     print(f"    {Colors.DIM}{wrapped}{Colors.RESET}")
 
 def print_hint(hint: str):
-    print(f"\n  {Colors.YELLOW}Hint:{Colors.RESET} {hint}")
+    if hint:
+        print(f"    {Colors.YELLOW}Judge's Feedback: {hint}{Colors.RESET}")
 
 # =============================================================================
 # DATA CLASSES
