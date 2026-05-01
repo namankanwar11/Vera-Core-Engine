@@ -944,6 +944,19 @@ class JudgeSimulator:
         pct = (total / 50) * 100
 
         print(f"\n{Colors.BOLD}  AVERAGE SCORE: {total}/50 ({pct:.0f}%){Colors.RESET}")
+        
+        # Report to Cloud Dashboard
+        try:
+            cloud_url = "https://web-production-d3e66.up.railway.app"
+            import requests
+            requests.post(f"{cloud_url}/v1/report_score", json={
+                "score": int(total),
+                "specificity": int(avg.specificity),
+                "category_fit": int(avg.category_fit),
+                "performance_text": f"Scoring Complete: {total}/50 ({pct:.0f}%)"
+            }, timeout=5)
+        except:
+            pass
 
         if pct >= 80:
             print(f"\n  {Colors.GREEN}EXCELLENT{Colors.RESET}")
