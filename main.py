@@ -122,8 +122,8 @@ async def push_context(request: Request):
     store.add_event(f"Context Push: {req_data.scope}/{req_data.context_id}")
     return {"accepted": True, "ack_id": ack_id, "stored_at": stored_at}
 
-# Rate-limit control for Groq Free Tier (Serial processing for absolute safety)
-semaphore = asyncio.Semaphore(1)
+# Rate-limit control for Cerebras/Groq (Concurrent processing with safety)
+semaphore = asyncio.Semaphore(3)
 
 @app.post("/v1/tick")
 async def process_tick(req: TickRequest):
@@ -153,7 +153,8 @@ async def process_tick(req: TickRequest):
                     customer_payload = customer_payload.model_dump()
                 
                 store.add_event(f"AI Reasoning: {merchant_id or trigger_id}...")
-                actions = await asyncio.to_thread(compose, trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
+                async with semaphore:
+                    actions = await compose(trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
                 store.add_event(f"Generated {len(actions)} actions for {trigger_id}")
                 return actions
             except Exception as e:
@@ -191,7 +192,8 @@ async def process_tick(req: TickRequest):
 @app.post("/v1/reply")
 async def process_reply(req: ReplyRequest):
     store.add_event(f"Incoming Reply: {req.message[:30]}...")
-    reply = handle_reply(req.conversation_id, req.message, req.turn_number, req.from_role)
+    async with semaphore:
+        reply = await handle_reply(req.conversation_id, req.message, req.turn_number, req.from_role)
     return JSONResponse(
         content=jsonable_encoder(reply),
         media_type="application/json; charset=utf-8"
