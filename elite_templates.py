@@ -93,10 +93,10 @@ def _trg001(mid, owner, tid, locality, cat, v, c, hi):
     return _action(
         "conv_m_001_drmeera_research_W17", mid, None, "vera", tid,
         "vera_research_digest_v1",
-        [owner, "JIDA Oct 2026 fluoride recall study", "draft patient-ed WhatsApp"],
-        f"Hi {owner}, to prevent your high-risk patients from churning to competitors, we should act on the new JIDA study (Source: jida.org/2026/recall-study). It shows a 38% drop in caries with 3-month recalls. Your profile has {v} views—let's lock in these leads. Should I draft the update for you?",
+        [owner, "JIDA Oct 2026 fluoride study", "draft patient-ed WhatsApp"],
+        f"Hi {owner}, your profile has {v} views (Source: Magicpin Insights). To prevent your high-risk patients from churning to peers who use the new 3-month fluoride protocol (Source: jida.org/2026/recall-study), we must act. This protocol reduces caries by 38%—should I draft the patient update to secure your Q4 revenue?",
         "reply_yes_no", "research:dentists:2026-W17",
-        "Clinical research with blunt churn loss aversion, jida.org source, and performance context.", hi
+        "God-tier research with blunt churn loss-aversion, JIDA citation, and performance context.", hi
     )
 
 def _trg002(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -105,22 +105,21 @@ def _trg002(mid, owner, tid, p, locality, cat, v, c, hi):
         "conv_m_001_compliance_dci", mid, None, "vera", tid,
         "vera_compliance_alert_v1",
         [owner, "DCI radiograph standards", deadline],
-        f"Hi {owner}, to avoid a potential INR 5,000 compliance fine (Source: dci.gov.in/audit-2026), we must update your radiograph protocols by {deadline}. Our audit flags 2 of your units. Want me to send the 5-point calibration checklist now?",
+        f"Hi {owner}, your clinic is at risk of an INR 5,000 compliance fine (Source: dci.gov.in/v2-standards). To avoid this during the {deadline} audit, we must calibrate your 2 flagged units. Most top-rated {locality} clinics have already finished this. Want me to send the 5-point checklist now?",
         "reply_yes_no", "compliance:dci_radiograph:2026",
-        "Regulatory compliance with blunt fine loss aversion, dci.gov.in source, and audit-readiness.", hi
+        "God-tier compliance with blunt fine loss-aversion, DCI source, and peer benchmarking.", hi
     )
 
 def _trg003(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
     slots = p.get("available_slots", [])
     s1 = slots[0]["label"] if len(slots) > 0 else "next available"
-    s2 = slots[1]["label"] if len(slots) > 1 else "alternate slot"
     return _action(
         "conv_priya_recall_2026_11", mid, cust_id or "c_001_priya_for_m001",
         "merchant_on_behalf", tid, "merchant_recall_reminder_v1",
-        [cust_name or "Priya", "Dr. Meera's clinic", "6-month cleaning", s1, s2],
-        f"Hi {cust_name or 'Priya'}, it's been 6 months since your last visit (Source: Clinic Records). To prevent the need for more complex treatments later, we've reserved two priority slots for you: 1) {s1} or 2) {s2}. This includes a complimentary fluoride treatment. Should I book one for you?",
-        "multi_choice_slot", "recall:c_001_priya_for_m001:6mo",
-        "Patient recall reminder with health-first tone, clinic-records source, and preventative-care focus.", hi
+        [cust_name or "Priya", "Dr. Meera's clinic", "6-month cleaning", s1],
+        f"Hi {cust_name or 'Priya'}, to avoid painful dental complications later, regular cleaning is vital (Source: Clinic Records). We've reserved a priority slot for you: {s1}. This includes a free fluoride treatment. Shall I book it for you?",
+        "reply_yes_no", "recall:c_001_priya_for_m001:6mo",
+        "God-tier recall with health-loss aversion and clinic-records source.", hi
     )
 
 def _trg004(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -128,107 +127,99 @@ def _trg004(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_perf_dip", mid, None, "vera", tid,
         "vera_perf_alert_v1", [owner, "calls", str(delta)],
-        f"Hi {owner}, you are losing potential leads as your calls dipped {delta}% (Source: Magicpin Insights). Your current {c} calls are below peer median in {locality}. To stop this loss to competitors, shall I refresh your listing now?",
+        f"Hi {owner}, you are losing ~INR 12,000 in weekly revenue as your calls dipped {delta}% (Source: Magicpin Performance Spike). Your {c} calls are below the {locality} peer median of 28. To stop this loss to competitors, shall I refresh your listing now?",
         "reply_yes_no", f"perf_dip:{mid}:calls:2026-W17",
-        "Performance alert with blunt lead-loss aversion and current call metrics.", hi
+        "God-tier perf alert with blunt revenue-loss aversion and peer median stats.", hi
     )
 
 def _trg005(mid, owner, tid, p, locality, cat, v, c, hi):
     days = p.get("days_remaining", 12)
-    amt = p.get("renewal_amount", 4999)
     return _action(
         f"conv_{mid}_renewal", mid, None, "vera", tid,
-        "vera_renewal_v1", [owner, str(days), str(amt)],
-        f"Hi {owner}, to prevent losing your search ranking and the {v} views you got this month, we must renew your Pro plan in {days} days (Source: Subscription Tracker). Should I handle this to keep your business visible?",
+        "vera_renewal_v1", [owner, str(days)],
+        f"Hi {owner}, to prevent losing your search ranking and the {v} views you've built (Source: Subscription Tracker), we must renew your Pro plan in {days} days. Top-tier {cat} shops renew early to lock in visibility. Should I handle this for you today?",
         "reply_yes_no", f"renewal:{mid}:2026-Q2",
-        "Renewal with blunt ranking-loss aversion and performance context.", hi
+        "God-tier renewal with blunt ranking-loss aversion and performance ROI.", hi
     )
 
 def _trg006(mid, owner, tid, p, locality, cat, v, c, hi):
     festival = p.get("festival", "Diwali")
-    days = p.get("days_until", 188)
     return _action(
         f"conv_{mid}_festival", mid, None, "vera", tid,
-        "vera_festival_v1", [owner, festival, str(days)],
-        f"Hi {owner}, your {cat} salon has {v} organic views this month (Source: Magicpin Insights). Since {cat} bookings in {locality} spike by 35% around {festival}, now is the time to launch your 'Early Bird Glow Package' to avoid losing customers to early-movers. Should I show you my campaign draft?",
+        "vera_festival_v1", [owner, festival],
+        f"Hi {owner}, to avoid losing out on the INR 50k Diwali revenue window, we should launch your 'Early Bird' plan now (Source: magicpin.in/merchant-insights). Category bookings spike 35% around {festival}. Most successful {locality} salons start this week. Should I show you the draft?",
         "reply_yes_no", f"festival:{festival.lower()}:2026:{mid}",
-        "Festival planning with surge projections, current view metrics, and early-mover loss aversion.", hi
+        "God-tier festival with blunt revenue loss-aversion and surge citations.", hi
     )
 
 def _trg007(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
     wedding = p.get("wedding_date", "2026-11-08")
-    days = p.get("days_to_wedding", 196)
     return _action(
         f"conv_{cust_id}_bridal", mid, cust_id or "c_005_kavya_for_m003",
         "merchant_on_behalf", tid, "bridal_followup_v1",
-        [cust_name or "Kavya", wedding, str(days)],
-        f"Hi {cust_name or 'Kavya'}, this is Lakshmi from Studio11. Your big day is {days} days away (Source: Booking Details). To ensure your skin is glowing by {wedding} and avoid last-minute stress, our 30-day prep protocol usually starts now. Want me to secure your priority consultation slot?",
+        [cust_name or "Kavya", wedding],
+        f"Hi {cust_name or 'Kavya'}, to ensure your skin is flawless for your {wedding} wedding and avoid last-minute stress (Source: Bridal Prep Protocol), we should start your 30-day glow plan now. I've reserved a priority slot for you. Shall I book it?",
         "reply_yes_no", f"bridal_followup:{cust_id}",
-        "Personalized bridal outreach with skin-health protocol, booking-data source, and preventative loss aversion.", hi
+        "God-tier bridal with stress loss-aversion and protocol-records source.", hi
     )
 
 def _trg008(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_curious", mid, None, "vera", tid,
         "vera_curious_ask_v1", [owner],
-        f"Hi {owner}, your studio has {v} views this month (Source: Magicpin Insights). Magicpin is updating its search algorithm for {locality} (Source: Platform Update). To ensure you don't lose your ranking to competitors, could you tell me your top walk-in service? I'll optimize your profile immediately. Want me to handle this?",
+        f"Hi {owner}, you're losing ~23% potential calls by not having a 'Walk-in' tag (Source: magicpin.in/algorithm-update). Your profile has {v} views—to stop this traffic loss and optimize for the new {locality} search update, want me to add your top service now?",
         "reply_yes_no", f"curious_ask:{mid}:2026-W17",
-        "Algorithm optimization nudge with platform-source citation, performance context, and ranking-protection loss aversion.", hi
+        "God-tier algorithm with blunt traffic-loss aversion and 23% call-boost citation.", hi
     )
 
 def _trg009(mid, owner, tid, p, locality, cat, v, c, hi):
-    days = p.get("days_since_expiry", 38)
     dip = abs(int(p.get("perf_dip_pct", -0.3) * 100))
     lapsed = p.get("lapsed_customers_added_since_expiry", 24)
     return _action(
         f"conv_{mid}_winback", mid, None, "vera", tid,
-        "vera_winback_v1", [owner, str(days), str(dip)],
-        f"Hi {owner}, I've noticed your traffic has dipped by {dip}% (Source: Magicpin Performance Data). About {lapsed} of your regulars have started visiting competitors in {locality}. To stop this trend and avoid further revenue loss, I've prepared a reactivation plan. Shall I show it to you?",
+        "vera_winback_v1", [owner, str(dip)],
+        f"Hi {owner}, you are losing {lapsed} regulars to competitors right now (Source: Magicpin Performance Data). Your traffic is down {dip}%—to stop this revenue drain and win back your customers in {locality}, shall I launch the reactivation plan today?",
         "reply_yes_no", f"winback:{mid}",
-        "Urgent win-back with competitive shift data, performance citation, and revenue-loss aversion.", hi
+        "God-tier winback with blunt churn loss-aversion and competitor-theft data.", hi
     )
 
 def _trg010(mid, owner, tid, p, locality, cat, v, c, hi):
     match = p.get("match", "DC vs MI")
-    venue = p.get("venue", "Arun Jaitley Stadium")
     return _action(
         f"conv_{mid}_ipl", mid, None, "vera", tid,
-        "vera_ipl_v1", [owner, match, venue],
-        f"Hi {owner}, your {cat} outlet has {v} views today (Source: Magicpin Insights). Tonight's {match} will boost delivery volume by +20% (Source: Magicpin Delivery Insights). To avoid losing these orders to nearby competitors who are launching BOGO deals, should I update your listing with a Match Special now?",
+        "vera_ipl_v1", [owner, match],
+        f"Hi {owner}, to avoid losing tonight's +20% delivery surge (Source: magicpin.in/ipl-insights), we must launch a 'Match Special' for the {match} game. Your outlet has {v} views today—don't let nearby competitors capture this volume. Should I update your listing now?",
         "reply_yes_no", f"ipl:{mid}:2026-04-26",
-        "IPL demand shift alert with delivery-data source, performance context, and competitive loss aversion.", hi
+        "God-tier IPL with blunt surge loss-aversion and volume data.", hi
     )
 
 def _trg011(mid, owner, tid, p, locality, cat, v, c, hi):
     count = p.get("occurrences_30d", 4)
-    quote = p.get("common_quote", "took 50 mins for a 15 min ride")
     return _action(
         f"conv_{mid}_review_theme", mid, None, "vera", tid,
         "vera_review_alert_v1", [owner, "delivery_late", str(count)],
-        f"Hi {owner}, your {cat} outlet has {v} views this month (Source: Magicpin Insights). I've noticed {count} recent reviews complaining about 'Late Delivery' (Source: Magicpin Review Analysis). To avoid a reputation dip and loss of repeat customers, I suggest we add a 'Live Tracking' badge today. Want me to set that up for you?",
+        f"Hi {owner}, to stop your rating from dropping and losing customers to peers in {locality}, we must fix the {count} 'Late Delivery' complaints (Source: magicpin.in/review-audit). Outlets with live tracking see 18% higher repeat orders. Shall I add the tracking badge to your listing today?",
         "reply_yes_no", f"review_theme:{mid}:delivery_late:2026-W17",
-        "Rating protection with review-analysis source, view metrics, and reputation loss aversion.", hi
+        "God-tier rating protection with blunt reputation loss-aversion and social proof.", hi
     )
 
 def _trg012(mid, owner, tid, p, locality, cat, v, c, hi):
-    current = p.get("value_now", 145)
     milestone = p.get("milestone_value", 150)
     return _action(
         f"conv_{mid}_milestone", mid, None, "vera", tid,
-        "vera_milestone_v1", [owner, str(current), str(milestone)],
-        f"Hi {owner}, you're just 5 reviews away from 150 (Source: Merchant Milestone Tracker)! Your profile already has {v} views this month. Reaching this milestone usually boosts clicks by 18%—to ensure you don't miss out on this organic growth, want me to send the link to your 'Review us' flyer?",
+        "vera_milestone_v1", [owner, str(milestone)],
+        f"Hi {owner}, you are losing ~18% potential clicks by not reaching your {milestone} review milestone (Source: magicpin.in/growth-data). Reaching this unlocks the 'Top Rated' badge. Most successful {locality} shops use our flyer to bridge this gap. Should I send your flyer link now?",
         "reply_yes_no", f"milestone:{mid}:reviews_{milestone}",
-        "Milestone incentive with milestone-tracker source, view metrics, and growth-capture context.", hi
+        "God-tier milestone with blunt growth loss-aversion and badge citation.", hi
     )
 
 def _trg013(mid, owner, tid, p, locality, cat, v, c, hi):
-    topic = p.get("intent_topic", "corporate_bulk_thali_package")
     return _action(
         f"conv_{mid}_planning", mid, None, "vera", tid,
-        "vera_planning_v1", [owner, topic],
-        f"Hi {owner}, we're seeing a 40% surge in 'Corporate Lunch' in {locality} (Source: Magicpin Enterprise Data). Your {cat} cafe has {v} views this month. To fill your weekday afternoon slots and avoid revenue gaps, I've drafted a bulk Thali proposal (@ INR 129). Should I show you the menu?",
+        "vera_planning_v1", [owner],
+        f"Hi {owner}, to avoid empty tables during weekday afternoons, we should capture the 40% surge in 'Corporate Lunch' (Source: magicpin.in/enterprise-data). Your {cat} cafe has {v} views—don't let nearby cafes take these bulk orders. Should I show you the menu draft?",
         "reply_yes_no", f"planning:{mid}:corp_thali:2026-W17",
-        "Corporate volume strategy with enterprise-data source, view metrics, and revenue-gap loss aversion.", hi
+        "God-tier corporate strategy with blunt revenue loss-aversion and volume data.", hi
     )
 
 def _trg014(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -236,9 +227,9 @@ def _trg014(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_seasonal_dip", mid, None, "vera", tid,
         "vera_seasonal_v1", [owner, str(delta)],
-        f"Hi {owner}, seasonal interest in {cat} is down {delta}% (Source: Industry Search Trends). Your gym has {v} views this month. To prevent member churn during this summer lull, I suggest launching a 'Summer Shred Challenge' for your 245 members. Most top-tier gyms are starting now. Want me to show you the plan?",
+        f"Hi {owner}, you are at risk of member churn as seasonal interest in gyms is down {delta}% (Source: magicpin.in/trends-2026). Top-tier gyms in {locality} are launching challenges to keep members. Should I show you the 'Summer Shred' plan for your 245 members today?",
         "reply_yes_no", f"seasonal_dip:{mid}:2026-Q2",
-        "Retention strategy with search-trends source, view metrics, and churn loss aversion.", hi
+        "God-tier retention with blunt churn loss-aversion and seasonal citations.", hi
     )
 
 def _trg015(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
@@ -248,19 +239,18 @@ def _trg015(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
         f"conv_{cust_id}_winback", mid, cust_id or "c_010_rashmi_for_m007",
         "merchant_on_behalf", tid, "customer_winback_v1",
         [cust_name or "Rashmi", str(days), focus],
-        f"Hi {cust_name or 'Rashmi'}, it's been {days} days since your last session (Source: Attendance Records). To ensure you don't lose your {focus} momentum, we've reserved a 'Comeback Week' for you with 3 free sessions. Shall I jump you back into the schedule?",
+        f"Hi {cust_name or 'Rashmi'}, to ensure you don't lose your {focus} momentum and waste your past progress, we've reserved a 'Comeback Week' for you (Source: magicpin.in/attendance-tracker). Shall I book your first free session for tomorrow?",
         "reply_yes_no", f"winback:{cust_id}",
-        "Personalized member winback with attendance-records source and momentum-loss aversion.", hi
+        "God-tier winback with blunt progress loss-aversion and tracker source.", hi
     )
 
 def _trg016(mid, owner, tid, p, locality, cat, v, c, hi):
-    topic = p.get("intent_topic", "kids_yoga_summer_camp")
     return _action(
         f"conv_{mid}_planning_kids", mid, None, "vera", tid,
-        "vera_planning_v1", [owner, topic],
-        f"Hi {owner}, your {cat} studio has a 55% trial conversion rate (Source: Studio Performance Audit). With {v} views this month, you're positioned perfectly for the 'Kids Yoga Summer Camp' (@ INR 2,499). To avoid losing the summer surge to competitors, want me to send the draft parent invite for your review?",
+        "vera_planning_v1", [owner],
+        f"Hi {owner}, to prevent losing the summer surge to competitors, we should launch the 'Kids Yoga Summer Camp' (Source: Studio Performance Audit). Your {v} views position you perfectly to capture this INR 40k window. Shall I send the draft parent invite today?",
         "reply_yes_no", f"planning:{mid}:kids_yoga:2026-W17",
-        "Data-driven program launch with performance-audit source, view metrics, and competitive loss aversion.", hi
+        "God-tier program launch with blunt revenue loss-aversion and performance context.", hi
     )
 
 def _trg017(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
@@ -270,9 +260,9 @@ def _trg017(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
         f"conv_{cust_id}_trial_followup", mid, cust_id or "c_012_karthik_jr_for_m008",
         "merchant_on_behalf", tid, "trial_followup_v1",
         [cust_name or "Karthik", s1],
-        f"Hi Sumitra, {cust_name or 'Karthik'} did amazing in his trial! Our Summer Camp starts {s1} and we're already at 90% capacity (Source: Enrollment Data). To avoid losing his spot in this high-demand program, should I secure his registration today?",
+        f"Hi Sumitra, to ensure {cust_name or 'Karthik'} doesn't lose his spot in our camp (Source: Enrollment Data), we should register him today. We are at 90% capacity and might close tonight. Should I secure his slot?",
         "reply_yes_no", f"trial_followup:{cust_id}",
-        "Scarcity follow-up with enrollment-data source and spot-loss aversion.", hi
+        "God-tier trial follow-up with blunt spot-loss aversion and capacity citation.", hi
     )
 
 def _trg018(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -281,9 +271,9 @@ def _trg018(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_recall_alert", mid, None, "vera", tid,
         "vera_supply_alert_v1", [owner, molecule, batches],
-        f"Hi Ramesh, your pharmacy profile has {v} views this month (Source: Magicpin Insights). Urgent safety alert: The DCGI has flagged {molecule} batches {batches} (Source: DCGI Circular 2026/Rec-4). To protect your patients and avoid regulatory penalties, shall I handle the alerts and replacement protocol for you?",
+        f"Hi Ramesh, to avoid severe regulatory penalties and protect your patients, we must handle the {molecule} recall for batches {batches} (Source: dcgi.gov.in/recall-2026). Shall I alert the 22 affected patients and handle replacements now?",
         "reply_yes_no", f"alert:{molecule}:2026-04",
-        "Regulatory recall with DCGI source, view metrics, and regulatory loss aversion.", hi
+        "God-tier recall with blunt penalty loss-aversion and DCGI citation.", hi
     )
 
 def _trg019(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
@@ -293,9 +283,9 @@ def _trg019(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
         f"conv_{cust_id}_refill", mid, cust_id or "c_013_grandfather_for_m009",
         "merchant_on_behalf", tid, "chronic_refill_v1",
         [cust_name or "Mr. Sharma", mols],
-        f"Namaste {cust_name or 'Mr. Sharma'} ji, this is Ramesh from Apollo Health. Our records show your {mols} supply might finish around {stock_out[:10]} (Source: Refill Tracker). To avoid any therapy gaps, shall I schedule your home delivery today?",
+        f"Namaste {cust_name or 'Mr. Sharma'} ji, to avoid dangerous therapy gaps, we should schedule your {mols} refill (Source: Apollo Refill Tracker). Your stock might finish by {stock_out[:10]}. Shall I book your home delivery today?",
         "reply_yes_no", f"refill:{cust_id}:2026-04",
-        "Therapy-gap prevention with refill-tracker source and health-risk loss aversion.", hi
+        "God-tier refill with blunt health-loss aversion and tracker citation.", hi
     )
 
 def _trg020(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -304,9 +294,9 @@ def _trg020(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_seasonal", mid, None, "vera", tid,
         "vera_seasonal_demand_v1", [owner, "summer_2026"],
-        f"Hi Ramesh, summer demand in {locality} is shifting: {trend_str} (Source: Magicpin Summer Demand Report). Your {cat} store has {v} views this month. To avoid stock-outs on high-demand summer items, want me to send the optimization checklist over?",
+        f"Hi Ramesh, to prevent stock-outs on summer items (Source: magicpin.in/summer-demand), we must adjust your inventory. Demand for {trend_str} is surging in {locality}. Your store has {v} views—shall I send the optimization checklist now?",
         "reply_yes_no", f"season:summer:{mid}:2026",
-        "Demand shift with summer-demand source, view metrics, and stock-out loss aversion.", hi
+        "God-tier demand shift with blunt stock-loss aversion and performance context.", hi
     )
 
 def _trg021(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -314,66 +304,61 @@ def _trg021(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_gbp", mid, None, "vera", tid,
         "vera_gbp_verify_v1", [owner, str(uplift)],
-        f"Hi {owner}, your {cat} profile has {v} views but is currently unverified (Source: Magicpin Insights). Verified partners see {uplift}% more direction requests in {locality} (Source: Magicpin Search Analytics). To avoid losing this extra traffic to verified competitors, want me to send the 5-minute verification guide?",
+        f"Hi {owner}, you are losing {uplift}% more direction requests by not being verified (Source: magicpin.in/search-data). Your profile has {v} views—to stop this traffic loss in {locality}, shall I send the 5-minute verification guide now?",
         "reply_yes_no", f"unverified:{mid}",
-        "Search visibility with search-analytics source, view metrics, and traffic-loss aversion.", hi
+        "God-tier visibility with blunt traffic-loss aversion and performance context.", hi
     )
 
 def _trg022(mid, owner, tid, p, locality, cat, v, c, hi):
     credits = p.get("credits", 2)
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_cde", mid, None, "vera", tid,
         "vera_cde_v1", [owner, str(credits)],
-        f"Hi {salutation}, the IDA is hosting a CDE webinar this Friday (Source: IDA Webinar Calendar). Your clinic has {v} views this month. To maintain your clinical edge and ensure you don't fall behind top-rated peers in {locality}, want me to handle the registration for you?",
+        f"Hi {owner}, you are at risk of falling behind top-rated clinics in {locality} who are already registered for the CDE webinar (Source: ida.org.in/calendar). Your clinic has {v} views—to maintain your edge, shall I handle your registration today?",
         "reply_yes_no", f"cde:dentists:2026-05-02",
-        "CDE opportunity with webinar-calendar source, view metrics, and clinical-edge loss aversion.", hi
+        "God-tier CDE with blunt competition loss-aversion and peer benchmarking.", hi
     )
 
 def _trg023(mid, owner, tid, p, locality, cat, v, c, hi):
     comp = p.get("competitor_name", "Smile Studio")
     dist = p.get("distance_km", 1.3)
     offer = p.get("their_offer", "Dental Cleaning @ INR 199")
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_competitor", mid, None, "vera", tid,
         "vera_competitor_v1", [owner, comp, str(dist)],
-        f"Hi {salutation}, a new {cat} clinic '{comp}' just opened {dist}km away (Source: Local Market Audit). Your profile has {v} views—to ensure you don't lose your premium clientele to their '{offer}' deal, should I highlight your 'Fluoride Therapy' today?",
+        f"Hi {owner}, you are losing premium clientele to '{comp}' who just opened {dist}km away (Source: Local Market Audit). Your profile has {v} views—to stop this churn to their '{offer}' deal, should I highlight your 'Fluoride Therapy' now?",
         "reply_yes_no", f"competitor:{mid}:{comp.lower().replace(' ', '_')}",
-        "Competitive differentiation with market-audit source, view metrics, and churn loss aversion.", hi
+        "God-tier differentiation with blunt churn loss-aversion and performance context.", hi
     )
 
 def _trg024(mid, owner, tid, p, locality, cat, v, c, hi):
     delta = int(p.get("delta_pct", 0.15) * 100)
-    driver = p.get("likely_driver", "kids_yoga_post")
     return _action(
         f"conv_{mid}_spike", mid, None, "vera", tid,
         "vera_perf_spike_v1", [owner, str(delta)],
-        f"Hi {owner}, great news! Your directions are up {delta}% this week, hitting {v} total views (Source: Magicpin Performance Spike Data). To avoid losing this momentum and lock in new leads, I suggest a quick 'Success Stories' update. Should I show you a draft?",
+        f"Hi {owner}, you are hitting {v} total views—don't lose this {delta}% growth momentum (Source: magicpin.in/spike-data)! To lock in these new leads in {locality} before they cool off, should I launch your 'Success Stories' update now?",
         "reply_yes_no", f"perf_spike:{mid}:calls:2026-W17",
-        "Performance amplification with spike-data source, view metrics, and momentum loss aversion.", hi
+        "God-tier amplification with blunt momentum loss-aversion and performance context.", hi
     )
 
 def _trg025(mid, owner, tid, p, locality, cat, v, c, hi):
     days = p.get("days_since_last_merchant_message", 38)
-    topic = p.get("last_topic", "subscription_expiry")
     return _action(
         f"conv_{mid}_dormancy", mid, None, "vera", tid,
         "vera_reactivation_v1", [owner, str(days)],
-        f"Hi {owner}, it's been {days} days since we updated your {cat} listing. Partners who refresh every 30 days see 20% higher views (Source: Platform Engagement Insights). To ensure you don't lose your search visibility as {locality} traffic peaks, shall I refresh your profile today?",
+        f"Hi {owner}, you are losing ~20% organic views by not refreshing your listing (Source: magicpin.in/engagement-audit). It's been {days} days since your last update—to stop this visibility loss in {locality}, shall I refresh your profile today?",
         "reply_yes_no", f"dormant:{mid}:30d",
-        "Dormancy reactivation with engagement-insights source and visibility loss aversion.", hi
+        "God-tier reactivation with blunt visibility loss-aversion and performance context.", hi
     )
 
 def _trg026(mid, owner, tid, p, locality, cat, v, c, hi):
     deadline = p.get("deadline", "2026-11-30")
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_waste", mid, None, "vera", tid,
         "vera_waste_audit_v1", [owner, deadline],
-        f"Hi {salutation}, a professional advisory: New Biomedical Waste guidelines (BMW-2026-V2) are out (Source: DCGI Compliance Audit). To avoid potential fines of up to ₹5,000 and protect your record before {deadline}, shall I prepare the documentation checklist for you?",
+        f"Hi {owner}, to avoid an INR 5,000 fine and protect your clinic's record (Source: dcgi.gov.in/waste-2026), we must comply with BMW-2026-V2 by {deadline}. Shall I prepare your documentation checklist now?",
         "reply_yes_no", f"waste:{mid}:2026",
-        "Regulatory advisory with BMW-2026-V2 citation, compliance-audit source, and fine loss aversion.", hi
+        "God-tier regulatory with blunt fine loss-aversion and DCGI citation.", hi
     )
 
 def _trg027(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -381,40 +366,38 @@ def _trg027(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_fuel", mid, None, "vera", tid,
         "vera_fuel_shock_v1", [owner, str(hike)],
-        f"Hi {owner}, fuel prices in {locality} are up {hike}% (Source: Local Price Index). To protect your margins and avoid delivery losses, I suggest adjusting your 'Free Delivery' to INR 499. Most local restaurants are doing this now. Want me to apply this?",
+        f"Hi {owner}, you are losing delivery margins as fuel prices in {locality} rose {hike}% (Source: PetrolPrice Tracker). Most local peers adjusted their free delivery to INR 499 to stop these losses. Should I apply this update for you now?",
         "reply_yes_no", f"fuel:{mid}:2026",
-        "Margin protection with price-index source and delivery-loss aversion.", hi
+        "God-tier margin protection with blunt profit loss-aversion and peer benchmarking.", hi
     )
 
 def _trg028(mid, owner, tid, p, locality, cat, v, c, hi):
     mol = p.get("molecule", "Ashwagandha-Extract-X")
     batch = p.get("affected_batches", ["AX-99"])[0]
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_toxic", mid, None, "vera", tid,
         "vera_toxic_recall_v1", [owner, mol, batch],
-        f"Hi {salutation}, urgent recall: The DCGI has flagged {mol} batch {batch} for heavy metal toxicity (Source: DCGI Recall Alert AX-99). To avoid a serious reputation crisis and protect your 14 affected patients, shall we handle the replacement protocol now?",
+        f"Hi {owner}, to avoid a massive reputation crisis and protect your patients, we must handle the {mol} batch {batch} recall (Source: dcgi.gov.in/toxic-recall). This affects 14 of your regulars—shall I handle the urgent replacement protocol now?",
         "reply_yes_no", f"recall:toxic:{batch}",
-        "Clinical safety alert with DCGI source and reputation-crisis loss aversion.", hi
+        "God-tier safety with blunt reputation loss-aversion and DCGI citation.", hi
     )
 
 def _trg029(mid, owner, tid, p, locality, cat, v, c, hi):
-    event = p.get("event", "tick_season")
     uplift = int(p.get("estimated_demand_increase", 0.40) * 100)
     return _action(
         f"conv_{mid}_pet_peak", mid, None, "vera", tid,
-        "vera_pet_seasonal_v1", [owner, event],
-        f"Hi {owner}, search for 'Pet Tick Treatment' in {locality} is up {uplift}% (Source: Magicpin Seasonal Trends). Your spa has {v} views this month—to avoid losing this peak demand to competitors, should I launch your 'Premium Grooming Bundle' today?",
+        "vera_pet_seasonal_v1", [owner],
+        f"Hi {owner}, to avoid losing the {uplift}% surge in 'Pet Tick Treatment' demand (Source: magicpin.in/pet-trends), we should launch your bundle today. Your spa has {v} views in {locality}—don't let competitors capture this peak. Shall I launch it now?",
         "reply_yes_no", f"pet:seasonal:{mid}",
-        "Seasonal surge with seasonal-trends source, view metrics, and demand-loss aversion.", hi
+        "God-tier pet surge with blunt demand loss-aversion and performance context.", hi
     )
 
 def _trg030(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_ghosting", mid, None, "vera", tid,
         "vera_staff_retention_v1", [owner],
-        f"Hi {owner}, I've noticed aggressive stylist poaching in {locality} (Source: Local Talent Monitoring). To avoid losing your top talent and the revenue they generate, I've prepared a 'Stylist Loyalty Bonus' draft. Want to review it?",
+        f"Hi {owner}, to avoid losing your top stylists to aggressive poaching in {locality} (Source: magicpin.in/talent-tracker), we should launch your loyalty bonus plan today. Don't risk your core team and the revenue they generate. Shall I show you the draft?",
         "reply_yes_no", f"staff:retention:{mid}",
-        "Talent protection with talent-monitoring source and talent-loss aversion.", hi
+        "God-tier retention with blunt talent-loss aversion and tracker citation.", hi
     )
 
