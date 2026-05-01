@@ -29,7 +29,9 @@ LLM_PROVIDER = "cerebras"
 # Your API key (paste your key here)
 import os
 from dotenv import load_dotenv
-load_dotenv()
+# Explicitly look for .env in current directory
+env_path = os.path.join(os.getcwd(), '.env')
+load_dotenv(dotenv_path=env_path)
 LLM_API_KEY = os.getenv("CEREBRAS_API_KEY")
 
 # Model to use (leave empty for default, or specify like "gpt-4o", "claude-3-5-sonnet-20241022", etc.)
@@ -352,7 +354,8 @@ class CerebrasProvider(LLMProvider):
             }).encode("utf-8"),
             headers={
                 "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
         )
         resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
