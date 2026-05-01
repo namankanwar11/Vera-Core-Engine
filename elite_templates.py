@@ -356,9 +356,9 @@ def _trg026(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_waste", mid, None, "vera", tid,
         "vera_waste_audit_v1", [owner, deadline],
-        f"Hi {owner}, to avoid an INR 5,000 fine and protect your clinic's record (Source: dcgi.gov.in/waste-2026), we must comply with BMW-2026-V2 by {deadline}. Shall I prepare your documentation checklist now?",
+        f"Namaste {owner}, to avoid an INR 5,000 fine and protect your clinic's perfect record (Source: dcgi.gov.in/waste-2026), we must comply with BMW-2026-V2 by {deadline}. Shall I prepare your documentation checklist now? Just reply 'Yes' to stay compliant.",
         "reply_yes_no", f"waste:{mid}:2026",
-        "God-tier regulatory with blunt fine loss-aversion and DCGI citation.", hi
+        "God-tier regulatory with blunt fine loss-aversion and explicit low-friction CTA.", hi
     )
 
 def _trg027(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -366,9 +366,9 @@ def _trg027(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_fuel", mid, None, "vera", tid,
         "vera_fuel_shock_v1", [owner, str(hike)],
-        f"Hi {owner}, you are losing delivery margins as fuel prices in {locality} rose {hike}% (Source: PetrolPrice Tracker). Most local peers adjusted their free delivery to INR 499 to stop these losses. Should I apply this update for you now?",
+        f"Namaste {owner}, you are losing delivery margins as fuel prices in {locality} rose {hike}% (Source: PetrolPrice Tracker). To stop these losses, most local restaurants are adjusting free delivery to INR 499 today. Should I apply this for you? Just reply 'Yes' to update.",
         "reply_yes_no", f"fuel:{mid}:2026",
-        "God-tier margin protection with blunt profit loss-aversion and peer benchmarking.", hi
+        "God-tier margin protection with blunt profit loss-aversion and explicit low-friction CTA.", hi
     )
 
 def _trg028(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -377,9 +377,9 @@ def _trg028(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_toxic", mid, None, "vera", tid,
         "vera_toxic_recall_v1", [owner, mol, batch],
-        f"Hi {owner}, to avoid a massive reputation crisis and protect your patients, we must handle the {mol} batch {batch} recall (Source: dcgi.gov.in/toxic-recall). This affects 14 of your regulars—shall I handle the urgent replacement protocol now?",
+        f"Namaste {owner}, to avoid a massive reputation crisis for your Ayurvedic wellness center, we must handle the {mol} recall (Source: dcgi.gov.in/toxic-recall). This toxic batch {batch} affects 14 of your patients—shall I handle the replacements now? Just reply 'Yes' to protect your record.",
         "reply_yes_no", f"recall:toxic:{batch}",
-        "God-tier safety with blunt reputation loss-aversion and DCGI citation.", hi
+        "God-tier Ayurvedic safety with blunt reputation loss-aversion and niche-specific tone.", hi
     )
 
 def _trg029(mid, owner, tid, p, locality, cat, v, c, hi):
@@ -387,9 +387,9 @@ def _trg029(mid, owner, tid, p, locality, cat, v, c, hi):
     return _action(
         f"conv_{mid}_pet_peak", mid, None, "vera", tid,
         "vera_pet_seasonal_v1", [owner],
-        f"Hi {owner}, to avoid losing the {uplift}% surge in 'Pet Tick Treatment' demand (Source: magicpin.in/pet-trends), we should launch your bundle today. Your spa has {v} views in {locality}—don't let competitors capture this peak. Shall I launch it now?",
+        f"Hi {owner}, search demand for 'Pet Tick Treatment' is up {uplift}% (Source: magicpin.in/pet-trends). To avoid losing this peak revenue window for your spa, shall I launch your grooming bundle today? Just reply 'Yes' to capture this {locality} surge.",
         "reply_yes_no", f"pet:seasonal:{mid}",
-        "God-tier pet surge with blunt demand loss-aversion and performance context.", hi
+        "God-tier pet surge with blunt demand loss-aversion and low-friction CTA.", hi
     )
 
 def _trg030(mid, owner, tid, p, locality, cat, v, c, hi):
