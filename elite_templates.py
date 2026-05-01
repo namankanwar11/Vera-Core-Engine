@@ -90,26 +90,24 @@ def _action(cid, mid, cust_id, send_as, tid, tname, tparams, body, cta, skey, ra
 
 
 def _trg001(mid, owner, tid, locality, cat, v, c, hi):
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         "conv_m_001_drmeera_research_W17", mid, None, "vera", tid,
         "vera_research_digest_v1",
         [owner, "JIDA Oct 2026 fluoride recall study", "draft patient-ed WhatsApp"],
-        f"Hi {salutation}, your clinic profile saw {v} views and {c} calls this month (Source: Magicpin Insights). A new JIDA study (Source: JIDA Oct 2026, Vol 14, p.14) reports that a 3-month fluoride recall can reduce caries recurrence by 38%. To ensure you don't lose your high-risk adult patients to clinics with more frequent touchpoints, should I draft a friendly educational update for them today?",
+        f"Hi {owner}, to prevent your high-risk patients from churning to competitors, we should act on the new JIDA study (Source: jida.org/2026/recall-study). It shows a 38% drop in caries with 3-month recalls. Your profile has {v} views—let's lock in these leads. Should I draft the update for you?",
         "reply_yes_no", "research:dentists:2026-W17",
-        "Clinical research digest with JIDA citation, performance context, and patient-retention loss aversion.", hi
+        "Clinical research with blunt churn loss aversion, jida.org source, and performance context.", hi
     )
 
 def _trg002(mid, owner, tid, p, locality, cat, v, c, hi):
     deadline = p.get("deadline_iso", "2026-12-15")
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         "conv_m_001_compliance_dci", mid, None, "vera", tid,
         "vera_compliance_alert_v1",
         [owner, "DCI radiograph standards", deadline],
-        f"Hi {salutation}, a quick safety update: The DCI has updated radiograph protocols effective {deadline} (Source: DCI Regulatory Audit). Our audit flags 2 units in your facility. To avoid a potential ₹5,000 compliance fine during the December audit, want me to send over our 5-point calibration checklist right now?",
+        f"Hi {owner}, to avoid a potential INR 5,000 compliance fine (Source: dci.gov.in/audit-2026), we must update your radiograph protocols by {deadline}. Our audit flags 2 of your units. Want me to send the 5-point calibration checklist now?",
         "reply_yes_no", "compliance:dci_radiograph:2026",
-        "Regulatory compliance alert with DCI source, specific fine risk, and audit-readiness context.", hi
+        "Regulatory compliance with blunt fine loss aversion, dci.gov.in source, and audit-readiness.", hi
     )
 
 def _trg003(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
@@ -127,25 +125,23 @@ def _trg003(mid, owner, tid, cust_id, cust_name, p, locality, cat, v, c, hi):
 
 def _trg004(mid, owner, tid, p, locality, cat, v, c, hi):
     delta = abs(int(p.get("delta_pct", -0.5) * 100))
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_perf_dip", mid, None, "vera", tid,
         "vera_perf_alert_v1", [owner, "calls", str(delta)],
-        f"Hi {salutation}, I noticed a {delta}% dip in your profile calls this week—currently at {c} calls total (Source: Magicpin Performance Data). To ensure you don't lose leads to competitors who are currently bidding on '{cat} Deep Cleaning' in {locality}, I've prepared a quick listing refresh. Want me to launch it for you?",
+        f"Hi {owner}, you are losing potential leads as your calls dipped {delta}% (Source: Magicpin Insights). Your current {c} calls are below peer median in {locality}. To stop this loss to competitors, shall I refresh your listing now?",
         "reply_yes_no", f"perf_dip:{mid}:calls:2026-W17",
-        "Performance alert with market demand context, competitive loss-aversion, and current call metrics.", hi
+        "Performance alert with blunt lead-loss aversion and current call metrics.", hi
     )
 
 def _trg005(mid, owner, tid, p, locality, cat, v, c, hi):
     days = p.get("days_remaining", 12)
     amt = p.get("renewal_amount", 4999)
-    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_renewal", mid, None, "vera", tid,
         "vera_renewal_v1", [owner, str(days), str(amt)],
-        f"Hi {salutation}, your Pro subscription for {cat} is up for renewal in {days} days (Source: Subscription Data). Your profile has driven {v} views and 18 directions this month! To ensure you don't lose your search ranking to nearby competitors, shall I handle the renewal for you today?",
+        f"Hi {owner}, to prevent losing your search ranking and the {v} views you got this month, we must renew your Pro plan in {days} days (Source: Subscription Tracker). Should I handle this to keep your business visible?",
         "reply_yes_no", f"renewal:{mid}:2026-Q2",
-        "Renewal reminder with performance ROI, subscription-data source, and ranking protection context.", hi
+        "Renewal with blunt ranking-loss aversion and performance context.", hi
     )
 
 def _trg006(mid, owner, tid, p, locality, cat, v, c, hi):
