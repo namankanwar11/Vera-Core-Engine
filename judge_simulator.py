@@ -32,7 +32,7 @@ BOT_URL = "https://web-production-d3e66.up.railway.app"
 LLM_PROVIDER = "cerebras"
 
 # Your API key (Pulled from .env automatically)
-LLM_API_KEY = os.getenv("CEREBRAS_API_KEY", "csk-f25wehneefm5pwye2j6m5r9jk3kk96dwjxc2ywdctfxvcxc4")
+LLM_API_KEY = os.getenv("CEREBRAS_API_KEY", "csk-5mrdm54r3nh6jdktxek3j462mmvnnn296ewwf439xcdd4nyp")
 
 # Model to use (leave empty for default, or specify like "gpt-4o", "claude-3-5-sonnet-20241022", etc.)
 LLM_MODEL = "llama3.1-8b"  # Must match a model your API key can access

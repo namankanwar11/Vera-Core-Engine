@@ -7,6 +7,10 @@ import asyncio
 import warnings
 import os
 from typing import Dict, Any
+from fastapi.encoders import jsonable_encoder
+from dotenv import load_dotenv
+
+load_dotenv()
 
 warnings.filterwarnings("ignore")
 
@@ -27,13 +31,13 @@ async def security_middleware(request: Request, call_next):
     if request.method == "POST":
         content_length = request.headers.get("Content-Length")
         if content_length and int(content_length) > 1 * 1024 * 1024:
-            return JSONResponse(status_code=413, content={"detail": "Payload too large (Max 1MB)"})
+            return JSONResponse(status_code=413, content={"detail": "Payload too large (Max 1MB)"}, media_type="application/json; charset=utf-8")
 
     if BOT_API_KEY:
         provided_key = request.headers.get("X-Vera-Key")
         if request.url.path not in ["/", "/v1/healthz", "/v1/metadata", "/v1/events"]:
             if provided_key != BOT_API_KEY:
-                return JSONResponse(status_code=401, content={"detail": "Unauthorized: Missing or invalid X-Vera-Key"})
+                return JSONResponse(status_code=401, content={"detail": "Unauthorized: Missing or invalid X-Vera-Key"}, media_type="application/json; charset=utf-8")
     
     return await call_next(request)
 
@@ -100,7 +104,8 @@ async def push_context(request: Request):
     if not accepted:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
-            content={"accepted": False, "reason": "stale_version", "current_version": current_version}
+            content={"accepted": False, "reason": "stale_version", "current_version": current_version},
+            media_type="application/json; charset=utf-8"
         )
 
     from datetime import datetime, timezone
@@ -120,7 +125,7 @@ async def push_context(request: Request):
 # Rate-limit control for Groq Free Tier (Serial processing for absolute safety)
 semaphore = asyncio.Semaphore(1)
 
-@app.post("/v1/tick", response_model=TickResponse)
+@app.post("/v1/tick")
 async def process_tick(req: TickRequest):
     try:
         store.add_event(f"Tick received: {len(req.available_triggers)} triggers")
@@ -165,7 +170,10 @@ async def process_tick(req: TickRequest):
             for res in results:
                 if res: actions.extend(res)
             store.add_event(f"Batch complete: {len(actions)} total actions")
-            return TickResponse(actions=actions[:20])
+            return JSONResponse(
+                content=jsonable_encoder(TickResponse(actions=actions[:20])),
+                media_type="application/json; charset=utf-8"
+            )
             
         except asyncio.TimeoutError:
             store.add_event("⚠️ BATCH TIMEOUT (55s). Returning mocks.")
@@ -178,9 +186,13 @@ async def process_tick(req: TickRequest):
         error_msg = f"CRITICAL TICK ERROR: {str(e)}"
         store.add_event(error_msg)
         logger.error(error_msg)
-        return JSONResponse(status_code=500, content={"detail": error_msg})
+        return JSONResponse(status_code=500, content={"detail": error_msg}, media_type="application/json; charset=utf-8")
 
-@app.post("/v1/reply", response_model=ReplyResponse)
+@app.post("/v1/reply")
 async def process_reply(req: ReplyRequest):
     store.add_event(f"Incoming Reply: {req.message[:30]}...")
-    return handle_reply(req.conversation_id, req.message, req.turn_number)
+    reply = handle_reply(req.conversation_id, req.message, req.turn_number, req.from_role)
+    return JSONResponse(
+        content=jsonable_encoder(reply),
+        media_type="application/json; charset=utf-8"
+    )
