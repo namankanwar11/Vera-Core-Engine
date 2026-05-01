@@ -149,7 +149,7 @@ def _trg001(mid, owner, biz, tid, views, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     body = f"{sal}, aapki clinic ke liye ek important update hai. I noticed a slight dip in follow-ups for {biz} this week. JIDA Guidelines (Source: Magicpin Data) confirm that regular fluoride recalls can improve retention by up to 30%. With {views:,} views on your profile, should we draft a quick reminder for your patients?" if hi else \
            f"{sal}, I noticed a slight dip in follow-ups for {biz} this week. A recent study (Source: Magicpin Data) mentions that regular fluoride recalls can improve patient retention by 30%+. With your {views:,} profile views, would you like me to draft a quick update for your high-risk patients?"
-    return _action(f"c_{mid}_001", mid, None, tid, body, "Show Draft", "Warm peer tone + hyper-specific views", hi)
+    return _action(f"c_{mid}_001", mid, None, tid, body, "Launch Patient Recall", "Warm peer tone + hyper-specific views", hi)
 
 def _trg002(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -206,40 +206,40 @@ def _trg009(mid, owner, biz, tid, hi, p):
     count = p.get("lapsed_customer_count", "78")
     body = f"{sal}, aapke {count} customers ne kaafi time se visit nahi kiya hai (Source: Magicpin CRM). Kya main unhe wapas lane ke liye ek warm 'Winback' note draft karoon?" if hi else \
            f"{sal}, I noticed about {count} customers haven't visited {biz} in a while (Source: Magicpin CRM). Would you like me to draft a warm winback note to bring them back?"
-    return _action(f"c_{mid}_009", mid, None, tid, body, "Draft Note", "CRM-based winback + exact count", hi)
+    return _action(f"c_{mid}_009", mid, None, tid, body, f"Win Back {count} Customers", "CRM-based winback + exact count", hi)
 
 def _trg010(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     surge = p.get("order_surge_percentage", "40%")
     body = f"{sal}, aaj ke match ke dauran orders {surge} badhne ki ummeed hai (Source: Magicpin Trends)! Kya main {biz} ke liye 'Cricket Combo' live kar doon taaki hum ye surge capture kar sakein?" if hi else \
            f"{sal}, we're expecting a {surge} rise in orders during tonight's match (Source: Magicpin Trends)! Should I push the 'Cricket Combo' live for {biz} now to capture this surge?"
-    return _action(f"c_{mid}_010", mid, None, tid, body, "Push Combo", "Contextual FOMO + exact surge %", hi)
+    return _action(f"c_{mid}_010", mid, None, tid, body, "Launch Cricket Combo", "Contextual FOMO + exact surge %", hi)
 
 def _trg011(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, {biz} ke reviews mein delivery delays ka zikr aaya hai (Source: Magicpin Reviews). Maine operations smooth karne ke liye ek simple SOP draft kiya hai. Kya main share karoon?" if hi else \
            f"{sal}, I noticed a few mentions of delivery delays in your recent feedback for {biz} (Source: Magicpin Reviews). I've drafted a simple SOP to help smooth things out. Shall I share it?"
-    return _action(f"c_{mid}_011", mid, None, tid, body, "Show SOP", "Review-based assistance + operational fix", hi)
+    return _action(f"c_{mid}_011", mid, None, tid, body, "Fix Delivery Delay", "Review-based assistance + operational fix", hi)
 
 def _trg012(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     milestone = p.get("milestone_count", "5,000")
     body = f"{sal}, {biz} par {milestone} orders complete karne par bahut badhayi! Momentum maintain karne ke liye kya main aapke top 50 customers ke liye 'VIP Reward' draft karoon?" if hi else \
            f"{sal}, congrats on reaching {milestone} orders at {biz}! To celebrate this momentum (Source: Magicpin Data), should I draft a 'VIP Reward' for your top 50 customers?"
-    return _action(f"c_{mid}_012", mid, None, tid, body, "Show Reward", "Warm tone + exact milestone", hi)
+    return _action(f"c_{mid}_012", mid, None, tid, body, "Launch VIP Rewards", "Warm tone + exact milestone", hi)
 
 def _trg013(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, aapke area mein corporate offices team lunches plan kar rahe hain (Source: Magicpin Data). {biz} ke liye maine ek naya 'Executive Thali' bundle draft kiya hai. Kya main share karoon?" if hi else \
            f"{sal}, more offices in your area are starting to plan team lunches again (Source: Magicpin Data). I've drafted a new 'Executive Thali' bundle for {biz} to help you capture this demand. Shall I show you?"
-    return _action(f"c_{mid}_013", mid, None, tid, body, "Show Bundle", "Market insight + product suggestion", hi)
+    return _action(f"c_{mid}_013", mid, None, tid, body, "Activate Thali Bundle", "Market insight + product suggestion", hi)
 
 def _trg014(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     dip = p.get("acquisition_dip", "15%")
     body = f"{sal}, is month new sign-ups mein {dip} ka dip dikha hai (Source: Magicpin Data). Volume wapas lane ke liye kya main ek 'Buddy Pass' referral plan draft karoon?" if hi else \
            f"{sal}, I noticed a {dip} dip in new sign-ups for {biz} this month (Source: Magicpin Data). I suggest a 'Buddy Pass' referral plan to bring that volume back. Would you like me to draft it?"
-    return _action(f"c_{mid}_014", mid, None, tid, body, "Draft Plan", "Growth focus + exact dip %", hi)
+    return _action(f"c_{mid}_014", mid, None, tid, body, "Launch Referral Plan", "Growth focus + exact dip %", hi)
 
 def _trg015(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi)
@@ -267,7 +267,7 @@ def _trg018(mid, owner, biz, tid, hi, p):
     batch = p.get("affected_batches", "AX-99")
     body = f"{sal}, main {mol} {batch} batches ke safety update review kar raha hoon (Source: Industry Notice). Patient safety ke liye kya main aapko affected patients ki list dikhaoon?" if hi else \
            f"{sal}, I'm reviewing a recent safety update for {mol} {batch} batches (Source: Industry Notice). To protect your patients, should I show you the affected patient list from your records?"
-    return _action(f"c_{mid}_018", mid, None, tid, body, "Show List", "Safety focus + exact batch info", hi)
+    return _action(f"c_{mid}_018", mid, None, tid, body, "Protect Affected Patients", "Safety focus + exact batch info", hi)
 
 def _trg019(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi)
@@ -280,7 +280,7 @@ def _trg020(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, agle hafte heatwave forecast hai (Source: Weather Data). Main suggest karta hoon ki hum {biz} ke profile par ORS aur hydration focus highlights update karein. Kya main gallery refresh karoon?" if hi else \
            f"{sal}, a heatwave is forecast for early next week (Source: Market Data). I suggest we update your {biz} highlights to focus on summer essentials and hydration. Shall I refresh your gallery now?"
-    return _action(f"c_{mid}_020", mid, None, tid, body, "Refresh Gallery", "Proactive + weather-contextual", hi)
+    return _action(f"c_{mid}_020", mid, None, tid, body, "Boost Visual Ranking", "Proactive + weather-contextual", hi)
 
 def _trg021(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
@@ -309,13 +309,13 @@ def _trg024(mid, owner, biz, tid, hi, p):
     surge = p.get("interest_surge", "25%")
     body = f"{sal}, {biz} ke interest mein is hafte {surge} ka rise dikha hai (Source: Magicpin Analytics)! Is momentum ka fayda uthane ke liye kya main ek naya profile update push karoon?" if hi else \
            f"{sal}, {biz} is seeing a {surge} rise in interest this week (Source: Magicpin Analytics)! To capture this momentum, should I push a fresh profile update for you now?"
-    return _action(f"c_{mid}_024", mid, None, tid, body, "Push Update", "Growth focus + exact surge %", hi)
+    return _action(f"c_{mid}_024", mid, None, tid, body, "Capture Weekly Momentum", "Growth focus + exact surge %", hi)
 
 def _trg025(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, maine dekha ki {biz} ka profile engagement pichle 14 days se thoda quiet hai (Source: Magicpin Data). Local ranking maintain karne ke liye kya main aapki gallery refresh karoon?" if hi else \
            f"{sal}, I noticed your profile engagement for {biz} has been quiet for 14 days (Source: Magicpin Data). To protect your local ranking, shall I refresh your gallery now?"
-    return _action(f"c_{mid}_025", mid, None, tid, body, "Refresh Gallery", "Ranking protection + exact dormancy period", hi)
+    return _action(f"c_{mid}_025", mid, None, tid, body, "Restore Local Ranking", "Ranking protection + exact dormancy period", hi)
 
 def _trg026(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -329,7 +329,7 @@ def _trg027(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, aaj fuel prices phir se change huye hain (Source: Market Data). {biz} ke delivery margins protect karne ke liye main suggest karta hoon ki hum free delivery threshold \u20b950 badha dein. Kya main update karoon?" if hi else \
            f"{sal}, fuel prices shifted again today (Source: Market Data). To protect your delivery margins at {biz}, I suggest we adjust the free delivery threshold by \u20b950 temporarily. Shall I update it?"
-    return _action(f"c_{mid}_027", mid, None, tid, body, "Update Delivery", "Margin protection + inflation context", hi)
+    return _action(f"c_{mid}_027", mid, None, tid, body, "Protect My Margins", "Margin protection + inflation context", hi)
 
 def _trg028(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -337,17 +337,17 @@ def _trg028(mid, owner, biz, tid, hi, p):
     batch = p.get("affected_batches", "AX-99")
     body = f"{sal}, main {mol}-Extract-X batch safety update follow kar raha hoon (Source: Industry Notice). Batch {batch} flag hua hai. Maine patients ke liye ek draft taiyaar kiya hai. Kya main share karoon?" if hi else \
            f"{sal}, I'm following the {mol}-Extract-X batch safety update (Source: Industry Notice). Batch {batch} has been flagged. I've prepared a safety draft for your customers at {biz}. Shall I show it?"
-    return _action(f"c_{mid}_028", mid, None, tid, body, "Show Draft", "Patient safety + exact batch info", hi)
+    return _action(f"c_{mid}_028", mid, None, tid, body, "Protect My Customers", "Patient safety + exact batch info", hi)
 
 def _trg029(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     surge = p.get("query_surge_percentage", "40%")
     body = f"{sal}, is hafte pet grooming queries mein {surge} ka rise dikha hai (Source: Magicpin Trends)! Is demand ko capture karne ke liye kya main {biz} ka 'Winter Spa' bundle update karoon?" if hi else \
            f"{sal}, I noticed a {surge} rise in queries for pet grooming this week (Source: Magicpin Trends)! To capture this demand, should I refresh your 'Winter Spa' bundle at {biz} now?"
-    return _action(f"c_{mid}_029", mid, None, tid, body, "Update Bundle", "Trend-based + exact surge %", hi)
+    return _action(f"c_{mid}_029", mid, None, tid, body, "Launch Winter Bundle", "Trend-based + exact surge %", hi)
 
 def _trg030(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, maine dekha ki Nearby Competitors actively hiring kar rahe hain (Source: Market Data). Aapki team ko secure rakhne ke liye kya main {biz} ke liye ek staff appreciation program draft karoon?" if hi else \
            f"{sal}, I noticed nearby competitors are actively hiring right now (Source: Market Data). To help you secure your team at {biz}, should I draft a staff appreciation program for you?"
-    return _action(f"c_{mid}_030", mid, None, tid, body, "Draft Program", "Retention focus + market context", hi)
+    return _action(f"c_{mid}_030", mid, None, tid, body, "Secure My Team", "Retention focus + market context", hi)
