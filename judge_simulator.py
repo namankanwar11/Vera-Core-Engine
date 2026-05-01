@@ -41,7 +41,7 @@ LLM_MODEL = "llama3.1-8b"  # Must match a model your API key can access
 OLLAMA_URL = "http://localhost:11434"
 
 # Which test to run by default
-TEST_SCENARIO = "EXTREME_CHALLENGE"
+TEST_SCENARIO = "full_evaluation"
 
 # =============================================================================
 # ██████  END OF CONFIGURATION - DON'T EDIT BELOW THIS LINE ██████
