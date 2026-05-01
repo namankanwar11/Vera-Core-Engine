@@ -351,12 +351,14 @@ def _trg025(mid, owner, tid, p, locality):
 def _trg026(mid, owner, tid, p, locality):
     deadline = p.get("deadline", "2026-11-30")
     fine = p.get("fine_amount", 50000)
+    # Smart salutation to prevent Dr. Dr.
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_waste", mid, None, "vera", tid,
         "vera_waste_audit_v1", [owner, deadline],
-        f"Dr. {owner}, critical update: the new Biomedical Waste Management Rules 2026 take effect on {deadline}. Non-compliance carries a ₹{fine} fine per unit. I have your current disposal logs ready for audit. Don't risk the penalty. Reply 'Yes' to start the audit now!",
-        "reply_yes_no", f"waste:{mid}:2026",
-        "Biomedical waste regulation audit with specific deadline and fine amount."
+        f"{salutation}, critical update: the new Biomedical Waste Management Rules 2026 take effect on {deadline}. Non-compliance carries a ₹{fine} fine per unit. I have your current disposal logs ready for audit. Don't risk the penalty. Reply '1' to start the audit now!",
+        "direct_action", f"waste:{mid}:2026",
+        "Biomedical waste regulation audit with specific deadline and direct-action CTA."
     )
 
 def _trg027(mid, owner, tid, p, locality):
@@ -365,20 +367,21 @@ def _trg027(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_fuel", mid, None, "vera", tid,
         "vera_fuel_shock_v1", [owner, str(hike)],
-        f"Suresh, fuel prices just spiked {hike}% in {locality}. This will eat {impact}% of your delivery margins tonight. I suggest pausing your 'Free Delivery' offer for orders under ₹499 temporarily to protect profits. Adapt or lose margin. Reply 'Yes' to update your listing now!",
-        "reply_yes_no", f"fuel:{mid}:2026",
-        "Macro-economic fuel shock with specific margin impact and mitigation strategy."
+        f"Hi {owner}, fuel prices just spiked {hike}% in {locality}. This will eat {impact}% of your delivery margins tonight. I suggest pausing your 'Free Delivery' offer for orders under ₹499 temporarily to protect profits. Adapt or lose margin. Reply '1' to update your listing now!",
+        "direct_action", f"fuel:{mid}:2026",
+        "Macro-economic fuel shock with specific margin impact and direct-action CTA."
     )
 
 def _trg028(mid, owner, tid, p, locality):
     mol = p.get("molecule", "Ashwagandha-Extract-X")
     batch = p.get("affected_batches", ["AX-99"])[0]
+    salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_toxic", mid, None, "vera", tid,
         "vera_toxic_recall_v1", [owner, mol, batch],
-        f"Dr. {owner}, EMERGENCY RECALL: DCGI has flagged {mol} batch {batch} for heavy metal toxicity. You have 14 regular customers on this supplement. I have the customer list and return instructions ready. Patient safety is first. Reply 'Yes' to alert affected customers now!",
-        "reply_yes_no", f"recall:toxic:{batch}",
-        "Life-safety toxic batch recall with molecule name and customer impact count."
+        f"{salutation}, EMERGENCY SAFETY ALERT: DCGI has flagged {mol} batch {batch} for heavy metal toxicity. You have 14 regular patients on this supplement. Holistic safety is our priority. I have the patient list ready. Reply '1' to alert affected patients now!",
+        "direct_action", f"recall:toxic:{batch}",
+        "Life-safety toxic batch recall with holistic tone and direct-action CTA."
     )
 
 def _trg029(mid, owner, tid, p, locality):
@@ -387,9 +390,9 @@ def _trg029(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_pet_peak", mid, None, "vera", tid,
         "vera_pet_seasonal_v1", [owner, event],
-        f"Hi {owner}, {event.replace('_', ' ')} is peaking in {locality}! We're seeing a {uplift}% surge in grooming searches. I suggest launching a 'Tick-Free Summer' combo package to capture this demand. Beat the peak. Reply 'Yes' to draft the promo now!",
-        "reply_yes_no", f"pet:seasonal:{mid}",
-        "Pet grooming seasonal surge with specific demand uplift and package suggestion."
+        f"Hi {owner}, {event.replace('_', ' ')} is peaking in {locality}! Our data shows a {uplift}% surge in pet parent searches for grooming. I suggest a 'Tick-Free Spa Day' combo to capture this demand. Reply '1' to launch the promo now!",
+        "direct_action", f"pet:seasonal:{mid}",
+        "Pet grooming seasonal surge with pet-parent focus and direct-action CTA."
     )
 
 def _trg030(mid, owner, tid, p, locality):
