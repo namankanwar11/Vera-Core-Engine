@@ -29,7 +29,7 @@ def _classify_reply_intent(message: str, conversation_id: str, turn_number: int,
     
     # 1. NEGATIVE SIGNALS (STOP/Hostile): PRIORITIZE END
     negative_signals = ["stop", "unsubscribe", "quit", "end", "fuck", "shut up", "don't want", "not interested", "block", "spam", "leave me alone"]
-    if any(sig == msg or (len(msg) < 10 and sig in msg) for sig in negative_signals):
+    if any(sig in msg for sig in negative_signals):
         return ReplyResponse(
             action="end", body=None, cta=None, 
             rationale="User requested termination or expressed hostility."
@@ -38,11 +38,11 @@ def _classify_reply_intent(message: str, conversation_id: str, turn_number: int,
     # 2. AUTO-REPLIES: Detect bots and cap loops
     auto_signals = ["i'm driving", "talk later", "i'm busy", "can't talk", "automated", "busy right now", "out of office"]
     if any(sig in msg for sig in auto_signals):
-        # Limit to 1 wait cycle before ending to avoid infinite loops
+        # HARD CAP: Wait once, then end.
         action = "wait" if turn_number < 1 else "end"
         return ReplyResponse(
             action=action, body=None, cta=None, wait_seconds=3600,
-            rationale=f"Detected auto-reply. Action: {action} (Turn: {turn_number})"
+            rationale=f"Auto-reply loop protection: {action} (Turn: {turn_number})"
         )
 
     # DEFAULT: Return None to let LLM handle the nuanced cases with context
