@@ -24,38 +24,28 @@ class LLMReplyOutput(BaseModel):
     cta: str
     rationale: str
 
-def _classify_reply_intent(message: str, conversation_id: str, turn_number: int, from_role: str = "merchant") -> Optional[ReplyResponse]:
-    msg = message.lower()
+def _classify_reply_intent(message: str, conversation_id: str, turn_number: int, role: str = "merchant") -> Optional[ReplyResponse]:
+    msg = message.strip().lower()
     
     # 1. NEGATIVE SIGNALS (STOP/Hostile): PRIORITIZE END
-    negative_signals = ["stop", "unsubscribe", "fuck", "shut up", "don't want", "not interested", "block", "spam"]
-    if any(sig in msg for sig in negative_signals):
+    negative_signals = ["stop", "unsubscribe", "quit", "end", "fuck", "shut up", "don't want", "not interested", "block", "spam", "leave me alone"]
+    if any(sig == msg or (len(msg) < 10 and sig in msg) for sig in negative_signals):
         return ReplyResponse(
             action="end", body=None, cta=None, 
-            rationale="Customer expressed disinterest or hostility. Ending conversation."
+            rationale="User requested termination or expressed hostility."
         )
 
-    # 2. AUTO-REPLIES: Detect bots
-    auto_signals = ["i'm driving", "talk later", "i'm busy", "can't talk", "automated", "busy right now"]
+    # 2. AUTO-REPLIES: Detect bots and cap loops
+    auto_signals = ["i'm driving", "talk later", "i'm busy", "can't talk", "automated", "busy right now", "out of office"]
     if any(sig in msg for sig in auto_signals):
-        # Limit to 2 wait cycles before ending to avoid infinite loops
-        action = "wait" if turn_number < 2 else "end"
+        # Limit to 1 wait cycle before ending to avoid infinite loops
+        action = "wait" if turn_number < 1 else "end"
         return ReplyResponse(
-            action=action, body=None, cta=None, 
+            action=action, body=None, cta=None, wait_seconds=3600,
             rationale=f"Detected auto-reply. Action: {action} (Turn: {turn_number})"
         )
 
-    # 3. BOOKING INTENT: customer picks a slot
-    booking_signals = ["book me", "book for", "wed ", "thu ", "fri ", "sat ", "6pm", "5pm", "7pm", "confirmed", "that works", "yes please"]
-    if any(sig in msg for sig in booking_signals) and from_role == "assistant":
-        return ReplyResponse(
-            action="send",
-            body="Confirmed! I've noted your preferred slot. You'll receive a confirmation shortly. See you then!",
-            cta="add_to_calendar",
-            rationale="Customer expressed clear booking intent."
-        )
-
-    # DEFAULT: Return None to let LLM handle the ambiguous cases
+    # DEFAULT: Return None to let LLM handle the nuanced cases with context
     return None
 
 async def handle_reply(conversation_id: str, message: str, turn_number: int, from_role: str = "merchant") -> ReplyResponse:
@@ -97,9 +87,9 @@ async def handle_reply(conversation_id: str, message: str, turn_number: int, fro
         
         # CRITICAL FIX: If the LLM returned 'wait' with NO body for an engaged message, override
         if action == "wait" and not body:
-            if any(k in message.lower() for k in ["x-ray", "audit", "book", "compliance", "slot", "when"]):
+            if any(k in message.lower() for k in ["x-ray", "audit", "book", "compliance", "slot", "when", "yes", "please", "help"]):
                 action = "send"
-                body = "I'm looking into that for you right now. I'll have the specifics ready in just a moment. Would you like me to proceed with the audit checklist or confirm the slot?"
+                body = f"I'm on it. I'll review your specific {message} request and have the details ready in just a moment. Shall I proceed?"
         
         return ReplyResponse(
             action=action,
