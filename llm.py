@@ -260,7 +260,7 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
                     model=os.getenv("DEFAULT_MODEL", "cerebras/llama3.1-8b"),
                     messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
                     response_format={"type": "json_object"},
-                    timeout=12, temperature=0.1
+                    timeout=30, temperature=0.1
                 )
                 parsed = LLMActionOutput.model_validate_json(response.choices[0].message.content)
                 return parsed.actions

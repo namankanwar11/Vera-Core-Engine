@@ -71,7 +71,7 @@ from urllib import request as urlrequest, error as urlerror
 from abc import ABC, abstractmethod
 
 # Constants
-TIMEOUT_LLM = 45
+TIMEOUT_LLM = 90
 DATASET_DIR = Path(__file__).parent / "dataset"
 
 # =============================================================================
