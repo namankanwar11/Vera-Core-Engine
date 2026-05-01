@@ -35,7 +35,7 @@ load_dotenv(dotenv_path=env_path)
 LLM_API_KEY = os.getenv("CEREBRAS_API_KEY")
 
 # Model to use (leave empty for default, or specify like "gpt-4o", "claude-3-5-sonnet-20241022", etc.)
-LLM_MODEL = "cerebras/llama3.1-8b"
+LLM_MODEL = "llama3.1-8b"
 
 # For Ollama only: local server URL
 OLLAMA_URL = "http://localhost:11434"
