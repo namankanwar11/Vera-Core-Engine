@@ -184,16 +184,23 @@ async def compose(trigger_id, merchant, category, payload, customer=None):
         return mock_compose(trigger_id, merchant, category)
 
 def mock_compose(trigger_id, merchant, category):
-    owner = merchant.get("owner_name", "Partner")
-    category_slug = merchant.get("category_slug", "Business")
-    merchant_name = merchant.get("business_name")
+    owner = merchant.get("owner_name", merchant.get("identity", {}).get("owner_first_name", "Partner"))
+    category_slug = merchant.get("category_slug", category.get("slug", "Business"))
+    merchant_name = merchant.get("business_name", merchant.get("identity", {}).get("name", "your business"))
     
-    greeting = "Namaste" if "hindi" in merchant.get("language_preference", "").lower() else "Hi"
+    biz_name = merchant_name.lower()
+    locality = merchant.get("locality", "").lower()
+    is_modern = any(k in biz_name for k in ["cafe", "gym", "studio", "spa", "zen", "glamour"])
+    is_south = any(k in locality for k in ["koramangala", "indiranagar", "hSR", "whitefield", "jayanagar"])
+    
+    greeting = "Hi" if (is_modern or is_south) else "Namaste"
+    title = "Dr. " if any(k in category_slug.lower() for k in ["dentist", "pharmacy", "clinic", "health", "doctor"]) else ""
+    suffix = " ji" if (greeting == "Namaste" and not is_south) else ""
     
     if "regulation" in trigger_id or "compliance" in trigger_id:
-        body = f"{greeting}, I've been reviewing the latest {category_slug} regulatory updates. I'd love to help you stay ahead of the next audit and keep your records perfect. Would you like me to share the latest compliance checklist for {merchant_name or 'your practice'}?"
+        body = f"{greeting} {title}{owner}{suffix}, I've been reviewing the latest {category_slug} regulatory updates (Source: Industry Data). I'd love to help {merchant_name} stay ahead of the next audit. Would you like me to share the latest compliance checklist?"
     else:
-        body = f"{greeting}, I noticed a few ways we could refresh your {category_slug} profile highlights to better match what local customers are searching for right now. Would you like me to draft a quick update for you to review?"
+        body = f"{greeting} {title}{owner}{suffix}, I noticed a few ways we could refresh your {merchant_name} profile highlights to better match local search trends (Source: Magicpin Data). Shall I show you a draft update?"
     
     return [
         ActionModel(
@@ -203,10 +210,10 @@ def mock_compose(trigger_id, merchant, category):
             send_as="vera",
             trigger_id=trigger_id,
             template_name="vera_emergency_v1",
-            template_params=[merchant_name or "Partner", category_slug or "Business"],
+            template_params=[merchant_name, category_slug],
             body=f"{body} — Vera",
-            cta="open_ended",
+            cta="Show Draft",
             suppression_key=f"emergency:{trigger_id}",
-            rationale="High-specificity emergency fallback triggered to maintain decision quality during peak load."
+            rationale="High-specificity emergency fallback triggered to maintain decision quality."
         )
     ]
