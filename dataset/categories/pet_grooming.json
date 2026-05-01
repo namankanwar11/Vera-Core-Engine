@@ -1,0 +1,10 @@
+{
+    "slug": "pet_grooming",
+    "name": "Pet Grooming & Spas",
+    "description": "Professional hygiene and aesthetic services for pets.",
+    "top_services": ["Full Grooming", "De-shedding", "Puppy's First Cut", "Tick & Flea Treatment"],
+    "common_triggers": ["tick_season_spike", "appointment_no_show", "vaccination_due"],
+    "tone": "Playful, pet-friendly, hygiene-focused, caring",
+    "regulatory_bodies": ["AWBI", "Pet Practitioners Association"],
+    "competitive_anchors": ["Stress-free environment", "Organic shampoos", "Pick-and-drop service"]
+}

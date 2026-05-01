@@ -174,7 +174,35 @@
       "scope": "merchant", "kind": "dormant_with_vera", "source": "internal",
       "merchant_id": "m_004_glamour_salon_pune", "customer_id": null,
       "payload": { "days_since_last_merchant_message": 38, "last_topic": "subscription_expiry" },
-      "urgency": 2, "suppression_key": "dormant:m_004:30d", "expires_at": "2026-05-30T00:00:00Z"
+      "urgency": 2, "suppression_key": "dormant:m_010:30d", "expires_at": "2026-06-15T00:00:00Z"
+    },
+    {
+      "id": "trg_026_biomedical_waste_regulation",
+      "scope": "merchant", "kind": "regulation_change", "source": "external",
+      "merchant_id": "m_001_drmeera_dentist_delhi", "customer_id": null,
+      "payload": { "rule_id": "BMW-2026-V2", "deadline": "2026-11-30", "fine_amount": 50000 },
+      "urgency": 4, "suppression_key": "compliance:waste:2026", "expires_at": "2026-11-30T00:00:00Z"
+    },
+    {
+      "id": "trg_027_inflation_fuel_price",
+      "scope": "merchant", "kind": "macro_economic_shock", "source": "external",
+      "merchant_id": "m_005_pizzajunction_restaurant_delhi", "customer_id": null,
+      "payload": { "event": "fuel_hike", "delta_pct": 0.12, "delivery_margin_impact": -0.05 },
+      "urgency": 3, "suppression_key": "macro:fuel:2026", "expires_at": "2026-05-15T00:00:00Z"
+    },
+    {
+      "id": "trg_028_ayurvedic_toxic_batch",
+      "scope": "merchant", "kind": "batch_recall", "source": "external",
+      "merchant_id": "m_011_ayurhealth_jaipur", "customer_id": null,
+      "payload": { "molecule": "Ashwagandha-Extract-X", "affected_batches": ["AX-99"], "manufacturer": "AyurCorp" },
+      "urgency": 5, "suppression_key": "recall:ayurvedic:2026", "expires_at": "2026-06-01T00:00:00Z"
+    },
+    {
+      "id": "trg_029_pet_grooming_peak",
+      "scope": "merchant", "kind": "seasonal_spike", "source": "external",
+      "merchant_id": "m_012_petpals_bangalore", "customer_id": null,
+      "payload": { "event": "tick_season", "estimated_demand_increase": 0.40 },
+      "urgency": 3, "suppression_key": "seasonal:pet:2026", "expires_at": "2026-07-01T00:00:00Z"
     }
   ]
 }

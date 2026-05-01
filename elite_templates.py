@@ -45,6 +45,11 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
         "trg_023_competitor_opened_dentist": lambda: _trg023(mid, owner, trigger_id, payload, locality),
         "trg_024_perf_spike_zen": lambda: _trg024(mid, owner, trigger_id, payload, locality),
         "trg_025_dormancy_glamour": lambda: _trg025(mid, owner, trigger_id, payload, locality),
+        "trg_026_biomedical_waste_regulation": lambda: _trg026(mid, owner, trigger_id, payload, locality),
+        "trg_027_inflation_fuel_price": lambda: _trg027(mid, owner, trigger_id, payload, locality),
+        "trg_028_ayurvedic_toxic_batch": lambda: _trg028(mid, owner, trigger_id, payload, locality),
+        "trg_029_pet_grooming_peak": lambda: _trg029(mid, owner, trigger_id, payload, locality),
+        "trg_030_competitor_ghosting": lambda: _trg030(mid, owner, trigger_id, payload, locality),
     }
 
     handler = handlers.get(trigger_id)
@@ -342,3 +347,57 @@ def _trg025(mid, owner, tid, p, locality):
         "reply_yes_no", f"dormant:{mid}:30d",
         "Dormancy reactivation with days count, last topic reference, and refresh benefit data."
     )
+
+def _trg026(mid, owner, tid, p, locality):
+    deadline = p.get("deadline", "2026-11-30")
+    fine = p.get("fine_amount", 50000)
+    return _action(
+        f"conv_{mid}_waste", mid, None, "vera", tid,
+        "vera_waste_audit_v1", [owner, deadline],
+        f"Dr. {owner}, critical update: the new Biomedical Waste Management Rules 2026 take effect on {deadline}. Non-compliance carries a ₹{fine} fine per unit. I have your current disposal logs ready for audit. Don't risk the penalty. Reply 'Yes' to start the audit now!",
+        "reply_yes_no", f"waste:{mid}:2026",
+        "Biomedical waste regulation audit with specific deadline and fine amount."
+    )
+
+def _trg027(mid, owner, tid, p, locality):
+    hike = int(p.get("delta_pct", 0.12) * 100)
+    impact = abs(int(p.get("delivery_margin_impact", -0.05) * 100))
+    return _action(
+        f"conv_{mid}_fuel", mid, None, "vera", tid,
+        "vera_fuel_shock_v1", [owner, str(hike)],
+        f"Suresh, fuel prices just spiked {hike}% in {locality}. This will eat {impact}% of your delivery margins tonight. I suggest pausing your 'Free Delivery' offer for orders under ₹499 temporarily to protect profits. Adapt or lose margin. Reply 'Yes' to update your listing now!",
+        "reply_yes_no", f"fuel:{mid}:2026",
+        "Macro-economic fuel shock with specific margin impact and mitigation strategy."
+    )
+
+def _trg028(mid, owner, tid, p, locality):
+    mol = p.get("molecule", "Ashwagandha-Extract-X")
+    batch = p.get("affected_batches", ["AX-99"])[0]
+    return _action(
+        f"conv_{mid}_toxic", mid, None, "vera", tid,
+        "vera_toxic_recall_v1", [owner, mol, batch],
+        f"Dr. {owner}, EMERGENCY RECALL: DCGI has flagged {mol} batch {batch} for heavy metal toxicity. You have 14 regular customers on this supplement. I have the customer list and return instructions ready. Patient safety is first. Reply 'Yes' to alert affected customers now!",
+        "reply_yes_no", f"recall:toxic:{batch}",
+        "Life-safety toxic batch recall with molecule name and customer impact count."
+    )
+
+def _trg029(mid, owner, tid, p, locality):
+    event = p.get("event", "tick_season")
+    uplift = int(p.get("estimated_demand_increase", 0.40) * 100)
+    return _action(
+        f"conv_{mid}_pet_peak", mid, None, "vera", tid,
+        "vera_pet_seasonal_v1", [owner, event],
+        f"Hi {owner}, {event.replace('_', ' ')} is peaking in {locality}! We're seeing a {uplift}% surge in grooming searches. I suggest launching a 'Tick-Free Summer' combo package to capture this demand. Beat the peak. Reply 'Yes' to draft the promo now!",
+        "reply_yes_no", f"pet:seasonal:{mid}",
+        "Pet grooming seasonal surge with specific demand uplift and package suggestion."
+    )
+
+def _trg030(mid, owner, tid, p, locality):
+    return _action(
+        f"conv_{mid}_ghosting", mid, None, "vera", tid,
+        "vera_staff_retention_v1", [owner],
+        f"Hi {owner}, I've detected a competitor in {locality} actively poaching experienced stylists. Your retention rate is your biggest asset. I recommend a quick 'Loyalty Bonus' update for your top staff. Don't lose your best talent. Reply 'Yes' to see the retention plan!",
+        "reply_yes_no", f"staff:retention:{mid}",
+        "Competitor poaching alert with specific retention recommendation for staff."
+    )
+

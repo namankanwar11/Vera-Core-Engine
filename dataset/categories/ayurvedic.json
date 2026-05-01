@@ -1,0 +1,10 @@
+{
+    "slug": "ayurvedic",
+    "name": "Ayurvedic Clinics",
+    "description": "Traditional Indian medicine practitioners and wellness centers.",
+    "top_services": ["Panchakarma", "Nadi Pariksha", "Abhyanga Massage", "Herbal Consultation"],
+    "common_triggers": ["batch_recall", "herb_shortage", "seasonal_detox"],
+    "tone": "Ancient wisdom meets modern science, expert, holistic, calm",
+    "regulatory_bodies": ["AYUSH", "DCGI"],
+    "competitive_anchors": ["Organic certification", "Generational practitioners", "Pure herb sourcing"]
+}

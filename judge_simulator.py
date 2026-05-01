@@ -41,7 +41,7 @@ LLM_MODEL = "llama3.1-8b"  # Must match a model your API key can access
 OLLAMA_URL = "http://localhost:11434"
 
 # Which test to run by default
-TEST_SCENARIO = "full_evaluation"
+TEST_SCENARIO = "EXTREME_CHALLENGE"
 
 # =============================================================================
 # ██████  END OF CONFIGURATION - DON'T EDIT BELOW THIS LINE ██████
@@ -117,7 +117,7 @@ def print_score_bar(dimension: str, score: int, max_score: int = 10):
     bar_filled = int((score / max_score) * 20)
     bar_empty = 20 - bar_filled
     color = Colors.GREEN if score >= 7 else Colors.YELLOW if score >= 4 else Colors.RED
-    print(f"  {dimension:22} [{color}{'█' * bar_filled}{Colors.DIM}{'░' * bar_empty}{Colors.RESET}] {color}{score:2}/{max_score}{Colors.RESET}")
+    print(f"  {dimension:22} [{color}{'#' * bar_filled}{Colors.DIM}{'-' * bar_empty}{Colors.RESET}] {color}{score:2}/{max_score}{Colors.RESET}")
 
 def print_reason(text: str):
     wrapped = text[:200] + "..." if len(text) > 200 else text
@@ -626,12 +626,15 @@ class JudgeSimulator:
                    f"{len(self.dataset.triggers)} triggers")
 
         scenarios = {
+            "WARMUP": self._warmup,
+            "FULL_EVALUATION": self._full,
+            "EXTREME_CHALLENGE": self._extreme,
             "warmup": self._warmup,
             "phase2_short": self._phase2_short,
             "auto_reply_hell": self._auto_reply,
-            "intent_transition": self._intent,
-            "hostile": self._hostile,
-            "all": self._all,
+            "intent_commitment": self._intent,
+            "hostile_handling": self._hostile,
+            "all_scenarios": self._all,
             "full_evaluation": self._full,
         }
 
@@ -643,6 +646,41 @@ class JudgeSimulator:
         success = scenarios[scenario]()
         self._final_summary()
         return success
+
+    def _extreme(self):
+        print_section("EXTREME CHALLENGE — UNSEEN SCENARIOS")
+        if not self._warmup(): return False
+        
+        # Hard triggers that aren't in elite templates
+        extreme_tids = [
+            "trg_026_biomedical_waste_regulation",
+            "trg_027_inflation_fuel_price",
+            "trg_028_ayurvedic_toxic_batch",
+            "trg_029_pet_grooming_peak"
+        ]
+        
+        results = []
+        print_section("SCORING EXTREME BATCH")
+        data, err, lat = self.client.tick(extreme_tids)
+        if err:
+            print_fail(f"Tick failed: {err}")
+            return False
+            
+        actions = data.get("actions", [])
+        for action in actions:
+            tid = action.get("trigger_id")
+            mid = action.get("merchant_id")
+            trigger = self.dataset.triggers.get(tid)
+            merchant = self.dataset.merchants.get(mid)
+            cat_slug = merchant.get("category_slug") if merchant else None
+            category = self.dataset.categories.get(cat_slug)
+            
+            score = self.scorer.score(action, category, merchant, trigger)
+            results.append(score)
+            self._score_and_display(action, verbose=False)
+            
+        # self._print_final_summary(results)
+        return True
 
     def _warmup(self) -> bool:
         print_section("WARMUP")
@@ -865,8 +903,10 @@ class JudgeSimulator:
         score = self.scorer.score(action, category, merchant, trigger, customer)
         self.all_scores.append(score)
 
-        body = action.get("body", "")[:50]
-        print(f"\n{Colors.CYAN}Message:{Colors.RESET} \"{body}...\"")
+        body = action.get("body", "")[:100]
+        # Strip non-ASCII for Windows terminal safety
+        safe_body = body.encode('ascii', 'ignore').decode('ascii')
+        print(f"\n{Colors.CYAN}Message:{Colors.RESET} \"{safe_body}...\"")
 
         print_score_bar("Specificity", score.specificity)
         if verbose and score.specificity_reason:

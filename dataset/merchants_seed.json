@@ -309,6 +309,36 @@
       "customer_aggregate": { "total_unique_ytd": 540, "repeat_customer_pct": 0.45, "chronic_rx_count": 60 },
       "signals": ["unverified_gbp", "no_active_offers", "no_recent_conversation", "delivery_not_set_up"],
       "review_themes": []
+    },
+    {
+      "merchant_id": "m_011_ayurhealth_jaipur",
+      "category_slug": "ayurvedic",
+      "identity": {
+        "name": "AyurHealth Wellness Center",
+        "city": "Jaipur",
+        "locality": "C-Scheme",
+        "owner_first_name": "Dr. Sharma",
+        "verified": true
+      },
+      "subscription": { "status": "active", "plan": "Pro" },
+      "performance": { "calls": 12, "views": 850 },
+      "signals": ["niche_authority", "recall_risk"],
+      "review_themes": []
+    },
+    {
+      "merchant_id": "m_012_petpals_bangalore",
+      "category_slug": "pet_grooming",
+      "identity": {
+        "name": "PetPals Spa & Grooming",
+        "city": "Bangalore",
+        "locality": "Indiranagar",
+        "owner_first_name": "Rahul",
+        "verified": true
+      },
+      "subscription": { "status": "active", "plan": "Pro" },
+      "performance": { "calls": 45, "views": 2100 },
+      "signals": ["high_demand_seasonal", "tick_season"],
+      "review_themes": []
     }
   ]
 }

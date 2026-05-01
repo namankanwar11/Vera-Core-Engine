@@ -45,8 +45,9 @@ METADATA = {
     "model": "cerebras/llama3.1-8b",
     "approach": "FastAPI + litellm orchestrator with context pruning, dynamic few-shot anchors, and anti-hype constraints",
     "contact_email": "namankanwar11@gmail.com",
-    "version": "2.0.0",
-    "submitted_at": "2026-04-30T09:00:00Z"
+    "version": "v1.3-extreme",
+    "engine": "Vera-Core-V3",
+    "submitted_at": "2026-05-01T12:00:00Z"
 }
 
 @app.get("/", response_class=HTMLResponse)
