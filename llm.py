@@ -1,6 +1,9 @@
 import json
 import os
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
 from typing import Optional, List
 from models import ActionModel, ReplyResponse
 from pydantic import BaseModel, ValidationError
@@ -159,7 +162,9 @@ def handle_reply(conversation_id: str, message: str, turn_number: int, from_role
         )
         
         response = litellm.completion(
-            model=os.getenv("DEFAULT_MODEL", "cerebras/llama3.1-8b"),
+            model="openai/llama3.1-8b",
+            api_key=os.getenv("CEREBRAS_API_KEY"),
+            base_url="https://api.cerebras.ai/v1",
             messages=[
                 {"role": "system", "content": REPLY_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
