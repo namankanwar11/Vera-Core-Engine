@@ -28,14 +28,14 @@ Author: magicpin AI Challenge Team
 # Your bot's URL (Point to RAILWAY for dashboard update)
 BOT_URL = "https://web-production-d3e66.up.railway.app"
 
-# Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
-LLM_PROVIDER = "groq"
+# Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "cerebras", "ollama", "openrouter"
+LLM_PROVIDER = "cerebras"
 
 # Your API key (Pulled from .env automatically)
-LLM_API_KEY = os.getenv("GROQ_API_KEY", "")
+LLM_API_KEY = os.getenv("CEREBRAS_API_KEY", "csk-f25wehneefm5pwye2j6m5r9jk3kk96dwjxc2ywdctfxvcxc4")
 
 # Model to use (leave empty for default, or specify like "gpt-4o", "claude-3-5-sonnet-20241022", etc.)
-LLM_MODEL = "llama-3.1-8b-instant"  # Must match a model your API key can access
+LLM_MODEL = "llama3.1-8b"  # Must match a model your API key can access
 
 # For Ollama only: local server URL
 OLLAMA_URL = "http://localhost:11434"
@@ -268,13 +268,13 @@ class DeepSeekProvider(LLMProvider):
         return data["choices"][0]["message"]["content"]
 
 
-class GroqProvider(LLMProvider):
+class CerebrasProvider(LLMProvider):
     def __init__(self, api_key: str, model: str = ""):
         self.api_key = api_key
-        self.model = model or "llama-3.1-70b-versatile"
+        self.model = model or "llama3.1-8b"
 
     def name(self) -> str:
-        return f"Groq ({self.model})"
+        return f"Cerebras ({self.model})"
 
     def complete(self, prompt: str, system: str = None) -> str:
         messages = []
@@ -285,7 +285,7 @@ class GroqProvider(LLMProvider):
         for attempt in range(3):
             try:
                 req = urlrequest.Request(
-                    "https://api.groq.com/openai/v1/chat/completions",
+                    "https://api.cerebras.ai/v1/chat/completions",
                     data=json.dumps({"model": self.model, "messages": messages,
                                     "temperature": 0.2, "max_tokens": 1500}).encode("utf-8"),
                     headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
@@ -354,7 +354,7 @@ def create_provider() -> LLMProvider:
         "anthropic": lambda: AnthropicProvider(LLM_API_KEY, LLM_MODEL),
         "gemini": lambda: GeminiProvider(LLM_API_KEY, LLM_MODEL),
         "deepseek": lambda: DeepSeekProvider(LLM_API_KEY, LLM_MODEL),
-        "groq": lambda: GroqProvider(LLM_API_KEY, LLM_MODEL),
+        "cerebras": lambda: CerebrasProvider(LLM_API_KEY, LLM_MODEL),
         "ollama": lambda: OllamaProvider(LLM_MODEL, OLLAMA_URL),
         "openrouter": lambda: OpenRouterProvider(LLM_API_KEY, LLM_MODEL),
     }

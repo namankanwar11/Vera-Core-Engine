@@ -1,7 +1,7 @@
 # Vera Core Engine v2.0
 > **Elite AI Message Orchestrator for magicpin Growth**
 
-**Vera** is a production-grade AI engine designed to handle the magicpin AI Challenge. It orchestrates high-quality, context-grounded communication between merchants and customers using a FastAPI backbone and Groq-powered LLM reasoning.
+**Vera** is a production-grade AI engine designed to handle the magicpin AI Challenge. It orchestrates high-quality, context-grounded communication between merchants and customers using a FastAPI backbone and Cerebras-powered LLM reasoning.
 
 ---
 
@@ -15,7 +15,7 @@ graph TD
     subgraph "Vera Core"
         API --> Store[MemoryStateStore]
         API --> Orchestrator[LLM Orchestrator]
-        Orchestrator -->|Reasoning| Groq[Groq Llama-3.1 LPU]
+        Orchestrator -->|Reasoning| Cerebras[Cerebras Llama-3.1]
     end
     
     subgraph "Monitoring"
@@ -73,7 +73,7 @@ Vera successfully passed the canonical test scenarios:
 ```text
 --- WARMUP ---
 [PASS] healthz (310ms)
-[PASS] metadata — Team: Naman Solo, Model: groq/llama-3.1-8b-instant
+[PASS] metadata — Team: Naman Solo, Model: cerebras/llama3.1-8b
 
 --- CONTEXT PUSH ---
 [PASS] Pushed 5 categories
@@ -92,8 +92,8 @@ Vera successfully passed the canonical test scenarios:
 
 ### 1. Configure `.env`
 ```env
-GROQ_API_KEY="gsk_your_key"
-DEFAULT_MODEL="groq/llama-3.1-8b-instant"
+CEREBRAS_API_KEY="csk_your_key"
+DEFAULT_MODEL="cerebras/llama3.1-8b"
 # BOT_API_KEY="optional_secret_here"
 ```
 

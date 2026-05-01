@@ -42,7 +42,7 @@ templates = Jinja2Templates(directory="templates")
 METADATA = {
     "team_name": "Naman Solo",
     "team_members": ["Naman"],
-    "model": "groq/llama-3.1-8b-instant",
+    "model": "cerebras/llama3.1-8b",
     "approach": "FastAPI + litellm orchestrator with context pruning, dynamic few-shot anchors, and anti-hype constraints",
     "contact_email": "namankanwar11@gmail.com",
     "version": "2.0.0",

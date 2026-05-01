@@ -160,7 +160,7 @@ def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyR
     if smart_reply is not None:
         return smart_reply
         
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key = os.getenv("CEREBRAS_API_KEY")
     if not api_key or not litellm:
         return ReplyResponse(action="wait", wait_seconds=3600, rationale="No API key and no keyword match.")
 
@@ -172,7 +172,7 @@ def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyR
         )
         
         response = litellm.completion(
-            model=os.getenv("DEFAULT_MODEL", "groq/llama-3.1-8b-instant"),
+            model=os.getenv("DEFAULT_MODEL", "cerebras/llama3.1-8b"),
             messages=[
                 {"role": "system", "content": REPLY_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
@@ -227,7 +227,7 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
     from dotenv import load_dotenv
     load_dotenv()
     
-    api_key = os.getenv("GROQ_API_KEY") or os.getenv("LITELLM_API_KEY") or os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("CEREBRAS_API_KEY") or os.getenv("LITELLM_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not litellm or not api_key:
         return mock_compose(trigger_id, merchant, category)
         
@@ -249,7 +249,7 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
         for attempt in range(max_retries):
             try:
                 response = litellm.completion(
-                    model=os.getenv("DEFAULT_MODEL", "groq/llama-3.1-8b-instant"),
+                    model=os.getenv("DEFAULT_MODEL", "cerebras/llama3.1-8b"),
                     messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}],
                     response_format={"type": "json_object"},
                     timeout=12, temperature=0.1
