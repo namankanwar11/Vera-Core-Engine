@@ -152,6 +152,10 @@ def _mock_compose(trigger_id, merchant, customer=None):
                      merchant.get("identity", {}).get("name") or 
                      merchant.get("name") or "your business")
     
+    perf = merchant.get("performance", {})
+    views = perf.get("views", 0)
+    calls = perf.get("calls", 0)
+    
     category_slug = merchant.get("category_slug", "business").lower()
     biz_name_lower = merchant_name.lower()
     locality = str(merchant.get("locality", "")).lower()
@@ -165,15 +169,19 @@ def _mock_compose(trigger_id, merchant, customer=None):
     
     t_id = trigger_id.lower()
     
-    # Category-Specific High-Impact Hooks (No Generic Fillers)
+    # Context-Aware High-Impact Hooks
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
         body = f"{greeting} {title}{owner}{suffix}, since {merchant_name} is in a high-traffic zone, staying compliant with the latest {category_slug} guidelines is critical (Source: Industry Data). I've prepared a specific audit checklist to protect your operations. Shall I share it?"
+        rat = "Regulatory compliance fallback"
     elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer"]):
         body = f"{greeting} {title}{owner}{suffix}, we're seeing an increase in local demand for {category_slug} services (Source: Magicpin Trends). I've identified a list of customers for {merchant_name} who are ready for a 'VIP Winback' offer. Would you like me to draft it?"
-    elif any(k in t_id for k in ["perf", "dip", "seasonal", "spike"]):
-        body = f"{greeting} {title}{owner}{suffix}, I've analyzed the recent performance dip at {merchant_name} (Source: Magicpin Data). To regain momentum, I suggest we launch a targeted 'Flash Rewards' campaign for your area. Shall I proceed?"
+        rat = "Retention-focused fallback"
+    elif views > 100 or calls > 5:
+        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is getting great traction with {views:,} views and {calls:,} calls (Source: Magicpin Data)! To maintain this momentum in {locality}, I suggest we refresh your profile highlights today. Shall I show you my draft?"
+        rat = "Momentum-based growth nudge"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, I've spotted a new growth opportunity for {merchant_name} based on this week's {category_slug} market data (Source: Magicpin Analytics). It's the perfect time to capture more local traffic. Should I show you my draft plan?"
+        body = f"{greeting} {title}{owner}{suffix}, I've spotted a new growth opportunity for {merchant_name} based on this week's {category_slug} market data (Source: Magicpin Analytics). It's the perfect time to capture more local traffic in {locality}. Should I show you my draft plan?"
+        rat = "General growth fallback"
     
     return [
         ActionModel(
@@ -187,7 +195,7 @@ def _mock_compose(trigger_id, merchant, customer=None):
             body=f"{body} \u2014 Vera",
             cta="Review Growth Plan",
             suppression_key=f"sk_{trigger_id}",
-            rationale="V5.2 Category-specific high-impact fallback."
+            rationale=rat
         )
     ]
 
