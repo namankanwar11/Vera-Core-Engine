@@ -114,10 +114,11 @@ async def compose(trigger_id, merchant, category, payload, customer=None):
     
     api_key = os.getenv("CEREBRAS_API_KEY")
     if not litellm or not api_key:
-        return mock_compose(trigger_id, merchant, category)
+        return mock_compose(trigger_id, merchant, customer)
         
     try:
         from prompts import SYSTEM_PROMPT, COMPOSE_TEMPLATE
+        from elite_templates import mock_compose
         m_p, c_p = _prune_context(merchant, category, payload)
         
         prompt = COMPOSE_TEMPLATE.format(
@@ -142,7 +143,8 @@ async def compose(trigger_id, merchant, category, payload, customer=None):
         return parsed.actions
     except Exception as e:
         logger.error(f"LLM error: {e}")
-        return mock_compose(trigger_id, merchant)
+        from elite_templates import mock_compose
+        return mock_compose(trigger_id, merchant, customer)
 
 def mock_compose(trigger_id, merchant, customer=None):
     # Aggressive Identity Search
@@ -168,15 +170,8 @@ def mock_compose(trigger_id, merchant, customer=None):
     
     t_id = trigger_id.lower()
     
-    # Category-Specific High-Impact Hooks (No Generic Fillers)
-    if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, since {merchant_name} is in a high-traffic zone, staying compliant with the latest {category_slug} guidelines is critical (Source: Industry Data). I've prepared a specific audit checklist to protect your operations. Shall I share it?"
-    elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer"]):
-        body = f"{greeting} {title}{owner}{suffix}, we're seeing an increase in local demand for {category_slug} services (Source: Magicpin Trends). I've identified a list of customers for {merchant_name} who are ready for a 'VIP Winback' offer. Would you like me to draft it?"
-    elif any(k in t_id for k in ["perf", "dip", "seasonal", "spike"]):
-        body = f"{greeting} {title}{owner}{suffix}, I've analyzed the recent performance dip at {merchant_name} (Source: Magicpin Data). To regain momentum, I suggest we launch a targeted 'Flash Rewards' campaign for your area. Shall I proceed?"
-    else:
-        body = f"{greeting} {title}{owner}{suffix}, I've spotted a new growth opportunity for {merchant_name} based on this week's {category_slug} market data (Source: Magicpin Analytics). It's the perfect time to capture more local traffic. Should I show you my draft plan?"
+    # Category-Specific High-Impact Hooks
+    body = f"{greeting} {title}{owner}{suffix}, I've spotted a new growth opportunity for {merchant_name} based on this week's {category_slug} market data. Shall I share my plan?"
     
     return [
         ActionModel(
