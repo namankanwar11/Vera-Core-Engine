@@ -381,35 +381,6 @@ def _trg025(mid, owner, biz, tid, hi, p):
     return _action(f"c_{mid}_025", mid, None, tid, body, "Restore Local Ranking", "Ranking protection + exact dormancy period", hi)
 
 def _trg026(mid, owner, biz, tid, hi, p):
-    sal = _get_sal(owner, hi)
-    body = f"{sal}, main biomedical waste compliance ke naye update review kar raha hoon (Source: Regulatory Board). {biz} ke safety standards maintain karne ke liye kya main audit checklist bhejoon?" if hi else \
-           f"{sal}, I'm reviewing new biomedical waste compliance updates (Source: Regulatory Board). To maintain {biz}'s safety standards, should I send you the audit checklist?"
-    return _action(f"c_{mid}_026", mid, None, tid, body, "Get Audit Checklist", "Regulatory compliance + safety focus", hi)
-
-def _trg027(mid, owner, biz, tid, hi, p):
-    sal = _get_sal(owner, hi)
-    body = f"{sal}, fuel prices mein hike ki wajah se delivery logistics par asar pad sakta hai (Source: Market Data). Profits protect karne ke liye kya main {biz} ke pricing analyze karoon?" if hi else \
-           f"{sal}, the recent hike in fuel prices may impact your delivery logistics (Source: Market Data). To protect your profits, should I analyze {biz}'s pricing strategy now?"
-    return _action(f"c_{mid}_027", mid, None, tid, body, "Analyze Profitability", "Profit protection + market-aware", hi)
-
-def _trg028(mid, owner, biz, tid, hi, p):
-    sal = _get_sal(owner, hi)
-    item = p.get("toxic_item", "Batch-X")
-    body = f"{sal}, maine dekha ki '{item}' ke kuch batches mein issues report hue hain (Source: Safety Alert). Customer safety ke liye kya main {biz} ka stock check karoon?" if hi else \
-           f"{sal}, I noticed issues reported in some batches of '{item}' (Source: Safety Alert). To ensure customer safety at {biz}, should I check your current stock now?"
-    return _action(f"c_{mid}_028", mid, None, tid, body, "Verify Stock Safety", "Safety-first + proactive alert", hi)
-
-def _trg029(mid, owner, biz, tid, hi, p):
-    sal = _get_sal(owner, hi)
-    body = f"{sal}, summer season ki wajah se pet grooming ki demand peak par hai (Source: Magicpin Trends). {biz} ki capacity fill karne ke liye kya main naya profile push karoon?" if hi else \
-           f"{sal}, pet grooming demand is peaking due to the summer season (Source: Magicpin Trends). To fill {biz}'s capacity, should I push a fresh profile highlight for you?"
-    return _action(f"c_{mid}_029", mid, None, tid, body, "Capture Peak Demand", "Seasonal growth + high conversion", hi)
-
-def _trg030(mid, owner, biz, tid, hi, p):
-    sal = _get_sal(owner, hi)
-    body = f"{sal}, pichle 7 days se competitors ka engagement aap se zyada raha hai (Source: Market Audit). {biz} ki visibility restore karne ke liye kya main gallery refresh karoon?" if hi else \
-           f"{sal}, I noticed competitors have had higher engagement than you over the last 7 days (Source: Market Audit). To restore {biz}'s visibility, shall I refresh your gallery now?"
-    return _action(f"c_{mid}_030", mid, None, tid, body, "Restore Market Lead", "Competitive edge + ranking focus", hi)
     sal = _get_sal(owner, hi, "Dr.")
     deadline = p.get("deadline", "Dec 20")
     fine = p.get("fine_amount", "₹5,000")
