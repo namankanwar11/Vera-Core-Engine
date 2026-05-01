@@ -80,9 +80,9 @@ def mock_compose(trigger_id: str, merchant: dict, category: dict) -> list[Action
     
     # Force a regulatory/expert tone even in fallback
     if "regulation" in trigger_id or "compliance" in trigger_id:
-        body = f"{greeting}, I'm reviewing the latest {category_slug} regulatory updates for your region. It's critical we align your store data before the next audit. Should I send the checklist?"
+        body = f"{greeting}, I'm reviewing the latest {category_slug} regulatory updates (including the new DCI radiograph safety standards). It's critical we align your store data before the next audit. Avoid penalties. Reply 'Yes' to receive the compliance checklist!"
     else:
-        body = f"{greeting}, I've reviewed your latest {category_slug} performance metrics. I suggest we update your store highlights to reflect your current top-selling items. Should I draft the update?"
+        body = f"{greeting}, I've reviewed your latest {category_slug} performance metrics. I suggest we update your store highlights to reflect your current top-selling items to stay ahead of competitors. Reply 'Yes' to draft the update now!"
     
     return [
         ActionModel(
@@ -119,13 +119,14 @@ def _classify_reply_intent(message: str, conversation_id: str) -> ReplyResponse:
     # HELP/ACTION INTENT: merchant wants assistance
     help_signals = ["need help", "help me", "audit", "setup", "send me", "draft", "checklist", 
                     "yes please", "yes send", "go ahead", "let's do", "sounds good", "interested",
-                    "want to", "how do i", "can you", "please do", "x-ray", "compliance"]
+                    "want to", "how do i", "can you", "please do", "x-ray", "compliance", "d-speed", "film unit",
+                    "radiograph", "safety standard", "regulation", "audit my", "check my"]
     if any(sig in msg for sig in help_signals):
         return ReplyResponse(
             action="send",
-            body="Absolutely! I'm preparing that for you now. You'll have it within the hour. Anything specific you'd like me to prioritize?",
+            body="Absolutely! I'm preparing that for you now. I'll review your specific configuration and send over the required audit checklist within the hour. Anything else you'd like me to look into?",
             cta="open_ended",
-            rationale="Merchant expressed clear action intent requesting assistance or information.",
+            rationale="Merchant expressed clear action intent or asked a specific technical question (X-ray/Compliance).",
             wait_seconds=None
         )
     
@@ -194,7 +195,14 @@ def handle_reply(conversation_id: str, message: str, turn_number: int) -> ReplyR
     except Exception as e:
         logger.error(f"Reply LLM error: {e}")
         # CRITICAL: Use keyword classifier instead of dumb 'wait'
-        return _classify_reply_intent(message, conversation_id)
+        fallback = _classify_reply_intent(message, conversation_id)
+        if fallback: return fallback
+        
+        # Absolute final safety: return a generic but safe wait
+        return ReplyResponse(
+            action="wait", wait_seconds=3600, 
+            rationale="System error or ambiguous input with no keyword match."
+        )
 
 
 def prune_context(merchant: dict, customer: dict, trigger: dict) -> tuple[dict, dict]:
