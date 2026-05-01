@@ -21,16 +21,19 @@ Author: magicpin AI Challenge Team
 # =============================================================================
 
 # Your bot's URL (where your bot is running)
-BOT_URL = "http://localhost:8080"
+BOT_URL = "https://web-production-d3e66.up.railway.app"
 
-# Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
-LLM_PROVIDER = "openai"
+# Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter", "cerebras"
+LLM_PROVIDER = "cerebras" 
 
 # Your API key (paste your key here)
-LLM_API_KEY = ""  # <-- PUT YOUR API KEY HERE
+import os
+from dotenv import load_dotenv
+load_dotenv()
+LLM_API_KEY = os.getenv("CEREBRAS_API_KEY")
 
 # Model to use (leave empty for default, or specify like "gpt-4o", "claude-3-5-sonnet-20241022", etc.)
-LLM_MODEL = ""  # <-- Optional: specify model or leave empty for default
+LLM_MODEL = "cerebras/llama3.1-8b"
 
 # For Ollama only: local server URL
 OLLAMA_URL = "http://localhost:11434"
@@ -313,12 +316,44 @@ class OpenRouterProvider(LLMProvider):
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
 
+        payload = {"model": self.model, "messages": messages, "temperature": 0.2, "max_tokens": 1500}
         req = urlrequest.Request(
             "https://openrouter.ai/api/v1/chat/completions",
             data=json.dumps({"model": self.model, "messages": messages,
                             "temperature": 0.2, "max_tokens": 1500}).encode("utf-8"),
             headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json",
                      "HTTP-Referer": "https://magicpin.com"}
+        )
+        resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
+        data = json.loads(resp.read().decode("utf-8"))
+        return data["choices"][0]["message"]["content"]
+
+
+class CerebrasProvider(LLMProvider):
+    def __init__(self, api_key: str, model: str = ""):
+        self.api_key = api_key
+        self.model = model or "llama3.1-8b"
+
+    def name(self) -> str:
+        return f"Cerebras ({self.model})"
+
+    def complete(self, prompt: str, system: str = None) -> str:
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": prompt})
+
+        req = urlrequest.Request(
+            "https://api.cerebras.ai/v1/chat/completions",
+            data=json.dumps({
+                "model": self.model,
+                "messages": messages,
+                "temperature": 0.1
+            }).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
         )
         resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
         data = json.loads(resp.read().decode("utf-8"))
@@ -335,6 +370,7 @@ def create_provider() -> LLMProvider:
         "groq": lambda: GroqProvider(LLM_API_KEY, LLM_MODEL),
         "ollama": lambda: OllamaProvider(LLM_MODEL, OLLAMA_URL),
         "openrouter": lambda: OpenRouterProvider(LLM_API_KEY, LLM_MODEL),
+        "cerebras": lambda: CerebrasProvider(LLM_API_KEY, LLM_MODEL),
     }
 
     if LLM_PROVIDER not in providers:
