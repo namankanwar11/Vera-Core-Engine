@@ -199,7 +199,7 @@ def _trg008(mid, owner, biz, tid, views, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, {biz} ke profile par {views:,} views aaye hain aur kaafi log 'Trial' offer mein interested hain (Source: Magicpin Data). Conversion badhane ke liye kya main ek 10% 'Welcome' coupon activate karoon?" if hi else \
            f"{sal}, {biz} had {views:,} views recently, and I noticed several people are interested in your 'Trial' offer (Source: Magicpin Data). To convert that interest, should I activate a 10% 'Welcome' coupon?"
-    return _action(f"c_{mid}_008", mid, None, tid, body, "Activate Coupon", "Conversion nudge + exact views", hi)
+    return _action(f"c_{mid}_008", mid, None, tid, body, "Activate 10% Discount", "Conversion nudge + exact views", hi)
 
 def _trg009(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
@@ -244,22 +244,22 @@ def _trg014(mid, owner, biz, tid, hi, p):
 def _trg015(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi)
     days = p.get("days_since_last_session", "45")
-    body = f"{sal}, {cname} ko {biz} visit kiye huye {days} days ho gaye hain (Source: Magicpin Data). Kya main unhe ek friendly 'Miss You' note bhejoon unka routine wapas start karne ke liye?" if hi else \
-           f"{sal}, it's been about {days} days since {cname}'s last session at {biz} (Source: Magicpin Data). Should I send her a friendly 'Miss You' note to help her get back into her routine?"
-    return _action(f"c_{mid}_015", mid, cid, tid, body, "Send Note", "Customer-focused + exact days", hi)
+    body = f"{sal}, {cname} ko {biz} visit kiye huye {days} days ho gaye hain (Source: Magicpin Data). Kya main unhe wapas lane ke liye ek 'FLAT 20% OFF' coupon ke saath ek draft bhejoon?" if hi else \
+           f"{sal}, it's been about {days} days since {cname}'s last session at {biz} (Source: Magicpin Data). Should I send her a 'FLAT 20% OFF' discount draft to help her get back into her routine?"
+    return _action(f"c_{mid}_015", mid, cid, tid, body, "Claim 20% Discount", "Incentive-based winback + exact days", hi)
 
 def _trg016(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     surge = p.get("interest_surge", "50%")
-    body = f"{sal}, aapke area mein 'Kids Yoga' ka interest {surge} badh gaya hai (Source: Magicpin Trends)! Kya main {biz} ke naye program ke liye ek flyer draft karoon?" if hi else \
-           f"{sal}, there's a {surge} rise in interest for 'Kids Yoga' in your area (Source: Magicpin Trends)! Should I draft a flyer for your new program at {biz} to reach these families?"
-    return _action(f"c_{mid}_016", mid, None, tid, body, "Show Flyer", "Trend-based + exact surge %", hi)
+    body = f"{sal}, aapke area mein 'Kids Yoga' ka interest {surge} badh gaya hai (Source: Magicpin Trends)! Is demand ko capture karne ke liye kya main 24 hours ke liye ek 'Trial Pass' flyer draft karoon?" if hi else \
+           f"{sal}, there's a {surge} rise in interest for 'Kids Yoga' in your area (Source: Magicpin Trends)! To capture this demand, should I draft a 24-hour 'Trial Pass' flyer for {biz}?"
+    return _action(f"c_{mid}_016", mid, None, tid, body, "Claim Trial Pass", "High-urgency trial offer + exact surge %", hi)
 
 def _trg017(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi)
-    body = f"{sal}, {cname} ka trial session {biz} par 24 hours mein khatam ho raha hai (Source: Magicpin Data). Kya main unhe ek special 'Early Bird' discount bhejoon membership join karne ke liye?" if hi else \
-           f"{sal}, {cname}'s trial at {biz} ends in 24 hours (Source: Magicpin Data). Should I send her a helpful 'Early Bird' discount to help her transition into a full membership?"
-    return _action(f"c_{mid}_017", mid, cid, tid, body, "Send Offer", "Trial conversion + urgency", hi)
+    body = f"{sal}, {cname} ka trial session {biz} par 24 hours mein khatam ho raha hai (Source: Magicpin Data). Kya main unhe membership par 'FLAT 15% OFF' ka early bird discount bhejoon?" if hi else \
+           f"{sal}, {cname}'s trial at {biz} ends in 24 hours (Source: Magicpin Data). Should I send her a 'FLAT 15% OFF' early bird discount to help her join now?"
+    return _action(f"c_{mid}_017", mid, cid, tid, body, "Claim 15% Discount", "Incentive-based conversion + urgency", hi)
 
 def _trg018(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
