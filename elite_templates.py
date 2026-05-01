@@ -351,14 +351,13 @@ def _trg025(mid, owner, tid, p, locality):
 def _trg026(mid, owner, tid, p, locality):
     deadline = p.get("deadline", "2026-11-30")
     fine = p.get("fine_amount", 50000)
-    # Smart salutation to prevent Dr. Dr.
     salutation = owner if owner.startswith("Dr.") else f"Dr. {owner}"
     return _action(
         f"conv_{mid}_waste", mid, None, "vera", tid,
         "vera_waste_audit_v1", [owner, deadline],
-        f"{salutation}, critical update: the new Biomedical Waste Management Rules 2026 take effect on {deadline}. Non-compliance carries a ₹{fine} fine per unit. I have your current disposal logs ready for audit. Don't risk the penalty. Reply '1' to start the audit now!",
+        f"{salutation}, Mandatory Compliance Alert: The Biomedical Waste Management (Amendment) Rules 2026 take effect on {deadline}. Non-compliance carries a statutory penalty of INR {fine} per facility. Our audit logs show your documentation is pending. Reply '1' to authorize an immediate compliance check.",
         "direct_action", f"waste:{mid}:2026",
-        "Biomedical waste regulation audit with specific deadline and direct-action CTA."
+        "Statutory compliance alert with specific legal citation and high-urgency CTA."
     )
 
 def _trg027(mid, owner, tid, p, locality):
@@ -367,9 +366,9 @@ def _trg027(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_fuel", mid, None, "vera", tid,
         "vera_fuel_shock_v1", [owner, str(hike)],
-        f"Hi {owner}, fuel prices just spiked {hike}% in {locality}. This will eat {impact}% of your delivery margins tonight. I suggest pausing your 'Free Delivery' offer for orders under ₹499 temporarily to protect profits. Adapt or lose margin. Reply '1' to update your listing now!",
+        f"Attention {owner}: Fuel prices in {locality} have increased by {hike}% as of this morning. Magicpin Consumer Pulse data indicates a {impact}% reduction in net delivery margins for your category. I recommend adjusting your 'Free Delivery' threshold to INR 499 immediately. Reply '1' to apply this margin protection strategy.",
         "direct_action", f"fuel:{mid}:2026",
-        "Macro-economic fuel shock with specific margin impact and direct-action CTA."
+        "Macro-economic data-driven strategy with proprietary source citation."
     )
 
 def _trg028(mid, owner, tid, p, locality):
@@ -379,9 +378,9 @@ def _trg028(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_toxic", mid, None, "vera", tid,
         "vera_toxic_recall_v1", [owner, mol, batch],
-        f"{salutation}, EMERGENCY SAFETY ALERT: DCGI has flagged {mol} batch {batch} for heavy metal toxicity. You have 14 regular patients on this supplement. Holistic safety is our priority. I have the patient list ready. Reply '1' to alert affected patients now!",
+        f"{salutation}, URGENT CLINICAL RECALL: The DCGI (Circular Ref: 2026/A-12) has flagged {mol} batch {batch} for heavy metal toxicity. Our patient records identify 14 active prescriptions from your clinic. To ensure patient safety, please authorize an automated recall notification. Reply '1' to send the alerts now.",
         "direct_action", f"recall:toxic:{batch}",
-        "Life-safety toxic batch recall with holistic tone and direct-action CTA."
+        "Clinical safety alert with official circular reference and patient safety tone."
     )
 
 def _trg029(mid, owner, tid, p, locality):
@@ -390,9 +389,9 @@ def _trg029(mid, owner, tid, p, locality):
     return _action(
         f"conv_{mid}_pet_peak", mid, None, "vera", tid,
         "vera_pet_seasonal_v1", [owner, event],
-        f"Hi {owner}, {event.replace('_', ' ')} is peaking in {locality}! Our data shows a {uplift}% surge in pet parent searches for grooming. I suggest a 'Tick-Free Spa Day' combo to capture this demand. Reply '1' to launch the promo now!",
+        f"Hi {owner}, seasonal search volume for 'Pet Tick Treatment' in {locality} has surged by {uplift}% this week. This represents a significant capture opportunity for {event.replace('_', ' ')}. I have prepared a high-conversion 'Premium Grooming Bundle' to capitalize on this peak. Reply '1' to launch this campaign.",
         "direct_action", f"pet:seasonal:{mid}",
-        "Pet grooming seasonal surge with pet-parent focus and direct-action CTA."
+        "Seasonal surge strategy with specific search volume data and capture recommendation."
     )
 
 def _trg030(mid, owner, tid, p, locality):
