@@ -40,8 +40,8 @@ async def security_middleware(request: Request, call_next):
 templates = Jinja2Templates(directory="templates")
 
 METADATA = {
-    "team_name": "Naman Solo v1.4-ULTIMATE",
-    "team_members": ["Naman"],
+    "team_name": "Vera-Core-90Plus-Master",
+    "team_members": ["Naman Solo"],
     "model": "cerebras/llama3.1-8b",
     "approach": "FastAPI + litellm orchestrator with context pruning, dynamic few-shot anchors, and anti-hype constraints",
     "contact_email": "namankanwar11@gmail.com",
