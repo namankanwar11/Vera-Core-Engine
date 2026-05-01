@@ -1,9 +1,4 @@
-import os
-import sys
-from dotenv import load_dotenv
-
-# Load environment variables from .env BEFORE EVERYTHING ELSE
-load_dotenv()
+#!/usr/bin/env python3
 """
 magicpin AI Challenge — LLM-Powered Judge Simulator
 ====================================================
@@ -25,39 +20,29 @@ Author: magicpin AI Challenge Team
 # ██████  CONFIGURATION - EDIT THIS SECTION ██████
 # =============================================================================
 
-# Your bot's URL (Point to RAILWAY for dashboard update)
-BOT_URL = "https://web-production-d3e66.up.railway.app"
+# Your bot's URL (where your bot is running)
+BOT_URL = "http://localhost:8080"
 
-# Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "cerebras", "ollama", "openrouter"
-LLM_PROVIDER = "cerebras"
+# Choose your LLM provider: "openai", "anthropic", "gemini", "deepseek", "groq", "ollama", "openrouter"
+LLM_PROVIDER = "openai"
 
-# Your API key (Pulled from .env automatically)
-LLM_API_KEY = os.getenv("CEREBRAS_API_KEY", "csk-5mrdm54r3nh6jdktxek3j462mmvnnn296ewwf439xcdd4nyp")
+# Your API key (paste your key here)
+LLM_API_KEY = ""  # <-- PUT YOUR API KEY HERE
 
 # Model to use (leave empty for default, or specify like "gpt-4o", "claude-3-5-sonnet-20241022", etc.)
-LLM_MODEL = "llama3.1-8b"  # Must match a model your API key can access
+LLM_MODEL = ""  # <-- Optional: specify model or leave empty for default
 
 # For Ollama only: local server URL
 OLLAMA_URL = "http://localhost:11434"
 
 # Which test to run by default
-TEST_SCENARIO = "full_evaluation"
+TEST_SCENARIO = "all"
 
 # =============================================================================
 # ██████  END OF CONFIGURATION - DON'T EDIT BELOW THIS LINE ██████
 # =============================================================================
 
-import sys
 import os
-import warnings
-from dotenv import load_dotenv
-
-# Suppress all warnings (clean terminal)
-warnings.filterwarnings("ignore")
-
-# Load environment variables from .env
-load_dotenv()
-
 import sys
 import json
 import time
@@ -71,7 +56,7 @@ from urllib import request as urlrequest, error as urlerror
 from abc import ABC, abstractmethod
 
 # Constants
-TIMEOUT_LLM = 90
+TIMEOUT_LLM = 45
 DATASET_DIR = Path(__file__).parent / "dataset"
 
 # =============================================================================
@@ -117,15 +102,14 @@ def print_score_bar(dimension: str, score: int, max_score: int = 10):
     bar_filled = int((score / max_score) * 20)
     bar_empty = 20 - bar_filled
     color = Colors.GREEN if score >= 7 else Colors.YELLOW if score >= 4 else Colors.RED
-    print(f"  {dimension:22} [{color}{'#' * bar_filled}{Colors.DIM}{'-' * bar_empty}{Colors.RESET}] {color}{score:2}/{max_score}{Colors.RESET}")
+    print(f"  {dimension:22} [{color}{'█' * bar_filled}{Colors.DIM}{'░' * bar_empty}{Colors.RESET}] {color}{score:2}/{max_score}{Colors.RESET}")
 
 def print_reason(text: str):
     wrapped = text[:200] + "..." if len(text) > 200 else text
     print(f"    {Colors.DIM}{wrapped}{Colors.RESET}")
 
 def print_hint(hint: str):
-    if hint:
-        print(f"    {Colors.YELLOW}Judge's Feedback: {hint}{Colors.RESET}")
+    print(f"\n  {Colors.YELLOW}Hint:{Colors.RESET} {hint}")
 
 # =============================================================================
 # DATA CLASSES
@@ -269,13 +253,13 @@ class DeepSeekProvider(LLMProvider):
         return data["choices"][0]["message"]["content"]
 
 
-class CerebrasProvider(LLMProvider):
+class GroqProvider(LLMProvider):
     def __init__(self, api_key: str, model: str = ""):
         self.api_key = api_key
-        self.model = model or "llama3.1-8b"
+        self.model = model or "llama-3.1-70b-versatile"
 
     def name(self) -> str:
-        return f"Cerebras ({self.model})"
+        return f"Groq ({self.model})"
 
     def complete(self, prompt: str, system: str = None) -> str:
         messages = []
@@ -283,22 +267,15 @@ class CerebrasProvider(LLMProvider):
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": prompt})
 
-        for attempt in range(3):
-            try:
-                req = urlrequest.Request(
-                    "https://api.cerebras.ai/v1/chat/completions",
-                    data=json.dumps({"model": self.model, "messages": messages,
-                                    "temperature": 0.2, "max_tokens": 1500}).encode("utf-8"),
-                    headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
-                )
-                resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
-                data = json.loads(resp.read().decode("utf-8"))
-                return data["choices"][0]["message"]["content"]
-            except Exception as e:
-                if "429" in str(e) and attempt < 2:
-                    time.sleep(2 ** (attempt + 1))
-                    continue
-                raise e
+        req = urlrequest.Request(
+            "https://api.groq.com/openai/v1/chat/completions",
+            data=json.dumps({"model": self.model, "messages": messages,
+                            "temperature": 0.2, "max_tokens": 1500}).encode("utf-8"),
+            headers={"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        )
+        resp = urlrequest.urlopen(req, timeout=TIMEOUT_LLM)
+        data = json.loads(resp.read().decode("utf-8"))
+        return data["choices"][0]["message"]["content"]
 
 
 class OllamaProvider(LLMProvider):
@@ -355,7 +332,7 @@ def create_provider() -> LLMProvider:
         "anthropic": lambda: AnthropicProvider(LLM_API_KEY, LLM_MODEL),
         "gemini": lambda: GeminiProvider(LLM_API_KEY, LLM_MODEL),
         "deepseek": lambda: DeepSeekProvider(LLM_API_KEY, LLM_MODEL),
-        "cerebras": lambda: CerebrasProvider(LLM_API_KEY, LLM_MODEL),
+        "groq": lambda: GroqProvider(LLM_API_KEY, LLM_MODEL),
         "ollama": lambda: OllamaProvider(LLM_MODEL, OLLAMA_URL),
         "openrouter": lambda: OpenRouterProvider(LLM_API_KEY, LLM_MODEL),
     }
@@ -439,18 +416,18 @@ class BotClient:
         return self._request("GET", "/v1/metadata", 5)
 
     def push_context(self, scope, cid, version, payload):
-        return self._request("POST", "/v1/context", 30, {
+        return self._request("POST", "/v1/context", 10, {
             "scope": scope, "context_id": cid, "version": version,
             "payload": payload, "delivered_at": datetime.utcnow().isoformat() + "Z"
         })
 
     def tick(self, triggers):
-        return self._request("POST", "/v1/tick", 120, {
+        return self._request("POST", "/v1/tick", 15, {
             "now": datetime.utcnow().isoformat() + "Z", "available_triggers": triggers
         })
 
     def reply(self, conv_id, merchant_id, message, turn):
-        return self._request("POST", "/v1/reply", 120, {
+        return self._request("POST", "/v1/reply", 15, {
             "conversation_id": conv_id, "merchant_id": merchant_id, "customer_id": None,
             "from_role": "merchant", "message": message,
             "received_at": datetime.utcnow().isoformat() + "Z", "turn_number": turn
@@ -552,18 +529,13 @@ Send As: {action.get('send_as', 'vera')}
 
 Score each dimension 0-10 with clear reasoning. Be STRICT."""
 
-        for attempt in range(3):
-            try:
-                print_llm(f"Analyzing message (Attempt {attempt+1})...")
-                time.sleep(1)  # Rate limiting
-                response = self.llm.complete(prompt, self.SYSTEM)
-                return self._parse_response(response, action)
-            except Exception as e:
-                print_warn(f"LLM error: {e}")
-                if attempt == 2:
-                    return self._fallback_score(action)
-                time.sleep(2)
-        return self._fallback_score(action)
+        try:
+            print_llm("Analyzing message...")
+            response = self.llm.complete(prompt, self.SYSTEM)
+            return self._parse_response(response, action)
+        except Exception as e:
+            print_warn(f"LLM error: {e}")
+            return self._fallback_score(action)
 
     def _parse_response(self, response: str, action: Dict) -> ScoreResult:
         """Parse LLM JSON response."""
@@ -632,15 +604,12 @@ class JudgeSimulator:
                    f"{len(self.dataset.triggers)} triggers")
 
         scenarios = {
-            "WARMUP": self._warmup,
-            "FULL_EVALUATION": self._full,
-            "EXTREME_CHALLENGE": self._extreme,
             "warmup": self._warmup,
             "phase2_short": self._phase2_short,
             "auto_reply_hell": self._auto_reply,
-            "intent_commitment": self._intent,
-            "hostile_handling": self._hostile,
-            "all_scenarios": self._all,
+            "intent_transition": self._intent,
+            "hostile": self._hostile,
+            "all": self._all,
             "full_evaluation": self._full,
         }
 
@@ -652,41 +621,6 @@ class JudgeSimulator:
         success = scenarios[scenario]()
         self._final_summary()
         return success
-
-    def _extreme(self):
-        print_section("EXTREME CHALLENGE — UNSEEN SCENARIOS")
-        if not self._warmup(): return False
-        
-        # Hard triggers that aren't in elite templates
-        extreme_tids = [
-            "trg_026_biomedical_waste_regulation",
-            "trg_027_inflation_fuel_price",
-            "trg_028_ayurvedic_toxic_batch",
-            "trg_029_pet_grooming_peak"
-        ]
-        
-        results = []
-        print_section("SCORING EXTREME BATCH")
-        data, err, lat = self.client.tick(extreme_tids)
-        if err:
-            print_fail(f"Tick failed: {err}")
-            return False
-            
-        actions = data.get("actions", [])
-        for action in actions:
-            tid = action.get("trigger_id")
-            mid = action.get("merchant_id")
-            trigger = self.dataset.triggers.get(tid)
-            merchant = self.dataset.merchants.get(mid)
-            cat_slug = merchant.get("category_slug") if merchant else None
-            category = self.dataset.categories.get(cat_slug)
-            
-            score = self.scorer.score(action, category, merchant, trigger)
-            results.append(score)
-            self._score_and_display(action, verbose=False)
-            
-        # self._print_final_summary(results)
-        return True
 
     def _warmup(self) -> bool:
         print_section("WARMUP")
@@ -705,12 +639,15 @@ class JudgeSimulator:
 
         print_section("CONTEXT PUSH")
         for slug, cat in self.dataset.categories.items():
-            self.client.push_context("category", slug, 1, cat)
-        print_success(f"Pushed {len(self.dataset.categories)} categories")
+            data, err, _ = self.client.push_context("category", slug, 1, cat)
+            status = "PASS" if data and data.get("accepted") else "FAIL"
+            print(f"  [{status}] category/{slug}")
 
-        for mid, m in self.dataset.merchants.items():
-            self.client.push_context("merchant", mid, 1, m)
-        print_success(f"Pushed {len(self.dataset.merchants)} merchants")
+        for mid, m in list(self.dataset.merchants.items())[:5]:
+            data, err, _ = self.client.push_context("merchant", mid, 1, m)
+            status = "PASS" if data and data.get("accepted") else "FAIL"
+            short_id = mid.split('_')[1] if '_' in mid else mid[:10]
+            print(f"  [{status}] merchant/{short_id}")
 
         return True
 
@@ -879,7 +816,6 @@ class JudgeSimulator:
 
         for i in range(0, len(tids), 5):
             batch = tids[i:i+5]
-            time.sleep(5) # Absolute safety for 10/10 run
             data, err, lat = self.client.tick(batch)
 
             if err:
@@ -890,8 +826,7 @@ class JudgeSimulator:
             print_info(f"Batch {i//5 + 1}: {len(actions)} actions ({lat:.0f}ms)")
 
             for action in actions:
-                time.sleep(5) # Absolute safety for 10/10 run
-                self._score_and_display(action, verbose=True)
+                self._score_and_display(action, verbose=False)
 
         return True
 
@@ -909,10 +844,8 @@ class JudgeSimulator:
         score = self.scorer.score(action, category, merchant, trigger, customer)
         self.all_scores.append(score)
 
-        body = action.get("body", "")[:100]
-        # Strip non-ASCII for Windows terminal safety
-        safe_body = body.encode('ascii', 'ignore').decode('ascii')
-        print(f"\n{Colors.CYAN}Message:{Colors.RESET} \"{safe_body}...\"")
+        body = action.get("body", "")[:50]
+        print(f"\n{Colors.CYAN}Message:{Colors.RESET} \"{body}...\"")
 
         print_score_bar("Specificity", score.specificity)
         if verbose and score.specificity_reason:
@@ -974,29 +907,13 @@ class JudgeSimulator:
         print(f"\n{Colors.BOLD}  AVERAGE SCORE: {total}/50 ({pct:.0f}%){Colors.RESET}")
 
         if pct >= 80:
-            status = "EXCELLENT"
-            print(f"\n  {Colors.GREEN}{status}{Colors.RESET}")
+            print(f"\n  {Colors.GREEN}EXCELLENT{Colors.RESET}")
         elif pct >= 60:
-            status = "GOOD"
-            print(f"\n  {Colors.YELLOW}{status}{Colors.RESET}")
+            print(f"\n  {Colors.YELLOW}GOOD{Colors.RESET}")
         elif pct >= 40:
-            status = "NEEDS IMPROVEMENT"
-            print(f"\n  {Colors.YELLOW}{status}{Colors.RESET}")
+            print(f"\n  {Colors.YELLOW}NEEDS IMPROVEMENT{Colors.RESET}")
         else:
-            status = "BELOW EXPECTATIONS"
-            print(f"\n  {Colors.RED}{status}{Colors.RESET}")
-
-        # Report to cloud bot for dynamic dashboard
-        try:
-            self.client._request("POST", "/v1/report_score", 10, {
-                "score": total,
-                "specificity": avg.specificity,
-                "category_fit": avg.category_fit,
-                "messages_sent": n,
-                "performance_text": f"Evaluation Complete: {status} ({total}/50)"
-            })
-        except:
-            pass
+            print(f"\n  {Colors.RED}BELOW EXPECTATIONS{Colors.RESET}")
 
 # =============================================================================
 # ENTRY POINT
@@ -1004,16 +921,6 @@ class JudgeSimulator:
 
 def main():
     print_header("magicpin AI Challenge — LLM Judge")
-
-    global BOT_URL
-    if "--local" in sys.argv:
-        BOT_URL = "http://localhost:8000"
-        print_info("Mode: Local Terminal Testing (localhost:8000)")
-    elif "--cloud" in sys.argv:
-        BOT_URL = "https://web-production-d3e66.up.railway.app"
-        print_info("Mode: Cloud Testing (Railway)")
-    else:
-        print_info(f"Mode: Default ({BOT_URL})")
 
     # Validate configuration
     if LLM_PROVIDER != "ollama" and not LLM_API_KEY:
@@ -1031,13 +938,18 @@ def main():
         sys.exit(1)
 
     # Test LLM connection
+    print_info("Testing LLM connection...")
     try:
-        print_info("Testing LLM connection...")
-        test_resp = llm.complete("Say OK")
-        print_success(f"LLM connected successfully")
+        test_response = llm.complete("Say 'ready' if you can hear me.", "You are a test assistant.")
+        if test_response:
+            print_success("LLM connected successfully")
+        else:
+            print_fail("LLM returned empty response")
+            sys.exit(1)
     except Exception as e:
-        print_warn(f"LLM connection test failed: {e}")
-        print_info("Continuing anyway — scoring will use heuristic fallback")
+        print_fail(f"LLM connection failed: {e}")
+        print_info("Check your API key and internet connection")
+        sys.exit(1)
 
     # Run the judge
     judge = JudgeSimulator(llm)

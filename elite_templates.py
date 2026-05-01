@@ -258,7 +258,9 @@ def _trg014(mid, owner, biz, tid, hi, p):
     body = f"{sal}, is month new sign-ups mein {dip} ka dip dikha hai (Source: Magicpin Data). Since competitors are active, what if we launch a 'Referral Program' to bring that volume back? Would you like me to draft it?" if hi else \
            f"{sal}, I noticed a {dip} dip in new sign-ups for {biz} this month (Source: Magicpin Data). To counter local competition, I suggest we launch a formal 'Referral Program' now. Would you like me to draft it?"
     return _action(f"c_{mid}_014", mid, None, tid, body, "Launch Referral Program", "Growth focus + accurate terminology", hi)
-
+def _trg015(mid, owner, biz, tid, cid, cname, hi, p):
+    sal = _get_sal(owner, hi)
+    days = p.get("days_since_last_session", "45")
     body = f"{sal}, {cname} ko {biz} visit kiye huye {days} days ho gaye hain (Source: Magicpin Analytics). Since weekend traffic is rising, it's the perfect time to win her back with a 'FLAT 25% OFF' VIP coupon. Kya main bhejoon?" if hi else \
            f"{sal}, it's been {days} days since {cname}'s last visit to {biz} (Source: Magicpin Analytics). Since we're seeing higher weekend intent, should I send her a 'FLAT 25% OFF' VIP coupon now?"
     return _action(f"c_{mid}_015", mid, cid, tid, body, "Send 25% OFF Coupon", "High-incentive winback + temporal urgency", hi)
