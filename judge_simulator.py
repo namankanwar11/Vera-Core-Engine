@@ -959,6 +959,16 @@ class JudgeSimulator:
 def main():
     print_header("magicpin AI Challenge — LLM Judge")
 
+    global BOT_URL
+    if "--local" in sys.argv:
+        BOT_URL = "http://localhost:8000"
+        print_info("Mode: Local Terminal Testing (localhost:8000)")
+    elif "--cloud" in sys.argv:
+        BOT_URL = "https://web-production-d3e66.up.railway.app"
+        print_info("Mode: Cloud Testing (Railway)")
+    else:
+        print_info(f"Mode: Default ({BOT_URL})")
+
     # Validate configuration
     if LLM_PROVIDER != "ollama" and not LLM_API_KEY:
         print_fail("LLM_API_KEY is not set!")
