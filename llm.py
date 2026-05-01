@@ -24,37 +24,8 @@ class LLMReplyOutput(BaseModel):
     cta: str
     rationale: str
 
-def _classify_reply_intent(message: str, conversation_id: str, turn_number: int, role: str = "merchant") -> Optional[ReplyResponse]:
-    msg = message.strip().lower()
-    
-    # 1. NEGATIVE SIGNALS (STOP/Hostile): PRIORITIZE END
-    negative_signals = ["stop", "unsubscribe", "quit", "end", "fuck", "shut up", "don't want", "not interested", "block", "spam", "leave me alone"]
-    if any(sig in msg for sig in negative_signals):
-        return ReplyResponse(
-            action="end", body=None, cta=None, 
-            rationale="User requested termination or expressed hostility."
-        )
-
-    # 2. AUTO-REPLIES: Detect bots and cap loops
-    auto_signals = ["i'm driving", "talk later", "i'm busy", "can't talk", "automated", "busy right now", "out of office"]
-    if any(sig in msg for sig in auto_signals):
-        # HARD CAP: Wait once, then end.
-        action = "wait" if turn_number < 1 else "end"
-        return ReplyResponse(
-            action=action, body=None, cta=None, wait_seconds=3600,
-            rationale=f"Auto-reply loop protection: {action} (Turn: {turn_number})"
-        )
-
-    # DEFAULT: Return None to let LLM handle the nuanced cases with context
-    return None
-
 async def handle_reply(conversation_id: str, message: str, turn_number: int, from_role: str = "merchant") -> ReplyResponse:
     from prompts import REPLY_SYSTEM_PROMPT, REPLY_TEMPLATE
-    
-    # 1. ALWAYS run the smart keyword classifier first
-    smart_reply = _classify_reply_intent(message, conversation_id, turn_number, from_role)
-    if smart_reply is not None:
-        return smart_reply
         
     api_key = os.getenv("CEREBRAS_API_KEY")
     if not api_key or not litellm:
