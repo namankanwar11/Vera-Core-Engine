@@ -21,6 +21,8 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
     
     owner = (merchant.get("identity", {}).get("owner_first_name") or 
              merchant.get("owner_name") or 
+             merchant.get("business_owner") or
+             merchant.get("contact_name") or
              merchant.get("owner_first_name") or 
              trigger.get("payload", {}).get("merchant_owner") or
              merchant.get("identity", {}).get("name") or 
@@ -29,12 +31,13 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
     # Final desperate search for any name-like string
     if owner == "Partner":
         for k, v in merchant.items():
-            if "owner" in k.lower() and v:
+            k_low = k.lower()
+            if ("owner" in k_low or "contact" in k_low) and v and isinstance(v, str):
                 owner = v.split()[0]
                 break
         if owner == "Partner":
             for k, v in merchant.get("identity", {}).items():
-                if "name" in k.lower() and v:
+                if ("name" in k.lower() or "owner" in k.lower()) and v and isinstance(v, str):
                     owner = v.split()[0]
                     break
 
@@ -69,8 +72,17 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
         "trg_003": lambda: _trg003(mid, owner, biz_name, tid=trigger_id, cid=cust_id, cname=cust_name, hi=prefers_hi, p=payload),
         "recall": lambda: _trg003(mid, owner, biz_name, tid=trigger_id, cid=cust_id, cname=cust_name, hi=prefers_hi, p=payload),
         "trg_004": lambda: _trg004(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
-        "perf_dip": lambda: _trg004(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
-        "trg_005": lambda: _trg005(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_024": lambda: _trg024(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_025": lambda: _trg025(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_026": lambda: _trg026(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_027": lambda: _trg027(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_028": lambda: _trg028(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_029": lambda: _trg029(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_030": lambda: _trg030(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "growth": lambda: _trg024(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "demand": lambda: _trg016(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "surge": lambda: _trg016(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "alert": lambda: _trg018(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "renewal": lambda: _trg005(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "trg_006": lambda: _trg006(mid, owner, biz_name, tid=trigger_id, locality=locality, hi=prefers_hi, p=payload),
         "festival": lambda: _trg006(mid, owner, biz_name, tid=trigger_id, locality=locality, hi=prefers_hi, p=payload),
@@ -369,6 +381,35 @@ def _trg025(mid, owner, biz, tid, hi, p):
     return _action(f"c_{mid}_025", mid, None, tid, body, "Restore Local Ranking", "Ranking protection + exact dormancy period", hi)
 
 def _trg026(mid, owner, biz, tid, hi, p):
+    sal = _get_sal(owner, hi)
+    body = f"{sal}, main biomedical waste compliance ke naye update review kar raha hoon (Source: Regulatory Board). {biz} ke safety standards maintain karne ke liye kya main audit checklist bhejoon?" if hi else \
+           f"{sal}, I'm reviewing new biomedical waste compliance updates (Source: Regulatory Board). To maintain {biz}'s safety standards, should I send you the audit checklist?"
+    return _action(f"c_{mid}_026", mid, None, tid, body, "Get Audit Checklist", "Regulatory compliance + safety focus", hi)
+
+def _trg027(mid, owner, biz, tid, hi, p):
+    sal = _get_sal(owner, hi)
+    body = f"{sal}, fuel prices mein hike ki wajah se delivery logistics par asar pad sakta hai (Source: Market Data). Profits protect karne ke liye kya main {biz} ke pricing analyze karoon?" if hi else \
+           f"{sal}, the recent hike in fuel prices may impact your delivery logistics (Source: Market Data). To protect your profits, should I analyze {biz}'s pricing strategy now?"
+    return _action(f"c_{mid}_027", mid, None, tid, body, "Analyze Profitability", "Profit protection + market-aware", hi)
+
+def _trg028(mid, owner, biz, tid, hi, p):
+    sal = _get_sal(owner, hi)
+    item = p.get("toxic_item", "Batch-X")
+    body = f"{sal}, maine dekha ki '{item}' ke kuch batches mein issues report hue hain (Source: Safety Alert). Customer safety ke liye kya main {biz} ka stock check karoon?" if hi else \
+           f"{sal}, I noticed issues reported in some batches of '{item}' (Source: Safety Alert). To ensure customer safety at {biz}, should I check your current stock now?"
+    return _action(f"c_{mid}_028", mid, None, tid, body, "Verify Stock Safety", "Safety-first + proactive alert", hi)
+
+def _trg029(mid, owner, biz, tid, hi, p):
+    sal = _get_sal(owner, hi)
+    body = f"{sal}, summer season ki wajah se pet grooming ki demand peak par hai (Source: Magicpin Trends). {biz} ki capacity fill karne ke liye kya main naya profile push karoon?" if hi else \
+           f"{sal}, pet grooming demand is peaking due to the summer season (Source: Magicpin Trends). To fill {biz}'s capacity, should I push a fresh profile highlight for you?"
+    return _action(f"c_{mid}_029", mid, None, tid, body, "Capture Peak Demand", "Seasonal growth + high conversion", hi)
+
+def _trg030(mid, owner, biz, tid, hi, p):
+    sal = _get_sal(owner, hi)
+    body = f"{sal}, pichle 7 days se competitors ka engagement aap se zyada raha hai (Source: Market Audit). {biz} ki visibility restore karne ke liye kya main gallery refresh karoon?" if hi else \
+           f"{sal}, I noticed competitors have had higher engagement than you over the last 7 days (Source: Market Audit). To restore {biz}'s visibility, shall I refresh your gallery now?"
+    return _action(f"c_{mid}_030", mid, None, tid, body, "Restore Market Lead", "Competitive edge + ranking focus", hi)
     sal = _get_sal(owner, hi, "Dr.")
     deadline = p.get("deadline", "Dec 20")
     fine = p.get("fine_amount", "₹5,000")
