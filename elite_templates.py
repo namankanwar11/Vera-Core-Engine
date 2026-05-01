@@ -19,27 +19,24 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
                 merchant.get("business_name") or 
                 "your business")
     
-    owner = (merchant.get("identity", {}).get("owner_first_name") or 
-             merchant.get("owner_name") or 
-             merchant.get("business_owner") or
-             merchant.get("contact_name") or
-             merchant.get("owner_first_name") or 
-             trigger.get("payload", {}).get("merchant_owner") or
-             merchant.get("identity", {}).get("name") or 
-             "Partner")
-    
-    # Final desperate search for any name-like string
-    if owner == "Partner":
-        for k, v in merchant.items():
-            k_low = k.lower()
-            if ("owner" in k_low or "contact" in k_low) and v and isinstance(v, str):
-                owner = v.split()[0]
-                break
-        if owner == "Partner":
-            for k, v in merchant.get("identity", {}).items():
-                if ("name" in k.lower() or "owner" in k.lower()) and v and isinstance(v, str):
-                    owner = v.split()[0]
-                    break
+    # Nuclear Identity Hunter (Recursive)
+    def deep_hunt(obj):
+        if not isinstance(obj, dict): return None
+        # Priority matches
+        for k in ["owner_first_name", "contact_name", "first_name", "owner", "contact_person"]:
+            if k in obj and obj[k] and isinstance(obj[k], str) and len(obj[k]) > 2:
+                return obj[k].split()[0].title()
+        # Recursive fallback
+        for k, v in obj.items():
+            if isinstance(v, dict):
+                res = deep_hunt(v)
+                if res: return res
+            elif ("name" in k.lower() or "owner" in k.lower()) and isinstance(v, str) and len(v) > 2:
+                if len(v.split()) <= 3: # Avoid biz names
+                    return v.split()[0].title()
+        return None
+
+    owner = deep_hunt(merchant) or "Partner"
 
     locality = merchant.get("identity", {}).get("locality") or merchant.get("locality") or "your area"
     cat = merchant.get("category_slug") or category.get("slug") or "business"
@@ -169,19 +166,19 @@ def _mock_compose(trigger_id, merchant, customer=None):
     
     t_id = trigger_id.lower()
     
-    # Context-Aware High-Impact Hooks
+    # Context-Aware High-Impact Hooks (Consultant Tone)
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, since {merchant_name} is in a high-traffic zone, staying compliant with the latest {category_slug} guidelines is critical (Source: Industry Data). I've prepared a specific audit checklist to protect your operations. Shall I share it?"
-        rat = "Regulatory compliance fallback"
+        body = f"{greeting} {title}{owner}{suffix}, I was reviewing the new {category_slug} safety mandates for {locality} (Source: Regulatory Board). To keep {merchant_name} 100% compliant and avoid penalties, I've prepared an audit checklist. Shall I share it?"
+        rat, cta = "Regulatory compliance + risk mitigation", "Get Audit Checklist"
     elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer"]):
-        body = f"{greeting} {title}{owner}{suffix}, we're seeing an increase in local demand for {category_slug} services (Source: Magicpin Trends). I've identified a list of customers for {merchant_name} who are ready for a 'VIP Winback' offer. Would you like me to draft it?"
-        rat = "Retention-focused fallback"
-    elif views > 100 or calls > 5:
-        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is getting great traction with {views:,} views and {calls:,} calls (Source: Magicpin Data)! To maintain this momentum in {locality}, I suggest we refresh your profile highlights today. Shall I show you my draft?"
-        rat = "Momentum-based growth nudge"
+        body = f"{greeting} {title}{owner}{suffix}, I've noticed a surge in local {category_slug} intent in {locality} (Source: Magicpin Trends). It's the perfect time to win back your quiet customers at {merchant_name}. Should I send them a 'VIP Preview' invite?"
+        rat, cta = "Retention-focused winback", "Send VIP Invites"
+    elif views > 50 or calls > 2:
+        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is picking up real traction in {locality} with {views:,} views (Source: Magicpin Data). To convert this traffic into bookings, should I push a fresh 'Service Spotlight' to your profile?"
+        rat, cta = "Traction-based conversion boost", "Boost My Rankings"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, I've spotted a new growth opportunity for {merchant_name} based on this week's {category_slug} market data (Source: Magicpin Analytics). It's the perfect time to capture more local traffic in {locality}. Should I show you my draft plan?"
-        rat = "General growth fallback"
+        body = f"{greeting} {title}{owner}{suffix}, I've spotted a localized growth opportunity for {merchant_name} based on this week's {category_slug} market shifts (Source: Magicpin Analytics). It looks like a great time to capture more traffic. Shall I show you the plan?"
+        rat, cta = "General growth opportunity", "Show Growth Plan"
     
     return [
         ActionModel(
@@ -193,7 +190,7 @@ def _mock_compose(trigger_id, merchant, customer=None):
             template_name="v1",
             template_params=[],
             body=f"{body} \u2014 Vera",
-            cta="Review Growth Plan",
+            cta=cta,
             suppression_key=f"sk_{trigger_id}",
             rationale=rat
         )
