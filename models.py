@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
 # --- Common Enums/Types ---
@@ -193,7 +193,17 @@ class ActionModel(BaseModel):
     send_as: Optional[str] = None
     trigger_id: Optional[str] = None
     template_name: Optional[str] = None
-    template_params: Optional[List[str]] = None
+    template_params: List[str] = Field(default_factory=list)
+    
+    @field_validator('template_params', mode='before')
+    @classmethod
+    def sanitize_template_params(cls, v):
+        if v is None:
+            return []
+        if isinstance(v, list):
+            return [str(item) if item is not None else "" for item in v]
+        return v
+
     body: str
     cta: str
     suppression_key: Optional[str] = None

@@ -255,9 +255,6 @@ def compose(trigger_id: str, merchant: dict, category: dict, trigger: dict = Non
                     timeout=12, temperature=0.1
                 )
                 parsed = LLMActionOutput.model_validate_json(response.choices[0].message.content)
-                for action in parsed.actions:
-                    if action.template_params:
-                        action.template_params = [str(p) if p is not None else "" for p in action.template_params]
                 return parsed.actions
             except Exception as retry_err:
                 if attempt < max_retries - 1:
