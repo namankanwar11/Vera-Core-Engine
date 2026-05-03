@@ -50,14 +50,14 @@ async def security_middleware(request: Request, call_next):
 templates = Jinja2Templates(directory="templates")
 
 METADATA = {
-    "team_name": "Vera-Core-90Plus-FINAL-v3",
+    "team_name": "Vera-Core-90Plus-FINAL-v4-SMART",
     "team_members": ["Naman Solo"],
     "model": "cerebras/llama3.1-8b",
-    "approach": "FastAPI + litellm orchestrator with context pruning, dynamic few-shot anchors, and anti-hype constraints",
+    "approach": "Hybrid 4-Gate Architecture: (1) Hard Stop, (2) Loop Kill, (3) Role persona, (4) Data-Rich Mock Fallback",
     "contact_email": "namankanwar11@gmail.com",
-    "version": "v1.3-extreme",
-    "engine": "Vera-Core-V3",
-    "submitted_at": "2026-05-01T12:00:00Z"
+    "version": "v4.0-resilient",
+    "engine": "Vera-Core-V4",
+    "submitted_at": "2026-05-03T12:00:00Z"
 }
 
 @app.get("/", response_class=HTMLResponse)
@@ -236,21 +236,25 @@ async def process_reply(req: ReplyRequest):
     # ---------------------------------------------------------
     # GATE 3: ROLE-BASED LLM BRANCHING
     # ---------------------------------------------------------
-    auto_reply_tracker[conv_id] = 0 # Reset on human message
-    
+    # --- TECH LEAD PATCH: NUCLEAR IDENTITY ---
+    # Fetch merchant context and ensure we NEVER use "Partner"
+    merchant = await store.get_context("merchant", req.merchant_id) or {}
+    biz_name = merchant.get("business_name") or merchant.get("name") or "this business"
+    owner_name = merchant.get("owner_name") or f"Team {biz_name}"
+
     if req.from_role == "customer":
         system_instructions = f"""
-        You are Vera, the warm Front-Desk Manager for {merchant.get('business_name', 'this business')}. 
+        You are Vera, the warm Front-Desk Manager for {biz_name}. 
         You are talking to a CUSTOMER. 
         1. NO GENERIC FILLERS: Never say "I've noted your preference".
-        2. ECHO LOGIC: If they mention a time/date, repeat it exactly: "Confirmed! We've saved your slot for [Time] at {merchant.get('business_name')}."
-        3. BRANDING: Always mention the business name. 
+        2. ECHO LOGIC: If they mention a time/date, repeat it exactly: "Confirmed! We've saved your slot for [Time] at {biz_name}."
+        3. BRANDING: Always mention the business name ({biz_name}). 
         Return action="send".
         """
     else:
         system_instructions = f"""
-        You are Vera, a Peer-Level Business Consultant. 
-        You are talking to the MERCHANT OWNER ({merchant.get('owner_name', 'Partner')}). 
+        You are Vera, a Peer-Level Business Consultant for {biz_name}. 
+        You are talking to the MERCHANT OWNER ({owner_name}). 
         1. HYPER-SPECIFICITY: If the owner mentions a specific tool or detail (e.g. "D-speed film unit"), your reply MUST address that specific item.
         2. CONSULTATIVE TONE: Don't just pitch upgrades. Acknowledge their current setup first.
         3. DATA-DRIVEN: Use details from their category context.
