@@ -30,9 +30,9 @@ class MemoryStateStore:
         }
         self._load_from_disk()
 
-    def _save_state(self):
+    async def _save_state(self):
+        """Save state to disk in a background thread to avoid blocking the event loop."""
         try:
-            # Pydantic-aware serialization
             def serialize(obj):
                 if hasattr(obj, "model_dump"):
                     return obj.model_dump()
@@ -41,11 +41,15 @@ class MemoryStateStore:
             serializable_data = {
                 "data": self.data,
                 "metrics": self.metrics,
-                "events": self.events
+                "events": self.events,
+                "conversation_states": self.conversation_states
             }
             
-            with open(STATE_FILE, "w") as f:
-                json.dump(serializable_data, f, default=serialize)
+            def do_write():
+                with open(STATE_FILE, "w") as f:
+                    json.dump(serializable_data, f, default=serialize)
+            
+            await asyncio.to_thread(do_write)
         except Exception as e:
             logger.error(f"Failed to save state: {e}")
 
@@ -64,7 +68,7 @@ class MemoryStateStore:
         self.events.append(f"[{timestamp}] {message}")
         if len(self.events) > 15:
             self.events.pop(0)
-        self._save_state()
+        asyncio.create_task(self._save_state())
 
     def get_uptime(self) -> int:
         return int(time.time() - self.start_time)
@@ -89,7 +93,7 @@ class MemoryStateStore:
                 "version": version,
                 "payload": payload
             }
-            self._save_state()
+            await self._save_state()
             return True, False, version
 
     async def get_context(self, scope: str, context_id: str) -> Any:
@@ -101,7 +105,7 @@ class MemoryStateStore:
 
     def report_score(self, metrics: Dict[str, Any]):
         self.metrics.update(metrics)
-        self._save_state()
+        asyncio.create_task(self._save_state())
 
     def track_reply(self, conversation_id: str, message: str) -> int:
         """Track message repetitions. Returns count of identical consecutive messages."""
