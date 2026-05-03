@@ -187,17 +187,17 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
 
     # Context-Aware High-Impact Hooks (Consultant Tone)
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). I was reviewing the latest {category_slug} safety mandates for {locality}. To keep {merchant_name} 100% compliant and protect your {merchant.get('rating', '4.5')} stars, I've prepared an audit checklist. Should I share it?{metric}"
-        rat, cta = "Regulatory compliance + risk mitigation", "Get Audit Checklist"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). DCI safety mandates for {locality} just shifted. To protect your {merchant.get('rating', '4.5')} stars and avoid the {p.get('fine_amount', '₹5,000')} penalty, shall I activate your digital compliance shield right now?{metric}"
+        rat, cta = "Immediate compliance activation", "Activate Shield Now"
     elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill", "loyalty"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). We're seeing a surge in local {category_slug} interest across {locality} (Source: Market Analytics). It's the perfect time to re-engage your customers at {merchant_name}. Should I send a 'VIP Preview' invite?{metric}"
-        rat, cta = "Retention-focused winback", "Send VIP Invites"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). We're seeing a surge in {category_slug} intent in {locality}. To capture this before the weekend, shall I push your 'VIP Winback' campaign live for you immediately?{metric}"
+        rat, cta = "Instant winback activation", "Push Winback Live"
     elif any(k in t_id for k in ["competitor", "market", "opened", "spike"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). Market shifts in {locality} are creating a new opportunity for {merchant_name}. To protect your {merchant.get('rating', '4.5')}-star ranking and capture this traffic, shall I help you activate a visibility boost?{metric}"
-        rat, cta = "Competitor/Market response logic", "Protect My Share"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). A competitor shift in {locality} is threatening your market share. To lock in your {merchant.get('rating', '4.5')}-star visibility, shall I activate a 24h 'Trust Boost' for {merchant_name} now?{metric}"
+        rat, cta = "Defensive visibility boost", "Activate Boost"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). I've spotted a localized growth opportunity for {merchant_name} based on recent {category_slug} trends in {locality}. Should we take action to secure your momentum?{metric}"
-        rat, cta = "General growth opportunity", "Show Growth Plan"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). I've spotted a growth surge for {category_slug} in {locality}. Shall I push your 'Market Leader' update live to capture this momentum?{metric}"
+        rat, cta = "Momentum-based activation", "Go Live Now"
     
     return [
         ActionModel(
