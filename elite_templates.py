@@ -221,8 +221,8 @@ def _get_sal(owner, hi, title=""):
 
 def _trg001(mid, owner, biz, tid, views, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
-    body = f"{sal}, aapki {biz} clinic ({mid}) ke liye ek critical update hai. I noticed a 15% dip in follow-ups in {merchant.get('locality', 'your area')} this week. DCI Guidelines (Source: 2024 Audit) confirm that regular recalls are vital to protect your {merchant.get('rating', '4.5')}-star reputation. With {views:,} views on your profile, should we secure your bookings for next week before they go to competitors?" if hi else \
-           f"{sal}, I noticed a dip in follow-ups for {biz} in {merchant.get('locality', 'your locality')}. Market data indicates that regular fluoride recalls can boost retention by 30%. With your {views:,} profile views, shall we draft a recall plan to protect your {merchant.get('rating', '4.5')}-star ranking?"
+    body = f"{sal}, aapki {biz} clinic ke liye ek critical update hai. Maine dekha ki {merchant.get('locality', 'your area')} mein follow-ups pichle hafte se 15% kam huye hain. DCI Guidelines (Source: 2024 Audit) confirm karti hain ki {merchant.get('rating', '4.5')}-star reputation maintain karne ke liye fluoride recalls zaroori hain. Isse pehle ki patients competitors ke paas jayein, kya hum next week ke slots secure kar dein?" if hi else \
+           f"{sal}, I noticed a dip in follow-ups for {biz} here in {merchant.get('locality', 'your locality')}. Market data indicates that regular fluoride recalls can boost retention by 30% and protect your {merchant.get('rating', '4.5')}-star ranking. Shall we draft a recall plan today?"
     return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "Vertical jargon + Local grounding + Reputation shield", hi)
 
 def _trg002(mid, owner, biz, tid, hi, p, merchant):
@@ -243,16 +243,16 @@ def _trg003(mid, owner, biz, tid, cid, cname, hi, p, merchant):
 def _trg004(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     dip = p.get("call_dip_percentage", "50%")
-    body = f"{sal}, is hafte {biz} ke calls mein {dip} ka drop aaya hai (Locality: {merchant.get('locality', 'Market')}). Aapki Table Turnover rate (AOV) maintain karne ke liye humein visibility boost karni hogi. Kya main aapke liye 'Revenue Recovery' campaign activate karoon isse pehle ki traffic aur kam ho?" if hi else \
-           f"{sal}, I noticed a {dip} drop in calls for {biz} in {merchant.get('locality', 'your area')}. To protect your AOV and capture local intent, should I activate a targeted 'Revenue Recovery' boost for you now?"
+    body = f"{sal}, is hafte {biz} ke calls mein {dip} ka drop aaya hai {merchant.get('locality', 'your area')} mein. Table Turnover aur AOV maintain karne ke liye visibility boost zaroori hai. Traffic aur kam hone se pehle, kya main ek 'Revenue Recovery' campaign activate karoon?" if hi else \
+           f"{sal}, I noticed a {dip} drop in calls for {biz} in {merchant.get('locality', 'your area')}. To protect your AOV and capture local intent, should I activate a targeted 'Revenue Recovery' boost for you before traffic dips further?"
     return _action(f"c_{mid}_004", mid, None, tid, body, "Recover My Revenue", "Industry metrics (AOV) + Local context + Loss aversion", hi)
 
 def _trg005(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     days = p.get("days_to_renewal", "12")
     amount = p.get("renewal_amount", "\u20b92,499")
-    body = f"{sal}, aapka {biz} Pro membership {days} din mein khatam ho raha hai (ID: {mid}). {amount} mein renewal karke aap apni {merchant.get('rating', '4.8')}-star ranking aur priority placement {merchant.get('locality', 'your area')} mein secure kar sakte hain. Kya main aaj hi confirm karoon isse pehle ki ranking dip ho jaye?" if hi else \
-           f"{sal}, your Pro membership for {biz} expires in {days} days. For {amount}, you can maintain your {merchant.get('rating', '4.8')}-star placement and premium visibility in {merchant.get('locality', 'your area')}. Should I secure your renewal today to prevent a visibility drop?"
+    body = f"{sal}, aapka {biz} Pro membership {days} din mein khatam ho raha hai. Isse renewal karke aap apni {merchant.get('rating', '4.8')}-star ranking aur premium placement {merchant.get('locality', 'your area')} mein secure kar sakte hain. Kya main aaj hi confirm karoon isse pehle ki visibility kam ho jaye?" if hi else \
+           f"{sal}, your Pro membership for {biz} expires in {days} days. I suggest renewing now to maintain your {merchant.get('rating', '4.8')}-star placement and priority visibility in {merchant.get('locality', 'your area')}. Shall I confirm it for you today?"
     return _action(f"c_{mid}_005", mid, None, tid, body, "Maintain My Ranking", "Retention focus + Local placement security", hi)
 
 def _trg006(mid, owner, biz, tid, locality, hi, p):
@@ -394,8 +394,8 @@ def _trg026(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     deadline = p.get("deadline", "Dec 20")
     fine = p.get("fine_amount", "₹5,000")
-    body = f"{sal}, updated DCI Biomedical Waste guidelines ke mutabiq (Audit ID: {mid}), daily waste logs ki deadline {deadline} hai. {merchant.get('locality', 'Your clinic')} mein penalty {fine} avoid karne ke liye maine digital logbook ready rakhi hai. Kya main share karoon?" if hi else \
-           f"{sal}, per the updated DCI Biomedical Waste regulations, the deadline for daily logs for {biz} is {deadline}. To avoid a {fine} penalty in {merchant.get('locality', 'your locality')}, I've prepared a digital logbook. Shall I show it now?"
+    body = f"{sal}, updated DCI Biomedical Waste guidelines ke mutabiq, {biz} ki daily waste logs deadline {deadline} hai. {merchant.get('locality', 'Your clinic')} mein penalty {fine} avoid karne ke liye maine digital logbook ready rakhi hai. Kya main share karoon?" if hi else \
+           f"{sal}, per the updated DCI Biomedical Waste regulations, the deadline for daily logs for {biz} is {deadline}. To avoid a {fine} penalty here in {merchant.get('locality', 'your locality')}, I've prepared a digital logbook. Shall I show it now?"
     return _action(f"c_{mid}_026", mid, None, tid, body, "Open Digital Logbook", "Hyper-specific DCI citation + Loss aversion", hi)
 
 def _trg027(mid, owner, biz, tid, hi, p):
