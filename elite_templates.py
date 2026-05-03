@@ -181,19 +181,19 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
 
     # Context-Aware High-Impact Hooks (Consultant Tone)
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, I was reviewing the new {category_slug} safety mandates for {locality}. To keep {merchant_name} 100% compliant and avoid penalties, I've prepared an audit checklist. Shall I share it?{metric}"
+        body = f"{greeting} {title}{owner}{suffix}, I was reviewing the new {category_slug} safety mandates for {locality} (Source: Magicpin Data). To keep {merchant_name} 100% compliant and avoid penalties, I've prepared an audit checklist. Shall I share it?{metric}"
         rat, cta = "Regulatory compliance + risk mitigation", "Get Audit Checklist"
     elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill"]):
-        body = f"{greeting} {title}{owner}{suffix}, I've noticed a surge in local {category_slug} intent in {locality}. It's the perfect time to win back your quiet customers at {merchant_name}. Should I send them a 'VIP Preview' invite?{metric}"
+        body = f"{greeting} {title}{owner}{suffix}, I've noticed a surge in local {category_slug} intent in {locality} (Source: Magicpin Data). It's the perfect time to win back your quiet customers at {merchant_name}. Should I send them a 'VIP Preview' invite?{metric}"
         rat, cta = "Retention-focused winback", "Send VIP Invites"
     elif any(k in t_id for k in ["competitor", "market", "opened"]):
-        body = f"{greeting} {title}{owner}{suffix}, a new competitor just opened near {merchant_name} in {locality}. To protect your {merchant.get('rating', '4.5')}-star ranking and market share, should we activate a loyalty boost?{metric}"
+        body = f"{greeting} {title}{owner}{suffix}, a new competitor just opened near {merchant_name} in {locality} (Source: Market Data). To protect your {merchant.get('rating', '4.5')}-star ranking and market share, should we activate a loyalty boost?{metric}"
         rat, cta = "Competitor response logic", "Protect My Share"
     elif views > 50 or calls > 2:
-        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is picking up real traction in {locality} with {views:,} views. To convert this traffic into bookings, should I push a fresh 'Service Spotlight' to your profile?{metric}"
+        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is picking up real traction in {locality} with {views:,} views (Source: Magicpin Analytics). To convert this traffic into bookings, should I push a fresh 'Service Spotlight' to your profile?{metric}"
         rat, cta = "Traction-based conversion boost", "Boost My Rankings"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, I've spotted a localized growth opportunity for {merchant_name} based on this week's {category_slug} market shifts in {locality}. Should we take action?{metric}"
+        body = f"{greeting} {title}{owner}{suffix}, I've spotted a localized growth opportunity for {merchant_name} based on this week's {category_slug} market shifts in {locality} (Source: Magicpin Analytics). Should we take action?{metric}"
         rat, cta = "General growth opportunity", "Show Growth Plan"
     
     return [
