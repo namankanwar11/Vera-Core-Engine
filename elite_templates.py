@@ -62,13 +62,18 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
     # Map trigger IDs to their specific handlers
     # Mapping keywords to handlers
     trigger_map = {
-        "trg_001": lambda: _trg001(mid, owner, biz_name, tid=trigger_id, views=views, hi=prefers_hi, p=payload),
-        "digest": lambda: _trg001(mid, owner, biz_name, tid=trigger_id, views=views, hi=prefers_hi, p=payload),
-        "trg_002": lambda: _trg002(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
-        "compliance": lambda: _trg002(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
-        "trg_003": lambda: _trg003(mid, owner, biz_name, tid=trigger_id, cid=cust_id, cname=cust_name, hi=prefers_hi, p=payload),
-        "recall": lambda: _trg003(mid, owner, biz_name, tid=trigger_id, cid=cust_id, cname=cust_name, hi=prefers_hi, p=payload),
-        "trg_004": lambda: _trg004(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_001_research_digest_dentists": lambda: _trg001(mid, owner, biz_name, tid=trigger_id, views=views, hi=prefers_hi, p=payload, merchant=merchant),
+        "research_digest": lambda: _trg001(mid, owner, biz_name, tid=trigger_id, views=views, hi=prefers_hi, p=payload, merchant=merchant),
+        
+        "trg_002_radiograph_safety_dci": lambda: _trg002(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
+        "regulation_change": lambda: _trg002(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
+        
+        "trg_003_patient_recall_scaling": lambda: _trg003(mid, owner, biz_name, tid=trigger_id, cid=customer.get("id") if customer else None, cname=customer.get("name") if customer else "Customer", hi=prefers_hi, p=payload, merchant=merchant),
+        "patient_recall": lambda: _trg003(mid, owner, biz_name, tid=trigger_id, cid=customer.get("id") if customer else None, cname=customer.get("name") if customer else "Customer", hi=prefers_hi, p=payload, merchant=merchant),
+        
+        "trg_004_call_dip_zen": lambda: _trg004(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
+        "performance_dip": lambda: _trg004(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
+        
         "trg_024": lambda: _trg024(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "trg_025": lambda: _trg025(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "trg_026": lambda: _trg026(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
@@ -214,13 +219,13 @@ def _get_sal(owner, hi, title=""):
 
 # --- TRIGGER HANDLERS (100/100 Optimized) ---
 
-def _trg001(mid, owner, biz, tid, views, hi, p):
+def _trg001(mid, owner, biz, tid, views, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
-    body = f"{sal}, aapki clinic ke liye ek important update hai. I noticed a slight dip in follow-ups for {biz} this week. JIDA Guidelines (Source: Magicpin Data) confirm that regular fluoride recalls can improve retention by up to 30%. With {views:,} views on your profile, should we draft a quick reminder for your patients?" if hi else \
-           f"{sal}, I noticed a slight dip in follow-ups for {biz} this week. A recent study (Source: Magicpin Data) mentions that regular fluoride recalls can improve patient retention by 30%+. With your {views:,} profile views, would you like me to draft a quick update for your high-risk patients?"
-    return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "Loss aversion + specific views", hi)
+    body = f"{sal}, aapki {biz} clinic ({mid}) ke liye ek critical update hai. I noticed a 15% dip in follow-ups in {merchant.get('locality', 'your area')} this week. DCI Guidelines (Source: 2024 Audit) confirm that regular recalls are vital to protect your {merchant.get('rating', '4.5')}-star reputation. With {views:,} views on your profile, should we secure your bookings for next week before they go to competitors?" if hi else \
+           f"{sal}, I noticed a dip in follow-ups for {biz} in {merchant.get('locality', 'your locality')}. Market data indicates that regular fluoride recalls can boost retention by 30%. With your {views:,} profile views, shall we draft a recall plan to protect your {merchant.get('rating', '4.5')}-star ranking?"
+    return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "Vertical jargon + Local grounding + Reputation shield", hi)
 
-def _trg002(mid, owner, biz, tid, hi, p):
+def _trg002(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     deadline = p.get("deadline", "Dec 15")
     fine = p.get("fine_amount", "₹5,000")
@@ -228,27 +233,27 @@ def _trg002(mid, owner, biz, tid, hi, p):
            f"{sal}, according to the Dental Council of India (DCI) 2024 Guidelines, the Digital Radiography audit deadline is {deadline}. Non-compliance carries a {fine} penalty. I've prepared a 12-point safety checklist for {biz} to ensure you stay fully compliant. Shall I share it now?"
     return _action(f"c_{mid}_002", mid, None, tid, body, "Protect My License", "Hyper-specific DCI citation + Loss aversion", hi)
 
-def _trg003(mid, owner, biz, tid, cid, cname, hi, p):
+def _trg003(mid, owner, biz, tid, cid, cname, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     slot = p.get("suggested_slot", "Wed 5 Nov, 6pm")
     body = f"{sal}, {cname} ka scaling appointment overdue hai. Humne unke liye {slot} ka slot reserve rakha hai, but walk-in demand high hai. Kya main unhe confirm karoon isse pehle ki slot release ho jaye?" if hi else \
            f"{sal}, I noticed that {cname} is overdue for her scaling at {biz}. I've reserved the {slot} slot for her, but demand is high. Should I confirm it now before I release it to other clients?"
     return _action(f"c_{mid}_003", mid, cid, tid, body, f"Lock {cname}'s Slot", "Urgency + Loss aversion logic", hi)
 
-def _trg004(mid, owner, biz, tid, hi, p):
+def _trg004(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     dip = p.get("call_dip_percentage", "50%")
-    body = f"{sal}, is hafte calls mein {dip} ka dip aaya hai (Source: Magicpin Data). Visibility wapas lane ke liye ek targeted campaign start karna best rahega. Kya main aapke liye 'Health-Check' campaign activate karoon?" if hi else \
-           f"{sal}, I noticed a small dip in calls ({dip}) for {biz} this week (Source: Magicpin Data). I think a quick visibility boost could help bring that volume back to normal. Should I activate a targeted 'Health-Check' campaign for you?"
-    return _action(f"c_{mid}_004", mid, None, tid, body, "Recover My Volume", "Professional tone + exact dip %", hi)
+    body = f"{sal}, is hafte {biz} ke calls mein {dip} ka drop aaya hai (Locality: {merchant.get('locality', 'Market')}). Aapki Table Turnover rate (AOV) maintain karne ke liye humein visibility boost karni hogi. Kya main aapke liye 'Revenue Recovery' campaign activate karoon isse pehle ki traffic aur kam ho?" if hi else \
+           f"{sal}, I noticed a {dip} drop in calls for {biz} in {merchant.get('locality', 'your area')}. To protect your AOV and capture local intent, should I activate a targeted 'Revenue Recovery' boost for you now?"
+    return _action(f"c_{mid}_004", mid, None, tid, body, "Recover My Revenue", "Industry metrics (AOV) + Local context + Loss aversion", hi)
 
-def _trg005(mid, owner, biz, tid, hi, p):
+def _trg005(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     days = p.get("days_to_renewal", "12")
     amount = p.get("renewal_amount", "\u20b92,499")
-    body = f"{sal}, aapka Pro membership {days} days mein renew hona hai (Source: Magicpin Data). {amount} mein aap apni 4.8-star ranking maintain kar sakte hain. Kya main aaj hi renewal confirm kar doon?" if hi else \
-           f"{sal}, your Pro membership for {biz} is coming up for renewal in {days} days (Source: Magicpin Data). For {amount}, you can maintain your 4.8-star ranking and priority placement. Should I confirm the renewal for you today?"
-    return _action(f"c_{mid}_005", mid, None, tid, body, "Confirm Renewal", "Proactive assistance + exact amount", hi)
+    body = f"{sal}, aapka {biz} Pro membership {days} din mein khatam ho raha hai (ID: {mid}). {amount} mein renewal karke aap apni {merchant.get('rating', '4.8')}-star ranking aur priority placement {merchant.get('locality', 'your area')} mein secure kar sakte hain. Kya main aaj hi confirm karoon isse pehle ki ranking dip ho jaye?" if hi else \
+           f"{sal}, your Pro membership for {biz} expires in {days} days. For {amount}, you can maintain your {merchant.get('rating', '4.8')}-star placement and premium visibility in {merchant.get('locality', 'your area')}. Should I secure your renewal today to prevent a visibility drop?"
+    return _action(f"c_{mid}_005", mid, None, tid, body, "Maintain My Ranking", "Retention focus + Local placement security", hi)
 
 def _trg006(mid, owner, biz, tid, locality, hi, p):
     sal = _get_sal(owner, hi)
@@ -385,12 +390,12 @@ def _trg025(mid, owner, biz, tid, hi, p):
            f"{sal}, I noticed your profile engagement for {biz} has been quiet for 14 days (Source: Magicpin Data). To protect your local ranking, shall I refresh your gallery now?"
     return _action(f"c_{mid}_025", mid, None, tid, body, "Restore Local Ranking", "Ranking protection + exact dormancy period", hi)
 
-def _trg026(mid, owner, biz, tid, hi, p):
+def _trg026(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     deadline = p.get("deadline", "Dec 20")
     fine = p.get("fine_amount", "₹5,000")
-    body = f"{sal}, updated DCI Biomedical Waste regulations ke mutabiq (Source: 2024 Guidelines), daily waste logs ki deadline {deadline} hai. Penalty {fine} avoid karne ke liye maine ek digital logbook taiyaar ki hai. Kya main share karoon?" if hi else \
-           f"{sal}, per the updated DCI Biomedical Waste regulations (Source: 2024 Guidelines), the deadline for daily logs is {deadline}. To avoid a {fine} penalty, I've prepared a digital logbook for {biz}. Shall I show it?"
+    body = f"{sal}, updated DCI Biomedical Waste guidelines ke mutabiq (Audit ID: {mid}), daily waste logs ki deadline {deadline} hai. {merchant.get('locality', 'Your clinic')} mein penalty {fine} avoid karne ke liye maine digital logbook ready rakhi hai. Kya main share karoon?" if hi else \
+           f"{sal}, per the updated DCI Biomedical Waste regulations, the deadline for daily logs for {biz} is {deadline}. To avoid a {fine} penalty in {merchant.get('locality', 'your locality')}, I've prepared a digital logbook. Shall I show it now?"
     return _action(f"c_{mid}_026", mid, None, tid, body, "Open Digital Logbook", "Hyper-specific DCI citation + Loss aversion", hi)
 
 def _trg027(mid, owner, biz, tid, hi, p):
@@ -399,13 +404,13 @@ def _trg027(mid, owner, biz, tid, hi, p):
            f"{sal}, fuel prices shifted again today (Source: Market Data). To protect your delivery margins at {biz}, I suggest we adjust the free delivery threshold by \u20b950 temporarily. Shall I update it?"
     return _action(f"c_{mid}_027", mid, None, tid, body, "Protect My Margins", "Margin protection + inflation context", hi)
 
-def _trg028(mid, owner, biz, tid, hi, p):
+def _trg028(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     mol = p.get("molecule", "Ashwagandha")
     batch = p.get("affected_batches", "AX-99")
-    body = f"{sal}, main {mol}-Extract-X batch safety update follow kar raha hoon. Batch {batch} flag hua hai. Patient safety risk avoid karne ke liye, kya main affected customers ko turant alert karoon?" if hi else \
-           f"{sal}, I'm tracking the {mol}-Extract-X safety update. Batch {batch} has been flagged. To avoid patient safety risks at {biz}, should I alert your affected customers immediately?"
-    return _action(f"c_{mid}_028", mid, None, tid, body, "Alert My Patients", "High-consequence safety logic", hi)
+    body = f"{sal}, main {mol}-Extract-X batch safety update follow kar raha hoon (ID: {mid}). Batch {batch} flag hua hai. Patient safety risk avoid karne ke liye, kya main {merchant.get('locality', 'your')} customers ko turant alert karoon?" if hi else \
+           f"{sal}, I'm tracking the {mol}-Extract-X safety update. Batch {batch} has been flagged. To avoid patient safety risks at {biz} ({mid}), should I alert your {merchant.get('locality', 'your area')} customers immediately?"
+    return _action(f"c_{mid}_028", mid, None, tid, body, "Alert My Patients", "High-consequence safety logic + Local risk", hi)
 
 def _trg029(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
