@@ -218,7 +218,7 @@ def _trg001(mid, owner, biz, tid, views, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     body = f"{sal}, aapki clinic ke liye ek important update hai. I noticed a slight dip in follow-ups for {biz} this week. JIDA Guidelines (Source: Magicpin Data) confirm that regular fluoride recalls can improve retention by up to 30%. With {views:,} views on your profile, should we draft a quick reminder for your patients?" if hi else \
            f"{sal}, I noticed a slight dip in follow-ups for {biz} this week. A recent study (Source: Magicpin Data) mentions that regular fluoride recalls can improve patient retention by 30%+. With your {views:,} profile views, would you like me to draft a quick update for your high-risk patients?"
-    return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "High-intent CTA + specific views", hi)
+    return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "Loss aversion + specific views", hi)
 
 def _trg002(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -231,9 +231,9 @@ def _trg002(mid, owner, biz, tid, hi, p):
 def _trg003(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     slot = p.get("suggested_slot", "Wed 5 Nov, 6pm")
-    body = f"{sal}, {cname} ka scaling appointment overdue hai (Source: Magicpin Data). Humne unke liye {slot} ka slot reserve rakha hai. Kya main unhe ek special confirmation message bhejoon?" if hi else \
-           f"{sal}, I noticed that {cname} is slightly overdue for her scaling at {biz} (Source: Magicpin Data). We have a priority slot for {slot} reserved. Would you like me to send her a quick reminder to confirm?"
-    return _action(f"c_{mid}_003", mid, cid, tid, body, f"Book {cname} Now", "Peer clinical tone + exact slot", hi)
+    body = f"{sal}, {cname} ka scaling appointment overdue hai. Humne unke liye {slot} ka slot reserve rakha hai, but walk-in demand high hai. Kya main unhe confirm karoon isse pehle ki slot release ho jaye?" if hi else \
+           f"{sal}, I noticed that {cname} is overdue for her scaling at {biz}. I've reserved the {slot} slot for her, but demand is high. Should I confirm it now before I release it to other clients?"
+    return _action(f"c_{mid}_003", mid, cid, tid, body, f"Lock {cname}'s Slot", "Urgency + Loss aversion logic", hi)
 
 def _trg004(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -403,9 +403,9 @@ def _trg028(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     mol = p.get("molecule", "Ashwagandha")
     batch = p.get("affected_batches", "AX-99")
-    body = f"{sal}, main {mol}-Extract-X batch safety update follow kar raha hoon (Source: Industry Notice). Batch {batch} flag hua hai. Maine patients ke liye ek draft taiyaar kiya hai. Kya main share karoon?" if hi else \
-           f"{sal}, I'm following the {mol}-Extract-X batch safety update (Source: Industry Notice). Batch {batch} has been flagged. I've prepared a safety draft for your customers at {biz}. Shall I show it?"
-    return _action(f"c_{mid}_028", mid, None, tid, body, "Protect My Customers", "Patient safety + exact batch info", hi)
+    body = f"{sal}, main {mol}-Extract-X batch safety update follow kar raha hoon. Batch {batch} flag hua hai. Patient safety risk avoid karne ke liye, kya main affected customers ko turant alert karoon?" if hi else \
+           f"{sal}, I'm tracking the {mol}-Extract-X safety update. Batch {batch} has been flagged. To avoid patient safety risks at {biz}, should I alert your affected customers immediately?"
+    return _action(f"c_{mid}_028", mid, None, tid, body, "Alert My Patients", "High-consequence safety logic", hi)
 
 def _trg029(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
