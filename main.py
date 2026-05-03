@@ -24,6 +24,11 @@ from elite_templates import _mock_compose as mock_compose
 
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 
+# --- TECH LEAD PATCH: Memory Hack for Auto-Reply Hell ---
+from collections import defaultdict
+auto_reply_tracker = defaultdict(int)
+CANNED_PHRASES = ["i am away", "out of office", "automated message", "not available right now", "will get back to you", "i'm busy", "driving now"]
+
 app = FastAPI(title="Vera Message Engine API")
 logger = logging.getLogger("uvicorn.error")
 
@@ -197,39 +202,75 @@ async def process_tick(req: TickRequest):
 
 @app.post("/v1/reply")
 async def process_reply(req: ReplyRequest):
-    msg = req.message.lower()
-    
-    # 1. HARD TERMINATION (STOP/Hostile)
-    stops = ["stop", "unsubscribe", "quit", "end", "fuck", "spam", "useless", "shut up"]
-    if any(s in msg for s in stops):
+    message_text = req.message.lower()
+    conv_id = req.conversation_id
+
+    # ---------------------------------------------------------
+    # GATE 1: HARD STOPS (Immediate Action: End)
+    # ---------------------------------------------------------
+    stops = ["stop", "unsubscribe", "cancel", "quit", "end", "don't message me"]
+    if any(s in message_text for s in stops):
         return JSONResponse(
-            content=jsonable_encoder(ReplyResponse(action="end", rationale="Hard-coded termination")),
-            media_type="application/json; charset=utf-8"
-        )
-        
-    # 2. AUTO-REPLY & REPETITION CAP
-    autos = ["driving", "automated", "busy", "talk later", "auto-reply", "out of office", "automated message", "can't talk right now"]
-    rep_count = store.track_reply(req.conversation_id, req.message)
-    
-    if any(a in msg for a in autos) or rep_count > 2:
-        store.add_event(f"Auto-reply/Repetition detected: {rep_count} turns. Terminating.")
-        return JSONResponse(
-            content=jsonable_encoder(ReplyResponse(action="end", rationale=f"Auto-reply or repetition ({rep_count}) detected")),
+            content=jsonable_encoder(ReplyResponse(action="end", rationale="User-requested STOP")),
             media_type="application/json; charset=utf-8"
         )
 
-    # 3. CONTEXT-AWARE REPLY
-    # Extract merchant_id from conversation_id (format: c_m_001_...)
-    parts = req.conversation_id.split("_")
-    merchant_id = "m_001" # Default
+    # ---------------------------------------------------------
+    # GATE 2: AUTO-REPLY "TWO-STRIKE" RULE
+    # ---------------------------------------------------------
+    is_auto_reply = any(phrase in message_text for phrase in CANNED_PHRASES)
+    if is_auto_reply:
+        auto_reply_tracker[conv_id] += 1
+        if auto_reply_tracker[conv_id] <= 2:
+            return JSONResponse(
+                content=jsonable_encoder(ReplyResponse(action="wait", rationale="Wait on auto-reply strike 1/2")),
+                media_type="application/json; charset=utf-8"
+            )
+        else:
+            auto_reply_tracker[conv_id] = 0 # Reset
+            return JSONResponse(
+                content=jsonable_encoder(ReplyResponse(action="end", rationale="Auto-reply Hell (3rd Strike) Terminated")),
+                media_type="application/json; charset=utf-8"
+            )
+
+    # ---------------------------------------------------------
+    # GATE 3: ROLE-BASED LLM BRANCHING
+    # ---------------------------------------------------------
+    auto_reply_tracker[conv_id] = 0 # Reset on human message
+    
+    if req.from_role == "customer":
+        system_instructions = """
+        You are Vera, a warm, helpful assistant acting on behalf of the business. 
+        You are talking to a CUSTOMER. Keep responses concise and friendly. 
+        Always mention the business name. If they want to book, confirm and return action="send".
+        """
+    else:
+        system_instructions = """
+        You are Vera, a peer-level business assistant for the merchant.
+        You are talking to the MERCHANT OWNER. Provide data-driven insights.
+        Never use high-pressure sales tactics. Return action="send".
+        """
+
+    # ---------------------------------------------------------
+    # GATE 4: CONTEXT-AWARE LLM CALL
+    # ---------------------------------------------------------
+    parts = conv_id.split("_")
+    merchant_id = "m_001"
     if len(parts) >= 2:
         merchant_id = f"{parts[1]}_{parts[2]}" if len(parts) >= 3 else parts[1]
     
     merchant = await store.get_context("merchant", merchant_id) or {}
     
     async with semaphore:
-        reply = await handle_reply(req.conversation_id, req.message, req.turn_number, req.from_role, merchant)
-    return JSONResponse(
-        content=jsonable_encoder(reply),
-        media_type="application/json; charset=utf-8"
-    )
+        try:
+            reply = await handle_reply(conv_id, req.message, req.turn_number, req.from_role, merchant, system_instructions)
+            return JSONResponse(
+                content=jsonable_encoder(reply),
+                media_type="application/json; charset=utf-8"
+            )
+        except Exception as e:
+            logger.error(f"Gate 4 Error: {e}")
+            return JSONResponse(
+                content=jsonable_encoder(ReplyResponse(action="end", rationale="Fail-safe termination")),
+                media_type="application/json; charset=utf-8"
+            )

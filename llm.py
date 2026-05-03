@@ -24,7 +24,7 @@ class LLMReplyOutput(BaseModel):
     cta: str
     rationale: str
 
-async def handle_reply(conversation_id: str, message: str, turn_number: int, from_role: str = "merchant", merchant: dict = {}) -> ReplyResponse:
+async def handle_reply(conversation_id: str, message: str, turn_number: int, from_role: str = "merchant", merchant: dict = {}, system_prompt_override: str = None) -> ReplyResponse:
     from prompts import REPLY_SYSTEM_PROMPT, REPLY_TEMPLATE
     
     biz_name = merchant.get("business_name") or merchant.get("name") or "the business"
@@ -48,7 +48,7 @@ async def handle_reply(conversation_id: str, message: str, turn_number: int, fro
             api_key=api_key,
             base_url="https://api.cerebras.ai/v1",
             messages=[
-                {"role": "system", "content": REPLY_SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt_override or REPLY_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
             response_format={"type": "json_object"},
