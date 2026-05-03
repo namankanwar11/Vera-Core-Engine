@@ -280,3 +280,9 @@ async def process_reply(req: ReplyRequest):
                 content=jsonable_encoder(ReplyResponse(action="end", rationale="Fail-safe termination")),
                 media_type="application/json; charset=utf-8"
             )
+
+if __name__ == "__main__":
+    import uvicorn
+    print("\n--- VERA CORE ENGINE STARTING ---")
+    print("Local testing at http://localhost:8000")
+    uvicorn.run(app, host="0.0.0.0", port=8000)

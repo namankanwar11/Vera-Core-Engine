@@ -141,9 +141,9 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
         if key in tid_lower:
             return handler()
 
-    return _mock_compose(trigger_id, merchant, customer)
+    return _mock_compose(trigger_id, merchant, customer, payload)
 
-def _mock_compose(trigger_id, merchant, customer=None):
+def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     # Aggressive Identity Search
     owner = (merchant.get("owner_name") or 
              merchant.get("identity", {}).get("owner_first_name") or 
@@ -170,19 +170,30 @@ def _mock_compose(trigger_id, merchant, customer=None):
     suffix = " ji" if (greeting == "Namaste" and not is_south) else ""
     
     t_id = trigger_id.lower()
+    p = payload or {}
     
+    # Extract real data point for specificity
+    metric = ""
+    for k, v in p.items():
+        if any(x in k.lower() for x in ["count", "percentage", "amount", "views", "calls", "date"]):
+            metric = f" (Ref: {k.replace('_', ' ').title()} is {v})"
+            break
+
     # Context-Aware High-Impact Hooks (Consultant Tone)
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, I was reviewing the new {category_slug} safety mandates for {locality} (Source: Regulatory Board). To keep {merchant_name} 100% compliant and avoid penalties, I've prepared an audit checklist. Shall I share it?"
+        body = f"{greeting} {title}{owner}{suffix}, I was reviewing the new {category_slug} safety mandates for {locality}. To keep {merchant_name} 100% compliant and avoid penalties, I've prepared an audit checklist. Shall I share it?{metric}"
         rat, cta = "Regulatory compliance + risk mitigation", "Get Audit Checklist"
-    elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer"]):
-        body = f"{greeting} {title}{owner}{suffix}, I've noticed a surge in local {category_slug} intent in {locality} (Source: Magicpin Trends). It's the perfect time to win back your quiet customers at {merchant_name}. Should I send them a 'VIP Preview' invite?"
+    elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill"]):
+        body = f"{greeting} {title}{owner}{suffix}, I've noticed a surge in local {category_slug} intent in {locality}. It's the perfect time to win back your quiet customers at {merchant_name}. Should I send them a 'VIP Preview' invite?{metric}"
         rat, cta = "Retention-focused winback", "Send VIP Invites"
+    elif any(k in t_id for k in ["competitor", "market", "opened"]):
+        body = f"{greeting} {title}{owner}{suffix}, a new competitor just opened near {merchant_name} in {locality}. To protect your {merchant.get('rating', '4.5')}-star ranking and market share, should we activate a loyalty boost?{metric}"
+        rat, cta = "Competitor response logic", "Protect My Share"
     elif views > 50 or calls > 2:
-        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is picking up real traction in {locality} with {views:,} views (Source: Magicpin Data). To convert this traffic into bookings, should I push a fresh 'Service Spotlight' to your profile?"
+        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is picking up real traction in {locality} with {views:,} views. To convert this traffic into bookings, should I push a fresh 'Service Spotlight' to your profile?{metric}"
         rat, cta = "Traction-based conversion boost", "Boost My Rankings"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, I've spotted a localized growth opportunity for {merchant_name} based on this week's {category_slug} market shifts (Source: Magicpin Analytics). It looks like a great time to capture more traffic. Shall I show you the plan?"
+        body = f"{greeting} {title}{owner}{suffix}, I've spotted a localized growth opportunity for {merchant_name} based on this week's {category_slug} market shifts in {locality}. Should we take action?{metric}"
         rat, cta = "General growth opportunity", "Show Growth Plan"
     
     return [
