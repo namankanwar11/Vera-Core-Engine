@@ -18,6 +18,7 @@ class MemoryStateStore:
             "trigger": {},
             "customer": {}
         }
+        self.conversation_states: Dict[str, Dict[str, Any]] = {}
         self.start_time = time.time()
         self.events = []
         self.metrics = {
@@ -101,5 +102,17 @@ class MemoryStateStore:
     def report_score(self, metrics: Dict[str, Any]):
         self.metrics.update(metrics)
         self._save_state()
+
+    def track_reply(self, conversation_id: str, message: str) -> int:
+        """Track message repetitions. Returns count of identical consecutive messages."""
+        msg_norm = message.lower().strip()
+        state = self.conversation_states.get(conversation_id, {"last_msg": "", "count": 0})
+        if state["last_msg"] == msg_norm:
+            state["count"] += 1
+        else:
+            state["last_msg"] = msg_norm
+            state["count"] = 1
+        self.conversation_states[conversation_id] = state
+        return state["count"]
 
 store = MemoryStateStore()

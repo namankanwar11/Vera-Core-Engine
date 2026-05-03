@@ -210,16 +210,28 @@ async def process_reply(req: ReplyRequest):
             media_type="application/json; charset=utf-8"
         )
         
-    # 2. AUTO-REPLY CAP (Zero tolerance to satisfy judge skill test)
-    autos = ["driving", "automated", "busy", "talk later", "auto-reply"]
-    if any(a in msg for a in autos):
+    # 2. AUTO-REPLY & REPETITION CAP
+    autos = ["driving", "automated", "busy", "talk later", "auto-reply", "out of office", "automated message", "can't talk right now"]
+    rep_count = store.track_reply(req.conversation_id, req.message)
+    
+    if any(a in msg for a in autos) or rep_count > 2:
+        store.add_event(f"Auto-reply/Repetition detected: {rep_count} turns. Terminating.")
         return JSONResponse(
-            content=jsonable_encoder(ReplyResponse(action="end", rationale="Auto-reply terminated")),
+            content=jsonable_encoder(ReplyResponse(action="end", rationale=f"Auto-reply or repetition ({rep_count}) detected")),
             media_type="application/json; charset=utf-8"
         )
 
+    # 3. CONTEXT-AWARE REPLY
+    # Extract merchant_id from conversation_id (format: c_m_001_...)
+    parts = req.conversation_id.split("_")
+    merchant_id = "m_001" # Default
+    if len(parts) >= 2:
+        merchant_id = f"{parts[1]}_{parts[2]}" if len(parts) >= 3 else parts[1]
+    
+    merchant = await store.get_context("merchant", merchant_id) or {}
+    
     async with semaphore:
-        reply = await handle_reply(req.conversation_id, req.message, req.turn_number, req.from_role)
+        reply = await handle_reply(req.conversation_id, req.message, req.turn_number, req.from_role, merchant)
     return JSONResponse(
         content=jsonable_encoder(reply),
         media_type="application/json; charset=utf-8"
