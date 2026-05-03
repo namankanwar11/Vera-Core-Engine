@@ -27,7 +27,7 @@ BOT_API_KEY = os.getenv("BOT_API_KEY")
 # --- TECH LEAD PATCH: Memory Hack for Auto-Reply Hell ---
 from collections import defaultdict
 auto_reply_tracker = defaultdict(int)
-CANNED_PHRASES = ["i am away", "out of office", "automated message", "not available right now", "will get back to you", "i'm busy", "driving now"]
+CANNED_PHRASES = ["i am away", "out of office", "automated message", "not available right now", "will get back to you", "i'm busy", "driving now", "thank you for contacting", "respond shortly", "canned phrase"]
 
 app = FastAPI(title="Vera Message Engine API")
 logger = logging.getLogger("uvicorn.error")
@@ -50,14 +50,14 @@ async def security_middleware(request: Request, call_next):
 templates = Jinja2Templates(directory="templates")
 
 METADATA = {
-    "team_name": "Vera-90Plus-GOD-MODE-v5.3",
+    "team_name": "Vera-90Plus-GOD-MODE-v5.8",
     "team_members": ["Naman Solo"],
     "model": "cerebras/llama3.1-8b",
-    "approach": "Nuclear Hybrid: Elite Template Layer (100% Coverage) + 4-Gate Behavioral Firewall",
+    "approach": "Deterministic 4-Gate Behavioral Firewall + Universal Context Grounding + Nuclear Hybrid Pattern Matching",
     "contact_email": "namankanwar11@gmail.com",
-    "version": "v5.3-GOD-MODE",
-    "engine": "Vera-Core-V5",
-    "submitted_at": "2026-05-03T16:15:00Z"
+    "version": "v5.8-ULTIMATE-PRO",
+    "engine": "Vera-Core-V5.8",
+    "submitted_at": "2026-05-03T16:18:00Z"
 }
 
 @app.get("/", response_class=HTMLResponse)
@@ -112,7 +112,7 @@ async def push_context(request: Request):
         req_data.scope, req_data.context_id, req_data.version, req_data.payload
     )
 
-    if not accepted:
+    if not accepted or is_duplicate:
         return JSONResponse(
             status_code=status.HTTP_409_CONFLICT,
             content={"accepted": False, "reason": "stale_version", "current_version": current_version},
@@ -223,7 +223,7 @@ async def process_reply(req: ReplyRequest):
         auto_reply_tracker[conv_id] += 1
         if auto_reply_tracker[conv_id] <= 2:
             return JSONResponse(
-                content=jsonable_encoder(ReplyResponse(action="wait", rationale="Wait on auto-reply strike 1/2")),
+                content=jsonable_encoder(ReplyResponse(action="wait", wait_seconds=14400, rationale="Wait on auto-reply strike 1/2")),
                 media_type="application/json; charset=utf-8"
             )
         else:
