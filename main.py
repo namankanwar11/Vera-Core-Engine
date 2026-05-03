@@ -50,14 +50,14 @@ async def security_middleware(request: Request, call_next):
 templates = Jinja2Templates(directory="templates")
 
 METADATA = {
-    "team_name": "Vera-Core-90Plus-FINAL-v4-SMART",
-    "team_members": ["Naman Solo"],
+    "team_name": "Vera-90Plus-GOD-MODE-v5",
+    "team_members": ["Naman Kanwar"],
     "model": "cerebras/llama3.1-8b",
-    "approach": "Hybrid 4-Gate Architecture: (1) Hard Stop, (2) Loop Kill, (3) Role persona, (4) Data-Rich Mock Fallback",
+    "approach": "Nuclear Hybrid: Elite Template Layer (100% Coverage) + 4-Gate Behavioral Firewall",
     "contact_email": "namankanwar11@gmail.com",
-    "version": "v4.0-resilient",
-    "engine": "Vera-Core-V4",
-    "submitted_at": "2026-05-03T12:00:00Z"
+    "version": "v5.0-GOD-MODE",
+    "engine": "Vera-Core-V5",
+    "submitted_at": "2026-05-03T16:00:00Z"
 }
 
 @app.get("/", response_class=HTMLResponse)

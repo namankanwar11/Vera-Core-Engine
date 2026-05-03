@@ -36,7 +36,7 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
                     return v.split()[0].title()
         return None
 
-    owner = deep_hunt(merchant) or (biz_name.split()[0] if biz_name else "Business Manager")
+    owner = deep_hunt(merchant) or "Partner"
 
     locality = merchant.get("identity", {}).get("locality") or merchant.get("locality") or "your area"
     cat = merchant.get("category_slug") or category.get("slug") or "business"
@@ -144,7 +144,6 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
     return _mock_compose(trigger_id, merchant, customer, payload)
 
 def _mock_compose(trigger_id, merchant, customer=None, payload=None):
-    m_id = (merchant.get("id") or merchant.get("merchant_id") or "m_001")
     merchant_name = (merchant.get("business_name") or 
                      merchant.get("identity", {}).get("name") or 
                      merchant.get("name") or "your business")
@@ -162,7 +161,7 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     
     category_slug = merchant.get("category_slug", "business").lower()
     biz_name_lower = merchant_name.lower()
-    locality = str(merchant.get("locality", "") or merchant.get("identity", {}).get("locality", "")).lower() or "your area"
+    locality = str(merchant.get("locality", "")).lower()
     
     is_modern = any(k in biz_name_lower for k in ["cafe", "gym", "studio", "spa", "zen", "glamour"])
     is_south = any(k in locality for k in ["koramangala", "indiranagar", "hsr", "whitefield", "jayanagar"])
