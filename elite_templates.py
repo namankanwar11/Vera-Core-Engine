@@ -144,6 +144,11 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
     return _mock_compose(trigger_id, merchant, customer, payload)
 
 def _mock_compose(trigger_id, merchant, customer=None, payload=None):
+    m_id = (merchant.get("id") or 
+            merchant.get("merchant_id") or 
+            merchant.get("identity", {}).get("merchant_id") or 
+            "m_001")
+    
     merchant_name = (merchant.get("business_name") or 
                      merchant.get("identity", {}).get("name") or 
                      merchant.get("name") or "your business")
