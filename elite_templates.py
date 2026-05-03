@@ -221,8 +221,8 @@ def _get_sal(owner, hi, title=""):
 
 def _trg001(mid, owner, biz, tid, views, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
-    body = f"{sal}, aapki {biz} clinic ke liye ek critical update hai. Maine dekha ki {merchant.get('locality', 'your area')} mein follow-ups pichle hafte se 15% kam huye hain. DCI Guidelines (Source: 2024 Audit) confirm karti hain ki {merchant.get('rating', '4.5')}-star reputation maintain karne ke liye fluoride recalls zaroori hain. Isse pehle ki patients competitors ke paas jayein, kya hum next week ke slots secure kar dein?" if hi else \
-           f"{sal}, I noticed a dip in follow-ups for {biz} here in {merchant.get('locality', 'your locality')}. Market data indicates that regular fluoride recalls can boost retention by 30% and protect your {merchant.get('rating', '4.5')}-star ranking. Shall we draft a recall plan today?"
+    body = f"{sal}, I was just reviewing {biz}'s performance here in {merchant.get('locality', 'your area')}. Follow-ups have dipped slightly this week, but with your {merchant.get('rating', '4.5')}-star reputation, we can recover this quickly. DCI Guidelines (Source: 2024 Audit) suggest that regular recalls can boost retention by 30%. Should I draft a quick plan to secure your bookings for next week?" if hi else \
+           f"{sal}, I noticed a small dip in follow-ups for {biz} in {merchant.get('locality', 'your locality')}. To protect your {merchant.get('rating', '4.5')}-star ranking and boost retention, shall we draft a quick recall update today?"
     return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "Vertical jargon + Local grounding + Reputation shield", hi)
 
 def _trg002(mid, owner, biz, tid, hi, p, merchant):
@@ -243,8 +243,8 @@ def _trg003(mid, owner, biz, tid, cid, cname, hi, p, merchant):
 def _trg004(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
     dip = p.get("call_dip_percentage", "50%")
-    body = f"{sal}, is hafte {biz} ke calls mein {dip} ka drop aaya hai {merchant.get('locality', 'your area')} mein. Table Turnover aur AOV maintain karne ke liye visibility boost zaroori hai. Traffic aur kam hone se pehle, kya main ek 'Revenue Recovery' campaign activate karoon?" if hi else \
-           f"{sal}, I noticed a {dip} drop in calls for {biz} in {merchant.get('locality', 'your area')}. To protect your AOV and capture local intent, should I activate a targeted 'Revenue Recovery' boost for you before traffic dips further?"
+    body = f"{sal}, I noticed a {dip} dip in calls for {biz} across {merchant.get('locality', 'your area')} this week. To protect your AOV and ensure {merchant.get('rating', '4.2')} stars keep translating into traffic, I suggest a quick 'Revenue Recovery' boost. Should I activate that for you now before the weekend?" if hi else \
+           f"{sal}, is hafte {biz} ke calls mein {dip} ka drop aaya hai {merchant.get('locality', 'your area')} mein. Table Turnover aur AOV maintain karne ke liye visibility boost zaroori hai. Kya main ek 'Revenue Recovery' campaign activate karoon?"
     return _action(f"c_{mid}_004", mid, None, tid, body, "Recover My Revenue", "Industry metrics (AOV) + Local context + Loss aversion", hi)
 
 def _trg005(mid, owner, biz, tid, hi, p, merchant):
