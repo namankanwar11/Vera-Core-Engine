@@ -164,8 +164,7 @@ async def process_tick(req: TickRequest):
                     customer_payload = customer_payload.model_dump()
                 
                 store.add_event(f"AI Reasoning: {merchant_id or trigger_id}...")
-                async with semaphore:
-                    actions = await compose(trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
+                actions = await compose(trigger_id, merchant_payload, category_payload, trigger_context, customer_payload)
                 store.add_event(f"Generated {len(actions)} actions for {trigger_id}")
                 return actions
             except Exception as e:
@@ -176,7 +175,8 @@ async def process_tick(req: TickRequest):
         tasks = [process_single_trigger(tid) for tid in req.available_triggers]
         
         try:
-            results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=55.0)
+            # Judge hard timeout is 30s. We set 25s for safety.
+            results = await asyncio.wait_for(asyncio.gather(*tasks), timeout=25.0)
             
             actions = []
             for res in results:
