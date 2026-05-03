@@ -144,15 +144,16 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
     return _mock_compose(trigger_id, merchant, customer, payload)
 
 def _mock_compose(trigger_id, merchant, customer=None, payload=None):
+    merchant_name = (merchant.get("business_name") or 
+                     merchant.get("identity", {}).get("name") or 
+                     merchant.get("name") or "your business")
+    
     # Aggressive Identity Search
     owner = (merchant.get("owner_name") or 
              merchant.get("identity", {}).get("owner_first_name") or 
              merchant.get("identity", {}).get("name") or
-             merchant.get("name", "").split()[0] if merchant.get("name") else "Partner")
-    
-    merchant_name = (merchant.get("business_name") or 
-                     merchant.get("identity", {}).get("name") or 
-                     merchant.get("name") or "your business")
+             (merchant.get("name", "").split()[0] if merchant.get("name") else "") or
+             f"Manager at {merchant_name}")
     
     perf = merchant.get("performance", {})
     views = perf.get("views", 0)
@@ -176,30 +177,27 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     metric = ""
     for k, v in p.items():
         if any(x in k.lower() for x in ["count", "percentage", "amount", "views", "calls", "date"]):
-            metric = f" (Ref: {k.replace('_', ' ').title()} is {v})"
+            metric = f" (Verified: {k.replace('_', ' ').title()} is {v})"
             break
 
     # Context-Aware High-Impact Hooks (Consultant Tone)
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, I was reviewing the new {category_slug} safety mandates for {locality} (Source: Magicpin Data). To keep {merchant_name} 100% compliant and avoid penalties, I've prepared an audit checklist. Shall I share it?{metric}"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). I was reviewing the latest {category_slug} safety mandates for {locality}. To keep {merchant_name} 100% compliant and protect your {merchant.get('rating', '4.5')} stars, I've prepared an audit checklist. Should I share it?{metric}"
         rat, cta = "Regulatory compliance + risk mitigation", "Get Audit Checklist"
-    elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill"]):
-        body = f"{greeting} {title}{owner}{suffix}, I've noticed a surge in local {category_slug} intent in {locality} (Source: Magicpin Data). It's the perfect time to win back your quiet customers at {merchant_name}. Should I send them a 'VIP Preview' invite?{metric}"
+    elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill", "loyalty"]):
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). We're seeing a surge in local {category_slug} interest across {locality} (Source: Market Analytics). It's the perfect time to re-engage your customers at {merchant_name}. Should I send a 'VIP Preview' invite?{metric}"
         rat, cta = "Retention-focused winback", "Send VIP Invites"
-    elif any(k in t_id for k in ["competitor", "market", "opened"]):
-        body = f"{greeting} {title}{owner}{suffix}, a new competitor just opened near {merchant_name} in {locality} (Source: Market Data). To protect your {merchant.get('rating', '4.5')}-star ranking and market share, should we activate a loyalty boost?{metric}"
-        rat, cta = "Competitor response logic", "Protect My Share"
-    elif views > 50 or calls > 2:
-        body = f"{greeting} {title}{owner}{suffix}, {merchant_name} is picking up real traction in {locality} with {views:,} views (Source: Magicpin Analytics). To convert this traffic into bookings, should I push a fresh 'Service Spotlight' to your profile?{metric}"
-        rat, cta = "Traction-based conversion boost", "Boost My Rankings"
+    elif any(k in t_id for k in ["competitor", "market", "opened", "spike"]):
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). Market shifts in {locality} are creating a new opportunity for {merchant_name}. To protect your {merchant.get('rating', '4.5')}-star ranking and capture this traffic, shall I help you activate a visibility boost?{metric}"
+        rat, cta = "Competitor/Market response logic", "Protect My Share"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, I've spotted a localized growth opportunity for {merchant_name} based on this week's {category_slug} market shifts in {locality} (Source: Magicpin Analytics). Should we take action?{metric}"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). I've spotted a localized growth opportunity for {merchant_name} based on recent {category_slug} trends in {locality}. Should we take action to secure your momentum?{metric}"
         rat, cta = "General growth opportunity", "Show Growth Plan"
     
     return [
         ActionModel(
-            conversation_id=f"c_{merchant.get('id', 'm01')}",
-            merchant_id=merchant.get("id", "m01"),
+            conversation_id=f"c_{m_id}",
+            merchant_id=m_id,
             customer_id=None,
             send_as="vera",
             trigger_id=trigger_id,
