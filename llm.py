@@ -35,12 +35,14 @@ async def handle_reply(conversation_id: str, message: str, turn_number: int, fro
         return ReplyResponse(action="wait", wait_seconds=3600, rationale="No API key.")
 
     try:
+        # Inject merchant/category context into the template for grounding
         prompt = REPLY_TEMPLATE.format(
             from_role=from_role,
             turn_number=turn_number,
             message=message,
             biz_name=biz_name,
-            owner=owner
+            owner=owner,
+            merchant_context=json.dumps(merchant)
         )
         
         response = await litellm.acompletion(

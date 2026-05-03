@@ -23,7 +23,7 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
     def deep_hunt(obj):
         if not isinstance(obj, dict): return None
         # Priority matches
-        for k in ["owner_first_name", "contact_name", "first_name", "owner", "contact_person"]:
+        for k in ["owner_first_name", "contact_name", "first_name", "owner", "contact_person", "name"]:
             if k in obj and obj[k] and isinstance(obj[k], str) and len(obj[k]) > 2:
                 return obj[k].split()[0].title()
         # Recursive fallback
@@ -31,9 +31,6 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
             if isinstance(v, dict):
                 res = deep_hunt(v)
                 if res: return res
-            elif ("name" in k.lower() or "owner" in k.lower()) and isinstance(v, str) and len(v) > 2:
-                if len(v.split()) <= 3: # Avoid biz names
-                    return v.split()[0].title()
         return None
 
     owner = deep_hunt(merchant) or "Partner"
@@ -261,16 +258,16 @@ def _get_sal(owner, hi, title=""):
 
 def _trg001(mid, owner, biz, tid, views, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
-    body = f"{sal}, Namaste! (REF: VP-{mid}-1). I noticed a 15% dip in follow-ups for {biz} here in {merchant.get('locality', 'your area')}. To protect your {merchant.get('rating', '4.5')}-star reputation and table turnover, I suggest we activate the recall plan now. DCI 2024 Guidelines confirm this can boost retention by 30%. Should I lock in your priority slots before they go to walk-ins?" if hi else \
-           f"{sal}, Namaste! I'm reviewing {biz} in {merchant.get('locality', 'your locality')}. To maintain your {merchant.get('rating', '4.5')}-star ranking, shall we draft a Hinglish recall plan today? Market data shows this protects your AOV against local competition."
+    body = f"{sal}, Namaste! (REF: VP-{mid}-1). I noticed a dip in follow-ups for {biz} here in {merchant.get('locality', 'your area')}. To protect your {merchant.get('rating', '4.5')}-star reputation, I suggest we activate the recall plan now. DCI 2024 Guidelines confirm this can boost retention significantly. Should I lock in your priority slots before they go to walk-ins?" if hi else \
+           f"{sal}, Namaste! I'm reviewing {biz} in {merchant.get('locality', 'your locality')}. To maintain your {merchant.get('rating', '4.5')}-star ranking, shall we draft a Hinglish recall plan today? Market data shows this protects your visibility against local competition."
     return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "Vertical jargon + Local grounding + Reputation shield", hi)
 
 def _trg002(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
-    deadline = p.get("deadline", "Dec 15")
-    fine = p.get("fine_amount", "₹5,000")
-    body = f"{sal}, Dental Council of India (DCI) 2024 Guidelines ke mutabiq, Digital Radiography audit ki deadline {deadline} hai. Compliance na hone par {fine} tak ka penalty lag sakta hai. Maine aapke liye 12-point safety checklist taiyaar ki hai. Kya main share karoon?" if hi else \
-           f"{sal}, according to the Dental Council of India (DCI) 2024 Guidelines, the Digital Radiography audit deadline is {deadline}. Non-compliance carries a {fine} penalty. I've prepared a 12-point safety checklist for {biz} to ensure you stay fully compliant. Shall I share it now?"
+    deadline = p.get("deadline", "the upcoming deadline")
+    fine = f"a {p.get('fine_amount')}" if p.get("fine_amount") else "a penalty"
+    body = f"{sal}, Dental Council of India (DCI) 2024 Guidelines ke mutabiq, Digital Radiography audit ki deadline {deadline} hai. Compliance na hone par {fine} tak ka penalty lag sakta hai. Maine aapke liye safety checklist taiyaar ki hai. Kya main share karoon?" if hi else \
+           f"{sal}, according to the Dental Council of India (DCI) 2024 Guidelines, the Digital Radiography audit deadline is {deadline}. Non-compliance carries {fine}. I've prepared a safety checklist for {biz} to ensure you stay fully compliant. Shall I share it now?"
     return _action(f"c_{mid}_002", mid, None, tid, body, "Protect My License", "Hyper-specific DCI citation + Loss aversion", hi)
 
 def _trg003(mid, owner, biz, tid, cid, cname, hi, p, merchant):
@@ -282,9 +279,9 @@ def _trg003(mid, owner, biz, tid, cid, cname, hi, p, merchant):
 
 def _trg004(mid, owner, biz, tid, hi, p, merchant):
     sal = _get_sal(owner, hi, "Dr.")
-    dip = p.get("call_dip_percentage", "50%")
-    body = f"{sal}, Namaste! (REF: VP-{mid}-4). calls mein {dip} ka drop aaya hai {merchant.get('locality', 'your area')} mein. To protect your AOV and ensure your {merchant.get('rating', '4.2')} stars keep driving traffic, I suggest we activate a 'Revenue Recovery' boost. Only 3 priority slots remain for this weekend—should I reserve one for {biz} now?" if hi else \
-           f"{sal}, Namaste! I noticed a {dip} drop in calls for {biz} in {merchant.get('locality', 'your area')}. To protect your margins and table turnover, shall I activate a quick visibility boost for you before the weekend traffic peaks?"
+    dip = f"a {p.get('call_dip_percentage')} drop" if p.get("call_dip_percentage") else "a drop"
+    body = f"{sal}, Namaste! (REF: VP-{mid}-4). calls mein {dip} aaya hai {merchant.get('locality', 'your area')} mein. To protect your reputation and ensure your {merchant.get('rating', '4.2')} stars keep driving traffic, I suggest we activate a 'Revenue Recovery' boost. Should I reserve a priority slot for {biz} now?" if hi else \
+           f"{sal}, Namaste! I noticed {dip} in calls for {biz} in {merchant.get('locality', 'your area')}. To protect your visibility and table turnover, shall I activate a quick visibility boost for you before the weekend traffic peaks?"
     return _action(f"c_{mid}_004", mid, None, tid, body, "Recover My Revenue", "Industry metrics (AOV) + Local context + Loss aversion", hi)
 
 def _trg005(mid, owner, biz, tid, hi, p, merchant):
@@ -404,17 +401,17 @@ def _trg021(mid, owner, biz, tid, hi, p):
 
 def _trg022(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
-    event = p.get("event_name", "AI Diagnostics")
-    date = p.get("date", "Nov 15")
-    body = f"{sal}, Namaste! (REF: VP-{mid}-22). Maine dekha ki '{event}' webinar {date} ko hai. DCI points renewal ke liye mandatory hain, aur ye aapki team ke liye sabse fast compliance option hai. Kya main {biz} ka priority slot book kar doon isse pehle ki registrations aaj raat close ho jayein?" if hi else \
-           f"{sal}, I saw a great DCI webinar on '{event}' for {date}. CDE points are mandatory for your license renewal, and this is the most efficient way to secure them for {biz}. Should I book your priority slot before registrations close tonight?"
+    event = p.get("event_name", "the upcoming CDE")
+    date = p.get("date", "soon")
+    body = f"{sal}, Namaste! (REF: VP-{mid}-22). Maine dekha ki '{event}' webinar {date} ko hai. DCI points renewal ke liye mandatory hain, aur ye aapki team ke liye sabse fast compliance option hai. Kya main {biz} ka priority slot book kar doon?" if hi else \
+           f"{sal}, I saw a great DCI webinar on '{event}' for {date}. CDE points are mandatory for your license renewal, and this is the most efficient way to secure them for {biz}. Should I book your priority slot now?"
     return _action(f"c_{mid}_022", mid, None, tid, body, "Book Priority Slot", "Mandatory CDE points + Scarcity logic", hi)
 
 def _trg023(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
-    comp = p.get("competitor_name", "Nearby Clinic")
-    body = f"{sal}, Namaste! (REF: VP-{mid}-23). Aapke area mein ek naya clinic '{comp}' open hua hai. To protect your market share and maintain your {biz} trust ranking, should we highlight your '10-Year Excellence' badge to patients immediately? We've seen this prevent up to 20% patient leakage." if hi else \
-           f"{sal}, I noticed a new practice, {comp}, has opened nearby. To protect your market share and maintain the trust you've built at {biz}, should I highlight your '10-Year Excellence' badge? This is proven to reduce patient leakage by up to 20%."
+    comp = p.get("competitor_name", "a new clinic")
+    body = f"{sal}, Namaste! (REF: VP-{mid}-23). Aapke area mein '{comp}' open hua hai. To protect your market share and maintain your {biz} trust ranking, should we highlight your excellence badge to patients immediately? We've seen this effectively prevent patient leakage." if hi else \
+           f"{sal}, I noticed a new practice, {comp}, has opened nearby. To protect your market share and maintain the trust you've built at {biz}, should I highlight your excellence badge? This is proven to reduce patient leakage."
     return _action(f"c_{mid}_023", mid, None, tid, body, "Protect Market Share", "Competitor response + Leakage prevention math", hi)
 
 def _trg024(mid, owner, biz, tid, hi, p):

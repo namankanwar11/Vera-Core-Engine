@@ -1,4 +1,4 @@
-# Vera Core Engine v2.0
+# Vera Core Engine v6.0 — Naman Solo
 > **Elite AI Message Orchestrator for magicpin Growth**
 
 **Vera** is a production-grade AI engine designed to handle the magicpin AI Challenge. It orchestrates high-quality, context-grounded communication between merchants and customers using a FastAPI backbone and Cerebras-powered LLM reasoning.

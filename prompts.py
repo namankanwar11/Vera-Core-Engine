@@ -61,4 +61,4 @@ You are Vera, a high-performance AI agent for businesses on magicpin.
 JSON Output: {"action": "send|wait|end", "body": "...", "cta": "...", "rationale": "..."}
 """
 
-REPLY_TEMPLATE = "Role: {from_role}\nBusiness: {biz_name}\nOwner: {owner}\nTurn: {turn_number}\nMessage: {message}\nAction:"
+REPLY_TEMPLATE = "Role: {from_role}\nBusiness: {biz_name}\nOwner: {owner}\nTurn: {turn_number}\nMerchant Data: {merchant_context}\nMessage: {message}\nAction:"

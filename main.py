@@ -50,12 +50,12 @@ async def security_middleware(request: Request, call_next):
 templates = Jinja2Templates(directory="templates")
 
 METADATA = {
-    "team_name": "Vera-90Plus-GOD-MODE-v5.8",
+    "team_name": "Naman Solo",
     "team_members": ["Naman Solo"],
     "model": "cerebras/llama3.1-8b",
     "approach": "Deterministic 4-Gate Behavioral Firewall + Universal Context Grounding + Nuclear Hybrid Pattern Matching",
     "contact_email": "namankanwar11@gmail.com",
-    "version": "v5.8-ULTIMATE-PRO",
+    "version": "v6.0-NAMAN-SOLO",
     "engine": "Vera-Core-V5.8",
     "submitted_at": "2026-05-03T16:18:00Z"
 }
@@ -264,13 +264,15 @@ async def process_reply(req: ReplyRequest):
     # ---------------------------------------------------------
     # GATE 4: CONTEXT-AWARE LLM CALL
     # ---------------------------------------------------------
-    parts = conv_id.split("_")
-    merchant_id = "m_001"
-    if len(parts) >= 2:
-        merchant_id = f"{parts[1]}_{parts[2]}" if len(parts) >= 3 else parts[1]
+    m_id = req.merchant_id or "m_001"
+    merchant = await store.get_context("merchant", m_id) or {}
+    cat_slug = merchant.get("category_slug", "dentists")
+    category = await store.get_context("category", cat_slug) or {}
     
-    merchant = await store.get_context("merchant", merchant_id) or {}
-    
+    # Merge category info into merchant for a single grounding object
+    if category:
+        merchant["category_data"] = category
+
     async with semaphore:
         try:
             reply = await handle_reply(conv_id, req.message, req.turn_number, req.from_role, merchant, system_instructions)
