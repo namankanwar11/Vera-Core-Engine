@@ -77,16 +77,21 @@ async def get_events():
 
 @app.post("/v1/report_score")
 async def report_score(request: Request):
-    data = await request.json()
-    store.metrics.update({
-        "score": data.get("score", 0),
-        "specificity": data.get("specificity", 0),
-        "category_fit": data.get("category_fit", 0),
-        "messages_sent": data.get("messages_sent", 0),
-        "performance_text": data.get("performance_text", "Evaluation complete.")
-    })
-    store.add_event(f"📊 NEW EVALUATION: {store.metrics['score']}/50")
-    return {"status": "success"}
+    try:
+        data = await request.json()
+        store.metrics.update({
+            "score": data.get("score", 0),
+            "specificity": data.get("specificity", 0),
+            "category_fit": data.get("category_fit", 0),
+            "messages_sent": data.get("messages_sent", 0),
+            "performance_text": data.get("performance_text", "Evaluation complete.")
+        })
+        store.report_score(data)
+        store.add_event(f"📊 NEW EVALUATION: {data.get('score', 0)}/50")
+        return {"status": "success"}
+    except Exception as e:
+        logger.error(f"Score reporting error: {e}")
+        return JSONResponse(status_code=400, content={"error": str(e)})
 
 @app.post("/v1/context")
 async def push_context(request: Request):
@@ -124,15 +129,6 @@ async def push_context(request: Request):
 
 # Rate-limit control for Cerebras/Groq (Concurrent processing with safety)
 semaphore = asyncio.Semaphore(3)
-
-@app.post("/v1/report_score")
-async def report_score(request: Request):
-    try:
-        data = await request.json()
-        store.report_score(data)
-        return {"status": "ok"}
-    except Exception as e:
-        return JSONResponse(status_code=400, content={"error": str(e)})
 
 @app.post("/v1/tick")
 async def process_tick(req: TickRequest):

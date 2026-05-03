@@ -103,11 +103,12 @@ def print_info(text: str):
 def print_llm(text: str):
     print(f"{Colors.MAGENTA}[LLM]{Colors.RESET} {text}")
 
-def print_score_bar(dimension: str, score: int, max_score: int = 10):
-    bar_filled = int((score / max_score) * 20)
-    bar_empty = 20 - bar_filled
-    color = Colors.GREEN if score >= 7 else Colors.YELLOW if score >= 4 else Colors.RED
-    print(f"  {dimension:22} [{color}{'█' * bar_filled}{Colors.DIM}{'░' * bar_empty}{Colors.RESET}] {color}{score:2}/{max_score}{Colors.RESET}")
+def print_score_bar(dimension, score, max_score=10):
+    bar_width = 20
+    bar_filled = int((score / max_score) * bar_width)
+    bar_empty = bar_width - bar_filled
+    color = Colors.GREEN if score >= 8 else Colors.YELLOW if score >= 6 else Colors.RED
+    print(f"  {dimension:22} [{'#' * bar_filled}{'.' * bar_empty}] {color}{score:2}/{max_score}{Colors.RESET}")
 
 def print_reason(text: str):
     wrapped = text[:200] + "..." if len(text) > 200 else text
