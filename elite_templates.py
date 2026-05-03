@@ -156,7 +156,7 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     # AGGRESSIVE IDENTITY HUNT
     def deep_hunt(obj):
         if not isinstance(obj, dict): return None
-        for k in ["owner_first_name", "contact_name", "first_name", "owner", "contact_person"]:
+        for k in ["owner_first_name", "contact_name", "first_name", "owner", "contact_person", "name"]:
             if k in obj and obj[k] and isinstance(obj[k], str) and len(obj[k]) > 2:
                 return obj[k].split()[0].title()
         for k, v in obj.items():
@@ -165,8 +165,18 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
                 if res: return res
         return None
 
-    owner = deep_hunt(merchant) or "Partner"
+    # Determine Recipient: If customer exists and it's a recall/refill, target customer.
+    t_id = trigger_id.lower()
+    is_outreach = any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill", "loyalty"])
     
+    recipient = "Partner"
+    if is_outreach and customer:
+        recipient = deep_hunt(customer) or "there"
+        send_as = "merchant_on_behalf"
+    else:
+        recipient = deep_hunt(merchant) or "Partner"
+        send_as = "vera"
+
     perf = merchant.get("performance", {})
     views = perf.get("views", 0)
     rating = merchant.get("rating", "4.5")
@@ -182,7 +192,6 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     title = "Dr. " if any(k in category_slug for k in ["dentist", "pharmacy", "clinic", "health", "doctor", "ayurvedic"]) else ""
     suffix = " ji" if (greeting == "Namaste" and not is_south) else ""
     
-    t_id = trigger_id.lower()
     p = payload or {}
     
     # GROUNDING: Only use facts from merchant or payload
@@ -191,33 +200,37 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     else:
         base_fact = f"we are tracking a new surge for {category_slug} services in {locality}"
 
-    # Extract specific payload data point for absolute grounding
     payload_fact = ""
     for k, v in p.items():
-        if any(x in k.lower() for x in ["count", "percentage", "amount", "views", "calls", "date"]):
+        if any(x in k.lower() for x in ["count", "percentage", "amount", "views", "calls", "date", "last_visit"]):
             payload_fact = f" (verified {k.replace('_', ' ').title()}: {v})"
             break
 
     # Context-Aware High-Impact Hooks (STRICTLY GROUNDED)
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). New {category_slug} safety mandates have been issued for {locality}{payload_fact}. To keep {merchant_name} fully compliant and protect your {rating}-star status, shall I activate your digital compliance shield right now?"
+        body = f"{greeting} {title}{recipient}{suffix}, (REF: VP-{m_id}). New {category_slug} safety mandates have been issued for {locality}{payload_fact}. To keep {merchant_name} fully compliant and protect your {rating}-star status, shall I activate your digital compliance shield right now?"
         rat, cta = "Grounded compliance activation", "Activate Shield Now"
-    elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill", "loyalty"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). {base_fact.capitalize()}{payload_fact}. To capture this momentum and re-engage your customers at {merchant_name}, shall I push your 'VIP Winback' campaign live immediately?"
-        rat, cta = "Momentum-based winback", "Push Winback Live"
+    elif is_outreach:
+        if customer:
+            # DIRECT OUTREACH TONE
+            body = f"{greeting} {recipient}, {merchant_name} here! We've noticed it's been a while since your last {category_slug} visit{payload_fact}. To welcome you back, we've saved a special offer for you. Reply 'YES' to see your slots!"
+            rat, cta = "Customer-direct recall logic", "Reply YES to Book"
+        else:
+            body = f"{greeting} {title}{recipient}{suffix}, (REF: VP-{m_id}). {base_fact.capitalize()}{payload_fact}. To capture this momentum and re-engage your customers at {merchant_name}, shall I push your 'VIP Winback' campaign live immediately?"
+            rat, cta = "Momentum-based winback", "Push Winback Live"
     elif any(k in t_id for k in ["competitor", "market", "opened", "spike"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). Market shifts in {locality} are impacting {category_slug} visibility. Based on your {rating}-star rating, shall I activate a 'Trust Boost' for {merchant_name} to lock in your market share right now?"
+        body = f"{greeting} {title}{recipient}{suffix}, (REF: VP-{m_id}). Market shifts in {locality} are impacting {category_slug} visibility. Based on your {rating}-star rating, shall I activate a 'Trust Boost' for {merchant_name} to lock in your market share right now?"
         rat, cta = "Defensive visibility logic", "Activate Boost"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). {base_fact.capitalize()}{payload_fact}. Shall I push your 'Market Leader' profile update live for {merchant_name} to capture this interest immediately?"
+        body = f"{greeting} {title}{recipient}{suffix}, (REF: VP-{m_id}). {base_fact.capitalize()}{payload_fact}. Shall I push your 'Market Leader' profile update live for {merchant_name} to capture this interest immediately?"
         rat, cta = "Grounded momentum activation", "Go Live Now"
     
     return [
         ActionModel(
             conversation_id=f"c_{m_id}_{trigger_id}",
             merchant_id=m_id,
-            customer_id=None,
-            send_as="vera",
+            customer_id=customer.get("customer_id") if customer else None,
+            send_as=send_as,
             trigger_id=trigger_id,
             template_name="v1",
             template_params=[],
