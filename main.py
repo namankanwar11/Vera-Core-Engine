@@ -19,7 +19,8 @@ from models import (
     ReplyRequest, ReplyResponse, HealthResponse
 )
 from store import store
-from llm import compose, handle_reply, mock_compose
+from llm import compose, handle_reply
+from elite_templates import _mock_compose as mock_compose
 
 BOT_API_KEY = os.getenv("BOT_API_KEY")
 

@@ -419,3 +419,43 @@ def _trg030(mid, owner, biz, tid, hi, p):
     body = f"{sal}, maine dekha ki Nearby Competitors actively hiring kar rahe hain (Source: Market Data). Aapki team ko secure rakhne ke liye kya main {biz} ke liye ek staff appreciation program draft karoon?" if hi else \
            f"{sal}, I noticed nearby competitors are actively hiring right now (Source: Market Data). To help you secure your team at {biz}, should I draft a staff appreciation program for you?"
     return _action(f"c_{mid}_030", mid, None, tid, body, "Secure My Team", "Retention focus + market context", hi)
+
+def _mock_compose(trigger_id, merchant, customer=None):
+    # Aggressive Identity Search
+    owner = (merchant.get("owner_name") or 
+             merchant.get("identity", {}).get("owner_first_name") or 
+             merchant.get("identity", {}).get("name") or
+             merchant.get("name", "").split()[0] if merchant.get("name") else "Partner")
+    
+    merchant_name = (merchant.get("business_name") or 
+                     merchant.get("identity", {}).get("name") or 
+                     merchant.get("name") or "your business")
+    
+    category_slug = merchant.get("category_slug", "business").lower()
+    biz_name_lower = merchant_name.lower()
+    locality = str(merchant.get("locality", "")).lower()
+    
+    is_modern = any(k in biz_name_lower for k in ["cafe", "gym", "studio", "spa", "zen", "glamour"])
+    is_south = any(k in locality for k in ["koramangala", "indiranagar", "hsr", "whitefield", "jayanagar"])
+    
+    greeting = "Hi" if (is_modern or is_south) else "Namaste"
+    title = "Dr. " if any(k in category_slug for k in ["dentist", "pharmacy", "clinic", "health", "doctor", "ayurvedic"]) else ""
+    suffix = " ji" if (greeting == "Namaste" and not is_south) else ""
+    
+    body = f"{greeting} {title}{owner}{suffix}, I've spotted a new growth opportunity for {merchant_name} based on this week's {category_slug} market data. Shall I share my plan?"
+    
+    return [
+        ActionModel(
+            conversation_id=f"c_{merchant.get('id', 'm01')}_{trigger_id}",
+            merchant_id=merchant.get("id", "m01"),
+            customer_id=None,
+            send_as="vera",
+            trigger_id=trigger_id,
+            template_name="v1",
+            template_params=[],
+            body=f"{body} \u2014 Vera",
+            cta="Review Growth Plan",
+            suppression_key=f"sk_{trigger_id}",
+            rationale="Category-specific high-impact fallback."
+        )
+    ]
