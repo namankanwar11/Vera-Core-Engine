@@ -218,7 +218,7 @@ def _trg001(mid, owner, biz, tid, views, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     body = f"{sal}, aapki clinic ke liye ek important update hai. I noticed a slight dip in follow-ups for {biz} this week. JIDA Guidelines (Source: Magicpin Data) confirm that regular fluoride recalls can improve retention by up to 30%. With {views:,} views on your profile, should we draft a quick reminder for your patients?" if hi else \
            f"{sal}, I noticed a slight dip in follow-ups for {biz} this week. A recent study (Source: Magicpin Data) mentions that regular fluoride recalls can improve patient retention by 30%+. With your {views:,} profile views, would you like me to draft a quick update for your high-risk patients?"
-    return _action(f"c_{mid}_001", mid, None, tid, body, "Launch Patient Recall", "Warm peer tone + hyper-specific views", hi)
+    return _action(f"c_{mid}_001", mid, None, tid, body, "Secure My Bookings", "High-intent CTA + specific views", hi)
 
 def _trg002(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -226,21 +226,21 @@ def _trg002(mid, owner, biz, tid, hi, p):
     fine = p.get("fine_amount", "₹5,000")
     body = f"{sal}, Dental Council of India (DCI) 2024 Guidelines ke mutabiq, Digital Radiography audit ki deadline {deadline} hai. Compliance na hone par {fine} tak ka penalty lag sakta hai. Maine aapke liye 12-point safety checklist taiyaar ki hai. Kya main share karoon?" if hi else \
            f"{sal}, according to the Dental Council of India (DCI) 2024 Guidelines, the Digital Radiography audit deadline is {deadline}. Non-compliance carries a {fine} penalty. I've prepared a 12-point safety checklist for {biz} to ensure you stay fully compliant. Shall I share it now?"
-    return _action(f"c_{mid}_002", mid, None, tid, body, "View DCI Checklist", "Hyper-specific DCI citation + Loss aversion", hi)
+    return _action(f"c_{mid}_002", mid, None, tid, body, "Protect My License", "Hyper-specific DCI citation + Loss aversion", hi)
 
 def _trg003(mid, owner, biz, tid, cid, cname, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     slot = p.get("suggested_slot", "Wed 5 Nov, 6pm")
     body = f"{sal}, {cname} ka scaling appointment overdue hai (Source: Magicpin Data). Humne unke liye {slot} ka slot reserve rakha hai. Kya main unhe ek special confirmation message bhejoon?" if hi else \
            f"{sal}, I noticed that {cname} is slightly overdue for her scaling at {biz} (Source: Magicpin Data). We have a priority slot for {slot} reserved. Would you like me to send her a quick reminder to confirm?"
-    return _action(f"c_{mid}_003", mid, cid, tid, body, "Send Reminder", "Peer clinical tone + exact slot", hi)
+    return _action(f"c_{mid}_003", mid, cid, tid, body, f"Book {cname} Now", "Peer clinical tone + exact slot", hi)
 
 def _trg004(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
     dip = p.get("call_dip_percentage", "50%")
     body = f"{sal}, is hafte calls mein {dip} ka dip aaya hai (Source: Magicpin Data). Visibility wapas lane ke liye ek targeted campaign start karna best rahega. Kya main aapke liye 'Health-Check' campaign activate karoon?" if hi else \
            f"{sal}, I noticed a small dip in calls ({dip}) for {biz} this week (Source: Magicpin Data). I think a quick visibility boost could help bring that volume back to normal. Should I activate a targeted 'Health-Check' campaign for you?"
-    return _action(f"c_{mid}_004", mid, None, tid, body, "Activate Boost", "Professional tone + exact dip %", hi)
+    return _action(f"c_{mid}_004", mid, None, tid, body, "Recover My Volume", "Professional tone + exact dip %", hi)
 
 def _trg005(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi, "Dr.")
@@ -412,13 +412,13 @@ def _trg029(mid, owner, biz, tid, hi, p):
     surge = p.get("query_surge_percentage", "40%")
     body = f"{sal}, is hafte pet grooming queries mein {surge} ka rise dikha hai (Source: Magicpin Trends)! Is demand ko capture karne ke liye kya main {biz} ka 'Winter Spa' bundle update karoon?" if hi else \
            f"{sal}, I noticed a {surge} rise in queries for pet grooming this week (Source: Magicpin Trends)! To capture this demand, should I refresh your 'Winter Spa' bundle at {biz} now?"
-    return _action(f"c_{mid}_029", mid, None, tid, body, "Launch Winter Bundle", "Trend-based + exact surge %", hi)
+    return _action(f"c_{mid}_029", mid, None, tid, body, "Update Winter Bundle", "Trend-based + exact surge %", hi)
 
 def _trg030(mid, owner, biz, tid, hi, p):
     sal = _get_sal(owner, hi)
     body = f"{sal}, maine dekha ki Nearby Competitors actively hiring kar rahe hain (Source: Market Data). Aapki team ko secure rakhne ke liye kya main {biz} ke liye ek staff appreciation program draft karoon?" if hi else \
            f"{sal}, I noticed nearby competitors are actively hiring right now (Source: Market Data). To help you secure your team at {biz}, should I draft a staff appreciation program for you?"
-    return _action(f"c_{mid}_030", mid, None, tid, body, "Secure My Team", "Retention focus + market context", hi)
+    return _action(f"c_{mid}_030", mid, None, tid, body, "Draft Appreciation Program", "Retention focus + market context", hi)
 
 def _mock_compose(trigger_id, merchant, customer=None):
     # Aggressive Identity Search
