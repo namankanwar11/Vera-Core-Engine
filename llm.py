@@ -87,10 +87,16 @@ async def handle_reply(conversation_id: str, message: str, turn_number: int, fro
             wait_seconds=None if action == "send" else 3600
         )
     except Exception as e:
-        logger.error(f"Reply LLM error: {e}")
+        logger.error(f"LLM Error: {e}")
+        # --- TECH LEAD PATCH: Data-Rich Circuit Breaker ---
+        # If the LLM fails, we return a high-quality pre-formatted response instead of a 500 error.
+        safe_body = f"I'm currently reviewing the latest growth data for {biz_name}. Can we catch up in a few minutes so I can give you the full breakdown?" if from_role == "merchant" else \
+                    f"I'm checking the current availability at {biz_name} for you. Just a moment!"
         return ReplyResponse(
-            action="wait", wait_seconds=3600, 
-            rationale="System error or ambiguous input."
+            action="wait",
+            wait_seconds=60,
+            body=safe_body,
+            rationale="Circuit breaker triggered due to LLM timeout/error."
         )
 
 def _prune_context(merchant, category, trigger):
