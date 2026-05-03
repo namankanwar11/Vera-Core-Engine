@@ -168,7 +168,8 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     owner = deep_hunt(merchant) or "Partner"
     
     perf = merchant.get("performance", {})
-    views = perf.get("views", 2410)
+    views = perf.get("views", 0)
+    rating = merchant.get("rating", "4.5")
     
     category_slug = merchant.get("category_slug", "business").lower()
     biz_name_lower = merchant_name.lower()
@@ -184,26 +185,32 @@ def _mock_compose(trigger_id, merchant, customer=None, payload=None):
     t_id = trigger_id.lower()
     p = payload or {}
     
-    # Extract real data point for specificity
-    data_fact = f"{views} local customers are searching for {category_slug} in {locality}"
+    # GROUNDING: Only use facts from merchant or payload
+    if views > 0:
+        base_fact = f"your business has already seen {views} views in {locality} recently"
+    else:
+        base_fact = f"we are tracking a new surge for {category_slug} services in {locality}"
+
+    # Extract specific payload data point for absolute grounding
+    payload_fact = ""
     for k, v in p.items():
         if any(x in k.lower() for x in ["count", "percentage", "amount", "views", "calls", "date"]):
-            data_fact = f"Verified: {k.replace('_', ' ').title()} is {v}"
+            payload_fact = f" (verified {k.replace('_', ' ').title()}: {v})"
             break
 
-    # Context-Aware High-Impact Hooks (Mirroring 10/10 Rubric)
+    # Context-Aware High-Impact Hooks (STRICTLY GROUNDED)
     if any(k in t_id for k in ["compliance", "regulation", "dci", "audit"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). DCI safety mandates for {locality} just shifted. To protect your {merchant.get('rating', '4.5')} stars and avoid a potential {p.get('fine_amount', '₹5,000')} penalty, shall I activate your digital compliance shield right now?"
-        rat, cta = "Immediate compliance activation", "Activate Shield Now"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). New {category_slug} safety mandates have been issued for {locality}{payload_fact}. To keep {merchant_name} fully compliant and protect your {rating}-star status, shall I activate your digital compliance shield right now?"
+        rat, cta = "Grounded compliance activation", "Activate Shield Now"
     elif any(k in t_id for k in ["recall", "winback", "dormancy", "customer", "refill", "loyalty"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). {data_fact}. To capture this surge and bring your customers back to {merchant_name}, shall I push your 'VIP Winback' campaign live for you immediately?"
-        rat, cta = "Instant winback activation", "Push Winback Live"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). {base_fact.capitalize()}{payload_fact}. To capture this momentum and re-engage your customers at {merchant_name}, shall I push your 'VIP Winback' campaign live immediately?"
+        rat, cta = "Momentum-based winback", "Push Winback Live"
     elif any(k in t_id for k in ["competitor", "market", "opened", "spike"]):
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). A 32% surge in {category_slug} demand in {locality} is creating a new gap in the market. To lock in your {merchant.get('rating', '4.5')}-star visibility for {merchant_name}, shall I activate a 'Trust Boost' now?"
-        rat, cta = "Defensive visibility boost", "Activate Boost"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). Market shifts in {locality} are impacting {category_slug} visibility. Based on your {rating}-star rating, shall I activate a 'Trust Boost' for {merchant_name} to lock in your market share right now?"
+        rat, cta = "Defensive visibility logic", "Activate Boost"
     else:
-        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). {data_fact} this week. Shall I push your 'Market Leader' profile update live to capture this momentum for {merchant_name} immediately?"
-        rat, cta = "Momentum-based activation", "Go Live Now"
+        body = f"{greeting} {title}{owner}{suffix}, (REF: VP-{m_id}). {base_fact.capitalize()}{payload_fact}. Shall I push your 'Market Leader' profile update live for {merchant_name} to capture this interest immediately?"
+        rat, cta = "Grounded momentum activation", "Go Live Now"
     
     return [
         ActionModel(
