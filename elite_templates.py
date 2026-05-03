@@ -85,7 +85,7 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
         "demand": lambda: _trg016(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "surge": lambda: _trg016(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "alert": lambda: _trg018(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
-        "renewal": lambda: _trg005(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "renewal": lambda: _trg005(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
         "trg_006": lambda: _trg006(mid, owner, biz_name, tid=trigger_id, locality=locality, hi=prefers_hi, p=payload),
         "festival": lambda: _trg006(mid, owner, biz_name, tid=trigger_id, locality=locality, hi=prefers_hi, p=payload),
         "trg_007": lambda: _trg007(mid, owner, biz_name, tid=trigger_id, cid=cust_id, cname=cust_name, hi=prefers_hi, p=payload),
@@ -120,13 +120,13 @@ def get_elite_response(trigger_id: str, merchant: dict, category: dict, trigger:
         "trg_025_dormancy_glamour": lambda: _trg025(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "dormant_with_vera": lambda: _trg025(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         
-        "trg_026_biomedical_waste_regulation": lambda: _trg026(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_026_biomedical_waste_regulation": lambda: _trg026(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
         
         "trg_027_inflation_fuel_price": lambda: _trg027(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "inflation_fuel_price": lambda: _trg027(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         
-        "trg_028_ayurvedic_toxic_batch": lambda: _trg028(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
-        "ayurvedic_toxic_batch": lambda: _trg028(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
+        "trg_028_ayurvedic_toxic_batch": lambda: _trg028(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
+        "ayurvedic_toxic_batch": lambda: _trg028(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload, merchant=merchant),
         
         "trg_029_pet_grooming_peak": lambda: _trg029(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
         "pet_grooming_peak": lambda: _trg029(mid, owner, biz_name, tid=trigger_id, hi=prefers_hi, p=payload),
